@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amine Adlane — Ingénieur & Consultant en Transformation Digitale</title>
+<meta name="description" content="Amine Adlane — Ingénieur double diplômé (Politecnico di Torino / École Centrale Casablanca), consultant en stratégie IT, automatisation des processus et architecture de données.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#081627;
+    --navy:#0c2038;
+    --navy-panel:#0f2944;
+    --navy-panel-2:#123354;
+    --line:#28577a;
+    --line-soft:rgba(95,212,196,.18);
+    --cyan:#5fd4c4;
+    --cyan-bright:#93ece0;
+    --amber:#f2a65a;
+    --paper:#eaf1f6;
+    --muted:#8ea3b8;
+    --muted-2:#5f7690;
+    --radius:2px;
+    --display:'Space Grotesk',sans-serif;
+    --body:'Inter',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+  body{
+    margin:0;
+    background:var(--navy-deep);
+    color:var(--paper);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:.05;
+  }
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;position:relative;z-index:1;}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 14px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;
+    background:var(--cyan);
+    display:inline-block;
+  }
+  h1,h2,h3{font-family:var(--display); font-weight:600; margin:0; color:var(--paper);}
+  .section-title{font-size:clamp(28px,4vw,38px); letter-spacing:-.01em;}
+  .lede{color:var(--muted); font-size:17px; max-width:640px;}
+
+  /* ---------- NAV ---------- */
+  header.site-nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(8,22,39,.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .nav-inner{
+    max-width:var(--maxw); margin:0 auto; padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{
+    font-family:var(--mono); font-size:14px; letter-spacing:.06em;
+    display:flex; align-items:center; gap:8px; color:var(--paper); text-decoration:none;
+  }
+  .brand .dot{width:7px;height:7px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);}
+  nav.links{display:flex; gap:30px; list-style:none; margin:0; padding:0;}
+  nav.links a{
+    font-family:var(--mono); font-size:13px; text-decoration:none; color:var(--muted);
+    letter-spacing:.03em; transition:color .2s ease; padding:4px 0; border-bottom:1px solid transparent;
+  }
+  nav.links a:hover{color:var(--cyan); border-color:var(--line-soft);}
+  .nav-cta{
+    font-family:var(--mono); font-size:12.5px; color:var(--navy-deep); background:var(--cyan);
+    padding:9px 16px; text-decoration:none; border-radius:var(--radius); letter-spacing:.04em;
+    transition:background .2s ease, transform .2s ease;
+  }
+  .nav-cta:hover{background:var(--cyan-bright); transform:translateY(-1px);}
+  .burger{display:none; background:none; border:1px solid var(--line); color:var(--paper); padding:8px 10px; border-radius:var(--radius); font-family:var(--mono);}
+  #nav-check{display:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:88px 0 60px; position:relative;}
+  .hero-grid{display:grid; grid-template-columns:1.05fr .95fr; gap:40px; align-items:center;}
+  .hero h1{font-size:clamp(38px,5.6vw,64px); line-height:1.03; letter-spacing:-.02em;}
+  .hero .role{
+    font-family:var(--mono); color:var(--cyan); font-size:15px; margin-top:16px; letter-spacing:.03em;
+  }
+  .hero p.desc{color:var(--muted); font-size:16.5px; margin-top:22px; max-width:520px;}
+  .hero-actions{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap;}
+  .btn{
+    font-family:var(--mono); font-size:13px; letter-spacing:.03em; text-decoration:none;
+    padding:12px 20px; border-radius:var(--radius); transition:all .2s ease; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{background:var(--cyan); color:var(--navy-deep);}
+  .btn-primary:hover{background:var(--cyan-bright); transform:translateY(-1px);}
+  .btn-ghost{border:1px solid var(--line); color:var(--paper);}
+  .btn-ghost:hover{border-color:var(--cyan); color:var(--cyan);}
+
+  .coords{
+    display:flex; gap:22px; margin-top:40px; flex-wrap:wrap;
+    font-family:var(--mono); font-size:12px; color:var(--muted-2); color:var(--muted);
+  }
+  .coords span b{color:var(--paper); font-weight:500;}
+
+  /* hero diagram */
+  .diagram-frame{
+    border:1px solid var(--line); border-radius:var(--radius); background:var(--navy-panel);
+    padding:18px; position:relative;
+  }
+  .diagram-frame::before{
+    content:"FIG. 01 — FLUX DE COMPÉTENCES"; position:absolute; top:-11px; left:16px;
+    background:var(--navy-deep); padding:0 8px; font-family:var(--mono); font-size:10.5px;
+    letter-spacing:.08em; color:var(--muted);
+  }
+  .pipeline-svg{width:100%; height:auto; display:block;}
+  .pl-line{fill:none; stroke:var(--line); stroke-width:1.5;}
+  .pl-line-active{fill:none; stroke:var(--cyan); stroke-width:1.5; stroke-dasharray:6 6; animation:flow 2.4s linear infinite;}
+  @keyframes flow{ to{ stroke-dashoffset:-24; } }
+  .pl-node-c{fill:var(--navy-panel-2); stroke:var(--cyan); stroke-width:1.4;}
+  .pl-node-out{fill:var(--cyan); }
+  .pl-node-src{fill:var(--navy-panel-2); stroke:var(--amber); stroke-width:1.4;}
+  .pl-label{font-family:var(--mono); font-size:10.5px; fill:var(--paper);}
+  .pl-label-muted{font-family:var(--mono); font-size:9px; fill:var(--muted);}
+  .pl-pulse{animation:pulse 2.4s ease-in-out infinite;}
+  @keyframes pulse{ 0%,100%{opacity:.55;} 50%{opacity:1;} }
+
+  /* ---------- SECTIONS COMMON ---------- */
+  section{padding:84px 0; border-top:1px solid var(--line-soft); position:relative;}
+  .reveal{opacity:0; transform:translateY(16px); transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+
+  /* ---------- ABOUT ---------- */
+  .about-grid{display:grid; grid-template-columns:.9fr 1.1fr; gap:52px; margin-top:36px;}
+  .about-grid p{color:var(--muted); font-size:16px;}
+  .stat-list{display:grid; grid-template-columns:1fr 1fr; gap:22px 28px;}
+  .stat{border-left:2px solid var(--line); padding-left:14px;}
+  .stat b{display:block; font-family:var(--display); font-size:26px; color:var(--cyan);}
+  .stat span{font-family:var(--mono); font-size:11.5px; color:var(--muted); letter-spacing:.03em;}
+
+  /* ---------- EXPERIENCE (pipeline timeline) ---------- */
+  .timeline{margin-top:44px; position:relative;}
+  .timeline::before{
+    content:""; position:absolute; left:15px; top:6px; bottom:6px; width:1px;
+    background:repeating-linear-gradient(var(--line),var(--line) 4px, transparent 4px, transparent 8px);
+  }
+  .exp{position:relative; padding-left:52px; margin-bottom:44px;}
+  .exp:last-child{margin-bottom:0;}
+  .exp-node{
+    position:absolute; left:0; top:2px; width:31px; height:31px; border-radius:50%;
+    background:var(--navy-panel); border:1.5px solid var(--cyan); display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:10px; color:var(--cyan);
+  }
+  .exp-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 16px; justify-content:space-between;}
+  .exp-role{font-family:var(--display); font-size:19px; font-weight:600; color:var(--paper);}
+  .exp-org{color:var(--amber); font-family:var(--mono); font-size:13.5px;}
+  .exp-meta{font-family:var(--mono); font-size:12px; color:var(--muted); white-space:nowrap;}
+  .exp-loc{font-family:var(--mono); font-size:11.5px; color:var(--muted-2); color:var(--muted); margin-top:2px;}
+  .exp ul{margin:14px 0 0; padding-left:18px; color:var(--muted); font-size:15px;}
+  .exp li{margin-bottom:7px;}
+  .exp li::marker{color:var(--cyan);}
+
+  /* ---------- SKILLS ---------- */
+  .skill-panels{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:40px;}
+  .panel{
+    background:var(--navy-panel); border:1px solid var(--line); border-radius:var(--radius); padding:24px;
+    position:relative;
+  }
+  .panel .tag{
+    font-family:var(--mono); font-size:10.5px; color:var(--muted); letter-spacing:.08em; margin-bottom:14px; display:block;
+  }
+  .panel h3{font-size:17px; margin-bottom:16px;}
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-family:var(--mono); font-size:11.5px; color:var(--paper); border:1px solid var(--line);
+    padding:5px 10px; border-radius:20px; background:var(--navy-panel-2);
+  }
+
+  /* ---------- CERTS ---------- */
+  .cert-row{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:36px;}
+  .cert{
+    border:1px solid var(--line); padding:18px 16px; border-radius:var(--radius); background:var(--navy-panel);
+    text-align:left;
+  }
+  .cert .cert-mark{color:var(--cyan); font-family:var(--mono); font-size:11px; margin-bottom:10px; display:block;}
+  .cert h4{font-family:var(--display); font-size:15px; margin:0 0 4px; font-weight:600;}
+  .cert span{font-family:var(--mono); font-size:11.5px; color:var(--muted);}
+
+  /* ---------- EDUCATION ---------- */
+  .edu-row{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:36px;}
+  .edu-card{border:1px solid var(--line); border-radius:var(--radius); padding:26px; background:var(--navy-panel);}
+  .edu-card .yr{font-family:var(--mono); font-size:11.5px; color:var(--amber); letter-spacing:.05em;}
+  .edu-card h3{font-size:18px; margin:10px 0 4px;}
+  .edu-card .school{font-family:var(--mono); font-size:12.5px; color:var(--muted); margin-bottom:14px;}
+  .edu-card .fields{color:var(--muted); font-size:14px;}
+
+  /* ---------- LANGUAGES ---------- */
+  .lang-list{margin-top:36px; display:grid; grid-template-columns:1fr 1fr; gap:18px 40px;}
+  .lang-item{display:flex; align-items:center; gap:16px;}
+  .lang-name{font-family:var(--mono); font-size:13px; width:110px; flex-shrink:0;}
+  .lang-bar{flex:1; height:6px; background:var(--navy-panel-2); border-radius:4px; overflow:hidden; position:relative;}
+  .lang-bar i{display:block; height:100%; background:linear-gradient(90deg,var(--cyan),var(--cyan-bright)); border-radius:4px;}
+  .lang-lvl{font-family:var(--mono); font-size:11.5px; color:var(--muted); width:34px; text-align:right;}
+
+  /* ---------- PROJECTS ---------- */
+  .proj-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; margin-top:40px;}
+  .proj{border:1px solid var(--line); border-radius:var(--radius); padding:22px; background:var(--navy-panel); display:flex; flex-direction:column; gap:10px;}
+  .proj .pdate{font-family:var(--mono); font-size:11px; color:var(--cyan);}
+  .proj h3{font-size:16px;}
+  .proj p{color:var(--muted); font-size:14px; margin:0;}
+
+  /* ---------- CONTACT / FOOTER ---------- */
+  .contact-wrap{
+    text-align:center; padding:100px 0 60px;
+  }
+  .contact-wrap h2{font-size:clamp(30px,5vw,46px); max-width:640px; margin:0 auto 18px;}
+  .contact-wrap p{color:var(--muted); max-width:480px; margin:0 auto 34px;}
+  .contact-actions{display:flex; justify-content:center; gap:16px; flex-wrap:wrap;}
+  footer{border-top:1px solid var(--line-soft); padding:28px 0;}
+  .footer-inner{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
+  .footer-inner p{font-family:var(--mono); font-size:11.5px; color:var(--muted); margin:0;}
+  .foot-links{display:flex; gap:20px; list-style:none; padding:0; margin:0;}
+  .foot-links a{font-family:var(--mono); font-size:11.5px; color:var(--muted); text-decoration:none;}
+  .foot-links a:hover{color:var(--cyan);}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 900px){
+    .hero-grid{grid-template-columns:1fr;}
+    .about-grid{grid-template-columns:1fr; gap:30px;}
+    .skill-panels{grid-template-columns:1fr 1fr;}
+    .proj-grid{grid-template-columns:1fr;}
+    .edu-row{grid-template-columns:1fr;}
+    .cert-row{grid-template-columns:1fr 1fr;}
+    .lang-list{grid-template-columns:1fr;}
+  }
+  @media (max-width: 680px){
+    nav.links{
+      position:fixed; inset:0 0 0 auto; top:64px; width:78%; height:calc(100% - 64px);
+      background:var(--navy); flex-direction:column; padding:32px 28px; gap:22px;
+      transform:translateX(100%); transition:transform .3s ease; border-left:1px solid var(--line);
+    }
+    #nav-check:checked ~ .nav-inner nav.links{transform:translateX(0);}
+    .burger{display:block;}
+    .nav-cta{display:none;}
+    .skill-panels{grid-template-columns:1fr;}
+    .cert-row{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<input type="checkbox" id="nav-check">
+<header class="site-nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand"><span class="dot"></span>A. ADLANE</a>
+    <label class="burger" for="nav-check">MENU</label>
+    <nav class="links">
+      <a href="#profil">Profil</a>
+      <a href="#experience">Expérience</a>
+      <a href="#competences">Compétences</a>
+      <a href="#formation">Formation</a>
+      <a href="#projets">Projets</a>
+      <a href="#contact" class="nav-cta">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero" style="border-top:none;">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Ingénieur double diplômé</p>
+        <h1>Amine<br>Adlane</h1>
+        <p class="role">Consultant en Stratégie &amp; Transformation Digitale</p>
+        <p class="desc">Je conçois des systèmes qui relient stratégie, données et automatisation — de la modélisation des processus métier au déploiement de pipelines et de modules d'IA en production.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="mailto:adlane-amine@hotmail.fr">Me contacter</a>
+          <a class="btn btn-ghost" href="https://linkedin.com/in/amine-adlane" target="_blank" rel="noopener">Voir le LinkedIn</a>
+          <a class="btn btn-ghost" href="CV_Amine_Adlane.pdf" target="_blank" rel="noopener">Télécharger le CV</a>
+        </div>
+        <div class="coords">
+          <span><b>Turin, Italie</b></span>
+          <span>+212 657 969 955</span>
+          <span>adlane-amine@hotmail.fr</span>
+        </div>
+      </div>
+
+      <div class="diagram-frame">
+        <svg class="pipeline-svg" viewBox="0 0 480 320" role="img" aria-label="Schéma représentant le flux de compétences d'Amine Adlane, de l'ingénierie vers la transformation digitale">
+          <!-- source node -->
+          <circle cx="46" cy="160" r="20" class="pl-node-src"/>
+          <text x="46" y="164" text-anchor="middle" class="pl-label" font-size="9">A.A</text>
+          <text x="46" y="196" text-anchor="middle" class="pl-label-muted">SOURCE</text>
+
+          <!-- connectors to mid nodes (orthogonal) -->
+          <path class="pl-line" d="M66,160 H100 V60 H190"/>
+          <path class="pl-line-active" d="M66,160 H100 V60 H190"/>
+          <path class="pl-line" d="M66,160 H100 V125 H190"/>
+          <path class="pl-line-active" d="M66,160 H100 V125 H190"/>
+          <path class="pl-line" d="M66,160 H100 V195 H190"/>
+          <path class="pl-line-active" d="M66,160 H100 V195 H190"/>
+          <path class="pl-line" d="M66,160 H100 V260 H190"/>
+          <path class="pl-line-active" d="M66,160 H100 V260 H190"/>
+
+          <!-- mid nodes -->
+          <g>
+            <rect x="190" y="46" width="118" height="28" rx="2" class="pl-node-c"/>
+            <text x="249" y="64" text-anchor="middle" class="pl-label">AUTOMATISATION</text>
+          </g>
+          <g>
+            <rect x="190" y="111" width="118" height="28" rx="2" class="pl-node-c"/>
+            <text x="249" y="129" text-anchor="middle" class="pl-label">DONNÉES &amp; IA</text>
+          </g>
+          <g>
+            <rect x="190" y="181" width="118" height="28" rx="2" class="pl-node-c"/>
+            <text x="249" y="199" text-anchor="middle" class="pl-label">ARCHITECTURE SI</text>
+          </g>
+          <g>
+            <rect x="190" y="246" width="118" height="28" rx="2" class="pl-node-c"/>
+            <text x="249" y="264" text-anchor="middle" class="pl-label">STRATÉGIE</text>
+          </g>
+
+          <!-- connectors to output -->
+          <path class="pl-line" d="M308,60 H360 V160 H400"/>
+          <path class="pl-line-active" d="M308,60 H360 V160 H400"/>
+          <path class="pl-line" d="M308,125 H360 V160 H400"/>
+          <path class="pl-line-active" d="M308,125 H360 V160 H400"/>
+          <path class="pl-line" d="M308,195 H360 V160 H400"/>
+          <path class="pl-line-active" d="M308,195 H360 V160 H400"/>
+          <path class="pl-line" d="M308,260 H360 V160 H400"/>
+          <path class="pl-line-active" d="M308,260 H360 V160 H400"/>
+
+          <!-- output node -->
+          <circle cx="422" cy="160" r="22" class="pl-node-c pl-pulse"/>
+          <circle cx="422" cy="160" r="4" class="pl-node-out"/>
+          <text x="422" y="200" text-anchor="middle" class="pl-label-muted">OUTPUT</text>
+          <text x="422" y="211" text-anchor="middle" class="pl-label-muted">TRANSFORMATION</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="profil">
+    <div class="wrap reveal">
+      <p class="eyebrow">Profil</p>
+      <h2 class="section-title">Ingénierie et stratégie, au même endroit</h2>
+      <div class="about-grid">
+        <p>Ingénieur double diplômé du Politecnico di Torino et de l'École Centrale Casablanca, spécialisé en transformation digitale, automatisation des processus métier et systèmes d'information. Cinq expériences opérationnelles dans des environnements exigeants — automobile (Stellantis), semi-conducteurs (STMicroelectronics), conseil financier et cabinet RH — couvrant l'analyse stratégique, la digitalisation et le déploiement d'architectures de données.</p>
+        <div class="stat-list">
+          <div class="stat"><b>5</b><span>EXPÉRIENCES OPÉRATIONNELLES</span></div>
+          <div class="stat"><b>12</b><span>PROCESSUS MÉTIER MODÉLISÉS (BPMN)</span></div>
+          <div class="stat"><b>-40%</b><span>TEMPS DE TRAITEMENT MANUEL</span></div>
+          <div class="stat"><b>4</b><span>CERTIFICATIONS PROFESSIONNELLES</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience">
+    <div class="wrap reveal">
+      <p class="eyebrow">Parcours</p>
+      <h2 class="section-title">Expériences professionnelles</h2>
+
+      <div class="timeline">
+
+        <div class="exp">
+          <div class="exp-node">01</div>
+          <div class="exp-head">
+            <div>
+              <div class="exp-role">IT Manager &amp; Lead Automation Engineer</div>
+              <div class="exp-org">Kitalent — TA Partners</div>
+            </div>
+            <div>
+              <div class="exp-meta">Mars 2025 – Présent</div>
+              <div class="exp-loc">Turin, Italie</div>
+            </div>
+          </div>
+          <ul>
+            <li>Piloté la stratégie de transformation digitale d'un cabinet de recrutement : modélisation BPMN de 12 processus métier critiques et déploiement d'une suite d'automatisation (n8n, Power Automate) réduisant le temps de traitement manuel de 40%.</li>
+            <li>Architecturé un pipeline de données (Apache Spark + MongoDB) unifiant les flux CRM/ERP, améliorant la qualité des données et permettant un reporting en temps réel pour la direction.</li>
+            <li>Intégré des modules d'IA (NLP, scoring candidats) au CRM, augmentant la précision de présélection de 25% sur un portefeuille de plus de 500 profils.</li>
+          </ul>
+        </div>
+
+        <div class="exp">
+          <div class="exp-node">02</div>
+          <div class="exp-head">
+            <div>
+              <div class="exp-role">Responsable Mission — Mobilité Autonome (DRL)</div>
+              <div class="exp-org">Stellantis CRF</div>
+            </div>
+            <div>
+              <div class="exp-meta">Sept. 2024 – Fév. 2025</div>
+              <div class="exp-loc">Turin, Italie</div>
+            </div>
+          </div>
+          <ul>
+            <li>Conduit une mission d'ingénierie stratégique pour la conception d'un véhicule concept autonome SAE Niveau 4 : définition des ODD, cartographie des scénarios de risque et planification Gantt sur 5 mois.</li>
+            <li>Déployé un modèle de Deep Learning (ADAS) pour l'adaptation aux dynamiques urbaines, réduisant la dépendance à l'électronique embarquée.</li>
+            <li>Coordonné les parties prenantes techniques (R&amp;D, partenaires mobilité) dans un environnement international multilingue.</li>
+          </ul>
+        </div>
+
+        <div class="exp">
+          <div class="exp-node">03</div>
+          <div class="exp-head">
+            <div>
+              <div class="exp-role">Consultant Data — Stagiaire</div>
+              <div class="exp-org">Disrupt (Conseil SI pour banque d'investissement)</div>
+            </div>
+            <div>
+              <div class="exp-meta">Avr. – Août 2023</div>
+              <div class="exp-loc">Casablanca, Maroc</div>
+            </div>
+          </div>
+          <ul>
+            <li>Accompagné la DSI d'une banque d'investissement dans la refonte de sa plateforme de reporting : collecte des besoins, architecture de données, spécifications fonctionnelles.</li>
+            <li>Développé des pipelines ETL en Python consolidant 6 sources hétérogènes dans un Data Warehouse centralisé, réduisant les délais de reporting de 30%.</li>
+            <li>Méthodologie Agile en sprints bimensuels, avec un taux de conformité aux exigences client de 100%.</li>
+          </ul>
+        </div>
+
+        <div class="exp">
+          <div class="exp-node">04</div>
+          <div class="exp-head">
+            <div>
+              <div class="exp-role">Consultant Stagiaire — Stratégie IT</div>
+              <div class="exp-org">CIMR</div>
+            </div>
+            <div>
+              <div class="exp-meta">Sept. – Déc. 2022</div>
+              <div class="exp-loc">Casablanca, Maroc</div>
+            </div>
+          </div>
+          <ul>
+            <li>Conception d'un système de gestion des équipements IT offrant une visibilité en temps réel : recueil d'exigences, modélisation de données (SQL) et tableaux de bord Power BI.</li>
+            <li>Collaboration au sein d'une équipe projet de 8 personnes sous méthodologie Scrum, jusqu'à la livraison d'un MVP en 4 mois.</li>
+          </ul>
+        </div>
+
+        <div class="exp">
+          <div class="exp-node">05</div>
+          <div class="exp-head">
+            <div>
+              <div class="exp-role">Assistant Ingénieur Industrie 4.0</div>
+              <div class="exp-org">STMicroelectronics</div>
+            </div>
+            <div>
+              <div class="exp-meta">Juin – Août 2022</div>
+              <div class="exp-loc">Casablanca, Maroc</div>
+            </div>
+          </div>
+          <ul>
+            <li>Analyse des données de maintenance préventive via une étude comparative Avant/Après, identifiant des opportunités d'optimisation du rendement de production.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="competences">
+    <div class="wrap reveal">
+      <p class="eyebrow">Compétences</p>
+      <h2 class="section-title">Boîte à outils</h2>
+
+      <div class="skill-panels">
+        <div class="panel">
+          <span class="tag">01 — CONSEIL &amp; STRATÉGIE</span>
+          <h3>Gestion &amp; méthode</h3>
+          <div class="chip-row">
+            <span class="chip">BPA / BPMN</span>
+            <span class="chip">Architecture d'entreprise</span>
+            <span class="chip">Agile / Scrum</span>
+            <span class="chip">Lean Six Sigma</span>
+            <span class="chip">KPI &amp; Reporting</span>
+            <span class="chip">Change Management</span>
+            <span class="chip">ERP (SAP notions)</span>
+          </div>
+        </div>
+        <div class="panel">
+          <span class="tag">02 — DONNÉES &amp; IA</span>
+          <h3>Data &amp; Machine Learning</h3>
+          <div class="chip-row">
+            <span class="chip">SQL</span>
+            <span class="chip">Python</span>
+            <span class="chip">Pandas / NumPy</span>
+            <span class="chip">Scikit-learn</span>
+            <span class="chip">TensorFlow</span>
+            <span class="chip">Power BI</span>
+            <span class="chip">Tableau</span>
+            <span class="chip">ETL / Data Warehouse</span>
+            <span class="chip">Apache Spark</span>
+          </div>
+        </div>
+        <div class="panel">
+          <span class="tag">03 — CLOUD &amp; DEVOPS</span>
+          <h3>Infrastructure</h3>
+          <div class="chip-row">
+            <span class="chip">AWS</span>
+            <span class="chip">Azure</span>
+            <span class="chip">Docker</span>
+            <span class="chip">GitHub</span>
+            <span class="chip">Node.js</span>
+            <span class="chip">MongoDB</span>
+            <span class="chip">n8n</span>
+            <span class="chip">Power Automate</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cert-row" style="margin-top:22px;">
+        <a class="cert" href="https://credly.com/amine-adlane" target="_blank" rel="noopener">
+          <span class="cert-mark">✓ CERTIFIÉ</span>
+          <h4>Scrum Master</h4>
+          <span>LearnQuest</span>
+        </a>
+        <a class="cert" href="https://credly.com/amine-adlane" target="_blank" rel="noopener">
+          <span class="cert-mark">✓ CERTIFIÉ</span>
+          <h4>Lean Six Sigma</h4>
+          <span>Coursera</span>
+        </a>
+        <a class="cert" href="https://credly.com/amine-adlane" target="_blank" rel="noopener">
+          <span class="cert-mark">✓ CERTIFIÉ</span>
+          <h4>Google Data Analytics</h4>
+          <span>Google</span>
+        </a>
+        <a class="cert" href="https://credly.com/amine-adlane" target="_blank" rel="noopener">
+          <span class="cert-mark">✓ CERTIFIÉ</span>
+          <h4>Fab. Numérique</h4>
+          <span>UB</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMATION -->
+  <section id="formation">
+    <div class="wrap reveal">
+      <p class="eyebrow">Formation</p>
+      <h2 class="section-title">Double diplôme d'ingénieur</h2>
+
+      <div class="edu-row">
+        <div class="edu-card">
+          <span class="yr">2023 – 2025</span>
+          <h3>Politecnico di Torino</h3>
+          <div class="school">MSc Engineering &amp; Management — New Technologies / Change Management</div>
+          <p class="fields">Systèmes d'Information · Transformation Digitale · Cloud Computing · ERP · Gestion de projet</p>
+        </div>
+        <div class="edu-card">
+          <span class="yr">2020 – 2025</span>
+          <h3>École Centrale Casablanca</h3>
+          <div class="school">Diplôme d'Ingénieur d'État — Industrie 4.0</div>
+          <p class="fields">Architecture d'Entreprise · Optimisation des Processus Métier · IA &amp; Solutions Cloud · Décision data-driven</p>
+        </div>
+      </div>
+
+      <div style="margin-top:44px;">
+        <p class="eyebrow" style="margin-bottom:20px;">Langues</p>
+        <div class="lang-list">
+          <div class="lang-item"><span class="lang-name">Français</span><div class="lang-bar"><i style="width:95%"></i></div><span class="lang-lvl">C1</span></div>
+          <div class="lang-item"><span class="lang-name">Anglais</span><div class="lang-bar"><i style="width:95%"></i></div><span class="lang-lvl">C1</span></div>
+          <div class="lang-item"><span class="lang-name">Arabe</span><div class="lang-bar"><i style="width:95%"></i></div><span class="lang-lvl">C1</span></div>
+          <div class="lang-item"><span class="lang-name">Italien</span><div class="lang-bar"><i style="width:72%"></i></div><span class="lang-lvl">B2</span></div>
+          <div class="lang-item"><span class="lang-name">Espagnol</span><div class="lang-bar"><i style="width:55%"></i></div><span class="lang-lvl">B1</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projets">
+    <div class="wrap reveal">
+      <p class="eyebrow">Projets &amp; activités complémentaires</p>
+      <h2 class="section-title">En dehors du poste</h2>
+
+      <div class="proj-grid">
+        <div class="proj">
+          <span class="pdate">FÉV. – JUIL. 2024</span>
+          <h3>Cas pratique de stratégie d'entreprise — Mega Learning</h3>
+          <p>Chef d'équipe sur un business case automobile : modélisation financière, analyse concurrentielle et recommandations stratégiques.</p>
+        </div>
+        <div class="proj">
+          <span class="pdate">2023</span>
+          <h3>Routage dynamique de coursiers</h3>
+          <p>Co-auteur d'un article scientifique sur l'optimisation du dernier kilomètre : algorithmes de routage et synthèse bibliographique.</p>
+        </div>
+        <div class="proj">
+          <span class="pdate">2021 – 2022</span>
+          <h3>Challenge Technologie &amp; Énergie</h3>
+          <p>Chef de projet — conception et prototypage d'une serre autonome à énergie renouvelable.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" style="border-bottom:none;">
+    <div class="wrap contact-wrap reveal">
+      <p class="eyebrow" style="justify-content:center;">Contact</p>
+      <h2>Discutons de votre prochain projet de transformation</h2>
+      <p>Disponible pour des missions de conseil en stratégie IT, automatisation des processus et architecture de données.</p>
+      <div class="contact-actions">
+        <a class="btn btn-primary" href="mailto:adlane-amine@hotmail.fr">adlane-amine@hotmail.fr</a>
+        <a class="btn btn-ghost" href="tel:+212657969955">+212 657 969 955</a>
+        <a class="btn btn-ghost" href="https://linkedin.com/in/amine-adlane" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <p>© <span id="year"></span> AMINE ADLANE — CONÇU COMME UN SYSTÈME, PAS UN CV.</p>
+    <ul class="foot-links">
+      <li><a href="https://linkedin.com/in/amine-adlane" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://credly.com/amine-adlane" target="_blank" rel="noopener">Credly</a></li>
+      <li><a href="mailto:adlane-amine@hotmail.fr">Email</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // close mobile nav on link click
+  document.querySelectorAll('nav.links a').forEach(function(a){
+    a.addEventListener('click', function(){
+      var check = document.getElementById('nav-check');
+      if(check) check.checked = false;
+    });
+  });
+
+  // scroll reveal
+  if('IntersectionObserver' in window){
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('in-view');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, {threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in-view'); });
+  }
+</script>
+
+</body>
+</html>
