@@ -1,0 +1,1155 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulateur d'automatisation</title>
+<meta name="description" content="Estimez le délai, le coût par dossier et le potentiel d'automatisation de votre processus, secteur par secteur.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#171a18; --paper:#f2f3f0; --surface:#fff; --line:#dfe1db; --line-soft:#ebece7;
+  --muted:#6e736c; --petrol:#0e6b72; --ochre:#a9761a; --ochre-soft:#f7efdf; --brick:#9e3b2e;
+  --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace; --radius:3px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--ink:#eceee9;--paper:#141615;--surface:#1c1f1d;--line:#303430;--line-soft:#262a27;
+  --muted:#9aa096;--petrol:#4fb3ac;--ochre:#d3a252;--ochre-soft:#302719;--brick:#d9756a;}
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1{font-size:clamp(26px,4.2vw,38px);letter-spacing:-.02em;line-height:1.18;font-weight:600;margin:10px 0 14px}
+p{margin:0}
+a{color:var(--petrol)}
+.wrap{max-width:1180px;margin:0 auto;padding:42px 24px 80px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+select,input[type=email]{width:100%;height:38px;padding:0 10px;font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);appearance:none}
+select{padding-right:28px;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 15px) 17px,calc(100% - 10px) 17px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+select:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--petrol);outline-offset:1px}
+button{font-family:var(--sans);font-size:14px;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:var(--radius);padding:8px 14px;cursor:pointer}
+button:hover{border-color:var(--ink)}
+button.primary{background:var(--ink);color:var(--paper);border-color:var(--ink);text-decoration:none;display:inline-block}
+input[type=range]{width:100%;height:20px;margin:0;appearance:none;background:transparent;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line)}
+input[type=range]::-moz-range-track{height:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:14px;height:14px;margin-top:-6px;border-radius:50%;background:var(--surface);border:2px solid var(--ink)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.sizes{display:flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
+.sizes button{flex:1;border:0;border-right:1px solid var(--line);border-radius:0;padding:7px 4px;line-height:1.25}
+.sizes button:last-child{border-right:0}
+.sizes button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.sizes small{display:block;font-size:10px;opacity:.6}
+.slider{padding:12px 0 14px}
+.slider+.slider{border-top:1px solid var(--line-soft)}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.slider-head label{font-size:14px;color:var(--muted)}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ochre);background:var(--ochre-soft);border-radius:2px;padding:1px 5px;margin-left:6px;vertical-align:1px}
+.gauge{position:relative;height:34px;background:var(--line-soft);border-radius:2px;overflow:hidden}
+.gauge-fill{position:absolute;inset:0 auto 0 0;background:var(--petrol);transition:width .18s ease-out,background .18s ease-out}
+.gauge-fill.capped{background:var(--ochre)}
+.gauge-forbidden{position:absolute;top:0;bottom:0;right:0;background-image:repeating-linear-gradient(-45deg,transparent 0 4px,var(--brick) 4px 5px);opacity:.34}
+.gauge-tick{position:absolute;top:0;bottom:0;width:1px;background:var(--brick)}
+.gauge-read{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:8px}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-top:1px solid var(--line)}
+.cell{padding:14px 16px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cell:last-child{border-right:0}
+.cell .val{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:26px;font-weight:500;letter-spacing:-.02em;display:block;margin:2px 0}
+.cell .before{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.delta{color:var(--petrol)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+@media (min-width:940px){.layout{grid-template-columns:minmax(0,420px) minmax(0,1fr)}.sticky{position:sticky;top:20px}}
+.wins{list-style:none;margin:8px 0 0;padding:0;counter-reset:w}
+.wins li{counter-increment:w;display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line-soft);font-size:14px}
+.wins li::before{content:counter(w,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--petrol);padding-top:3px}
+details summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:12px 16px;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:" +"}
+details[open] summary::after{content:" \2212"}
+.note{font-size:13px;color:var(--muted);line-height:1.65}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+  /* ---------- SITE INTEGRATION ---------- */
+  .sim-nav{max-width:1180px;margin:0 auto;padding:18px 24px 0;display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .sim-brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink);font-family:var(--mono);font-size:14px;letter-spacing:.06em}
+  .sim-dot{width:7px;height:7px;background:var(--petrol);border-radius:50%;box-shadow:0 0 8px var(--petrol);flex-shrink:0}
+  .sim-back{color:var(--muted);font-family:var(--mono);font-size:11px;text-decoration:none;letter-spacing:.04em}
+  .sim-back:hover{color:var(--ink)}
+  @media (max-width:680px){.sim-nav{padding:14px 18px 0}.sim-back{font-size:10px}}
+
+</style>
+</head>
+<body>
+<header class="sim-nav">
+  <a class="sim-brand" href="index.html" aria-label="Retour à l'accueil">
+    <span class="sim-dot"></span>A. ADLANE
+  </a>
+  <a class="sim-back" href="index.html">← Retour au site</a>
+</header>
+<main class="wrap">
+  <header style="margin-bottom:26px;max-width:660px">
+    <p class="eyebrow">Simulateur</p>
+    <h1>Ce que l'automatisation change réellement dans votre processus</h1>
+    <p style="color:var(--muted)">Le secteur calibre le modèle. Les curseurs l'ajustent à votre réalité. Aucun résultat n'est caché derrière un formulaire.</p>
+  </header>
+
+  <div class="layout">
+    <!-- Colonne de réglage -->
+    <div>
+      <section class="panel" style="padding:16px">
+        <p class="eyebrow">Calibration</p>
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label for="sector" style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px">Secteur</label>
+            <select id="sector"></select>
+          </div>
+          <div>
+            <label for="process" style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px">Processus</label>
+            <select id="process"></select>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin:14px 0 4px">Taille de la structure</p>
+        <div class="sizes" id="sizes"></div>
+      </section>
+
+      <section class="panel" style="padding:4px 16px 16px;margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px">
+          <p class="eyebrow">Vos chiffres</p>
+          <button type="button" id="reset" style="padding:4px 9px;font-size:12px;display:none">Revenir au preset</button>
+        </div>
+        <div id="sliders"></div>
+      </section>
+
+      <details class="panel" style="margin-top:12px">
+        <summary>Hypothèses du modèle</summary>
+        <div style="padding:0 16px 16px">
+          <p class="note" style="margin-bottom:12px">Ces coefficients viennent du profil sectoriel et de la taille. Corrigez-les si vous connaissez mieux votre terrain que nous.</p>
+          <div id="assumptions"></div>
+          <p class="note" id="constants" style="margin-top:10px"></p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Colonne de lecture -->
+    <div class="sticky">
+      <section class="panel">
+        <div style="padding:16px">
+          <div class="gauge-read">
+            <p class="eyebrow">Indice d'automatisabilité</p>
+            <span class="num" style="font-size:30px;font-weight:500;line-height:1"><span id="idx">0</span><span style="font-size:14px;color:var(--muted)"> / 100</span></span>
+          </div>
+          <div class="gauge" id="gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-label="Indice d'automatisabilité">
+            <div class="gauge-fill" id="fill"></div>
+            <div class="gauge-forbidden" id="forbidden"></div>
+            <div class="gauge-tick" id="tick"></div>
+          </div>
+          <p style="font-size:14px;font-weight:500;margin:10px 0 4px" id="verdict"></p>
+          <p class="note" id="constraint"></p>
+        </div>
+        <div class="readout">
+          <div class="cell">
+            <p class="eyebrow">Délai de bout en bout</p>
+            <span class="val" id="m1"></span><span class="before" id="m1b"></span>
+          </div>
+          <div class="cell">
+            <p class="eyebrow">Heures libérées / mois</p>
+            <span class="val" id="m2"></span><span class="before" id="m2b"></span>
+          </div>
+          <div class="cell">
+            <p class="eyebrow">Coût par dossier</p>
+            <span class="val" id="m3"></span><span class="before" id="m3b"></span>
+          </div>
+          <div class="cell">
+            <p class="eyebrow">Retour sur investissement</p>
+            <span class="val" id="m4"></span><span class="before" id="m4b"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" style="padding:16px;margin-top:12px">
+        <p class="eyebrow" id="winsTitle"></p>
+        <ul class="wins" id="wins"></ul>
+      </section>
+
+      <section class="panel" style="padding:16px;margin-top:12px">
+        <p class="eyebrow">Aller plus loin</p>
+        <p style="font-size:14px;margin:8px 0 12px">Ces chiffres décrivent un ordre de grandeur. Pour les confronter à votre terrain, envoyez-moi votre simulation.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="primary" id="contact" href="#" style="padding:9px 16px;border-radius:var(--radius);font-size:14px">En parler de votre simulation</a>
+          <button type="button" id="copy">Copier le lien de cette simulation</button>
+        </div>
+      </section>
+
+      <p class="note" style="margin-top:14px">Méthode — modèle déterministe. Les valeurs préremplies sont des points de départ typiques issus du profil sectoriel, pas des mesures relevées chez vous. Le taux d'automatisation est le produit de la part répétitive et de l'efficacité du secteur, plafonné par la contrainte réglementaire. Le délai intègre l'attente entre intervenants, qui domine la plupart des processus manuels. Ajustez les hypothèses pour retrouver vos propres chiffres.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+/* =======================================================================
+   CONFIGURATION — modifiez ces deux lignes
+   ======================================================================= */
+var CONTACT = "mailto:adlane-amine@hotmail.fr?subject=Simulation%20d'automatisation";
+var DEVISE  = "€";   /* mettez "MAD" et ajustez les coûts horaires ci-dessous */
+
+/* =======================================================================
+   PROFILS SECTORIELS
+   Hypothèses argumentées, pas des données mesurées. Voir la note de méthode.
+     eta   efficacité réelle sur la part répétitive (structuration des entrées)
+     alpha revue humaine résiduelle (risque réglementaire)
+     wait  attente moyenne par transfert, en heures ouvrées
+     cap   plafond d'automatisation imposé par la loi ou la déontologie
+   ======================================================================= */
+var SECTORS = [
+  {
+    "id": "rh",
+    "label": "Recrutement et RH",
+    "eta": 0.8,
+    "alpha": 0.15,
+    "wait": 6,
+    "cap": 0.85,
+    "hourlyCost": 26,
+    "constraint": "Le tri et la qualification sont automatisables. L'évaluation finale et l'entretien restent humains.",
+    "processes": [
+      {
+        "id": "tri",
+        "label": "Tri de candidatures",
+        "volume": 400,
+        "minutes": 25,
+        "actors": 3,
+        "rework": 0.1,
+        "repetitive": 0.75,
+        "quickWins": [
+          "Extraction structurée des CV, quel que soit le format reçu",
+          "Scoring automatique contre la fiche de poste, avec justification lisible",
+          "Réponse négative personnalisée envoyée sous 48 h"
+        ]
+      },
+      {
+        "id": "onboarding",
+        "label": "Onboarding administratif",
+        "volume": 40,
+        "minutes": 90,
+        "actors": 4,
+        "rework": 0.12,
+        "repetitive": 0.7,
+        "quickWins": [
+          "Génération du contrat et des annexes depuis une seule saisie",
+          "Relance automatique des pièces manquantes",
+          "Création des comptes et acces déclenchée à la signature"
+        ]
+      },
+      {
+        "id": "sourcing",
+        "label": "Sourcing et prise de contact",
+        "volume": 600,
+        "minutes": 12,
+        "actors": 2,
+        "rework": 0.15,
+        "repetitive": 0.8,
+        "quickWins": [
+          "Constitution et dedoublonnage de la liste cible",
+          "Vérification des adresses avant envoi pour protéger le domaine",
+          "Sequence de relance qui s'arrête des la première reponse"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "juridique",
+    "label": "Juridique et notariat",
+    "eta": 0.65,
+    "alpha": 0.35,
+    "wait": 12,
+    "cap": 0.6,
+    "hourlyCost": 45,
+    "constraint": "Responsabilité professionnelle engagée : toute pièce sortante exige une validation nominative.",
+    "processes": [
+      {
+        "id": "contrats",
+        "label": "Analyse de contrats",
+        "volume": 80,
+        "minutes": 120,
+        "actors": 3,
+        "rework": 0.08,
+        "repetitive": 0.45,
+        "quickWins": [
+          "Extraction des clauses sensibles et des dates clés",
+          "Comparaison automatique contre votre modèle de référence",
+          "Note de synthese pré-rédigée, soumise à validation"
+        ]
+      },
+      {
+        "id": "dossier",
+        "label": "Constitution de dossier client",
+        "volume": 60,
+        "minutes": 90,
+        "actors": 4,
+        "rework": 0.1,
+        "repetitive": 0.6,
+        "quickWins": [
+          "Checklist de pièces générée selon le type d'acte",
+          "Contrôle de complétude à la réception de chaque document",
+          "Relance automatique du client sur les pièces manquantes"
+        ]
+      },
+      {
+        "id": "veille",
+        "label": "Veille et mise en conformité",
+        "volume": 30,
+        "minutes": 180,
+        "actors": 3,
+        "rework": 0.06,
+        "repetitive": 0.4,
+        "quickWins": [
+          "Surveillance des sources officielles pertinentes",
+          "Tri des textes par impact sur vos dossiers en cours",
+          "Note de veille mensuelle assemblée automatiquement"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "comptabilite",
+    "label": "Comptabilité et expertise",
+    "eta": 0.88,
+    "alpha": 0.15,
+    "wait": 5,
+    "cap": 0.85,
+    "hourlyCost": 30,
+    "constraint": "Règles explicites et pièces normalisées : le secteur le mieux placé pour l'automatisation.",
+    "processes": [
+      {
+        "id": "factures",
+        "label": "Saisie des factures fournisseurs",
+        "volume": 800,
+        "minutes": 8,
+        "actors": 2,
+        "rework": 0.06,
+        "repetitive": 0.9,
+        "quickWins": [
+          "Lecture automatique des factures, y compris scannées",
+          "Affectation comptable proposée et apprise au fil des validations",
+          "Détection des doublons et des écarts avant intégration"
+        ]
+      },
+      {
+        "id": "rapprochement",
+        "label": "Rapprochement bancaire",
+        "volume": 400,
+        "minutes": 12,
+        "actors": 2,
+        "rework": 0.05,
+        "repetitive": 0.88,
+        "quickWins": [
+          "Appariement automatique des écritures et des relevés",
+          "Mise en file des seuls cas ambigus, avec explication",
+          "Journal des exceptions consultable par le client"
+        ]
+      },
+      {
+        "id": "liasse",
+        "label": "Liasse et déclarations",
+        "volume": 50,
+        "minutes": 150,
+        "actors": 3,
+        "rework": 0.07,
+        "repetitive": 0.65,
+        "quickWins": [
+          "Controles de cohérence lancés avant la revue",
+          "Pré-remplissage des états à partir de la balance",
+          "Suivi des échéances avec alerte à J-10"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "assurance",
+    "label": "Assurance et courtage",
+    "eta": 0.8,
+    "alpha": 0.25,
+    "wait": 10,
+    "cap": 0.75,
+    "hourlyCost": 30,
+    "constraint": "La tarification suit des règles. L'arbitrage d'un sinistre litigieux ne se délègue pas.",
+    "processes": [
+      {
+        "id": "souscription",
+        "label": "Souscription et devis",
+        "volume": 300,
+        "minutes": 35,
+        "actors": 3,
+        "rework": 0.09,
+        "repetitive": 0.7,
+        "quickWins": [
+          "Récupération des données du prospect sans ressaisie",
+          "Devis généré depuis votre grille tarifaire",
+          "Détection des dossiers hors norme avant l'étude"
+        ]
+      },
+      {
+        "id": "sinistre",
+        "label": "Déclaration de sinistre",
+        "volume": 200,
+        "minutes": 60,
+        "actors": 4,
+        "rework": 0.12,
+        "repetitive": 0.6,
+        "quickWins": [
+          "Ouverture du dossier dès la réception de la déclaration",
+          "Contrôle de garantie automatique sur le contrat",
+          "Information proactive de l'assuré à chaque étape"
+        ]
+      },
+      {
+        "id": "renouvellement",
+        "label": "Renouvellement de contrats",
+        "volume": 500,
+        "minutes": 20,
+        "actors": 2,
+        "rework": 0.07,
+        "repetitive": 0.8,
+        "quickWins": [
+          "Détection des échéances et priorisation du portefeuille",
+          "Avenant pré-rempli avec les évolutions tarifaires",
+          "Relance graduée jusqu'à la signature"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "banque",
+    "label": "Banque et financement",
+    "eta": 0.85,
+    "alpha": 0.3,
+    "wait": 14,
+    "cap": 0.7,
+    "hourlyCost": 38,
+    "constraint": "Données structurées, mais KYC et octroi imposent une décision humaine tracée et opposable.",
+    "processes": [
+      {
+        "id": "kyc",
+        "label": "KYC et entrée en relation",
+        "volume": 250,
+        "minutes": 75,
+        "actors": 4,
+        "rework": 0.1,
+        "repetitive": 0.65,
+        "quickWins": [
+          "Collecte et contrôle automatique des pièces d'identité",
+          "Interrogation des listes de sanctions et des bases publiques",
+          "Dossier assemblé et prêt pour la revue conformité"
+        ]
+      },
+      {
+        "id": "credit",
+        "label": "Dossier de credit",
+        "volume": 120,
+        "minutes": 180,
+        "actors": 5,
+        "rework": 0.09,
+        "repetitive": 0.55,
+        "quickWins": [
+          "Lecture des bilans et calcul automatique des ratios",
+          "Note de présentation pré-rédigée pour le comité",
+          "Suivi des pièces manquantes côté client"
+        ]
+      },
+      {
+        "id": "réclamations",
+        "label": "Traitement des réclamations",
+        "volume": 300,
+        "minutes": 40,
+        "actors": 3,
+        "rework": 0.12,
+        "repetitive": 0.6,
+        "quickWins": [
+          "Qualification et routage automatique vers le bon service",
+          "Reconstitution de l'historique client en un écran",
+          "Réponse type proposée, validée avant envoi"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sante",
+    "label": "Santé et cliniques",
+    "eta": 0.75,
+    "alpha": 0.35,
+    "wait": 8,
+    "cap": 0.65,
+    "hourlyCost": 28,
+    "constraint": "L'administratif est largement automatisable. L'acte clinique et son interprétation ne le sont pas.",
+    "processes": [
+      {
+        "id": "admission",
+        "label": "Admission et pré-admission",
+        "volume": 600,
+        "minutes": 25,
+        "actors": 3,
+        "rework": 0.1,
+        "repetitive": 0.7,
+        "quickWins": [
+          "Pré-admission en ligne avec contrôle des droits",
+          "Vérification de complétude du dossier avant l'arrivée",
+          "Rappel des documents à apporter, envoye la veille"
+        ]
+      },
+      {
+        "id": "facturation",
+        "label": "Facturation et tiers payant",
+        "volume": 900,
+        "minutes": 15,
+        "actors": 3,
+        "rework": 0.14,
+        "repetitive": 0.8,
+        "quickWins": [
+          "Contrôle des droits avant émission de la facture",
+          "Détection des rejets et régénération automatique",
+          "Suivi des impayés avec relance graduée"
+        ]
+      },
+      {
+        "id": "rdv",
+        "label": "Prise de rendez-vous et rappels",
+        "volume": 1500,
+        "minutes": 6,
+        "actors": 2,
+        "rework": 0.08,
+        "repetitive": 0.85,
+        "quickWins": [
+          "Prise de rendez-vous sans intervention du secrétariat",
+          "Rappel automatique pour réduire les absences",
+          "Replanification proposée dès l'annulation"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "immobilier",
+    "label": "Immobilier et gestion locative",
+    "eta": 0.78,
+    "alpha": 0.15,
+    "wait": 16,
+    "cap": 0.8,
+    "hourlyCost": 25,
+    "constraint": "Le délai vient de l'attente des tiers, pas du traitement. La relance automatique est le vrai levier.",
+    "processes": [
+      {
+        "id": "locataire",
+        "label": "Constitution de dossier locataire",
+        "volume": 150,
+        "minutes": 60,
+        "actors": 3,
+        "rework": 0.12,
+        "repetitive": 0.7,
+        "quickWins": [
+          "Dépôt des pièces en ligne avec contrôle immédiat",
+          "Vérification de cohérence des justificatifs",
+          "Bail pré-rempli dès le dossier complet"
+        ]
+      },
+      {
+        "id": "intervention",
+        "label": "Demandes d'intervention",
+        "volume": 400,
+        "minutes": 25,
+        "actors": 4,
+        "rework": 0.15,
+        "repetitive": 0.65,
+        "quickWins": [
+          "Qualification de la demande à la réception",
+          "Mise en relation directe avec le prestataire compétent",
+          "Suivi et clôture confirmés auprès du locataire"
+        ]
+      },
+      {
+        "id": "quittancement",
+        "label": "Quittancement et relances",
+        "volume": 800,
+        "minutes": 10,
+        "actors": 2,
+        "rework": 0.08,
+        "repetitive": 0.85,
+        "quickWins": [
+          "Émission et envoi des quittances sans intervention",
+          "Rapprochement automatique des encaissements",
+          "Relance graduée dès le premier retard"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "transit",
+    "label": "Transit, douane et logistique",
+    "eta": 0.85,
+    "alpha": 0.2,
+    "wait": 18,
+    "cap": 0.8,
+    "hourlyCost": 22,
+    "constraint": "Documents normalisés, donc très automatisables. La latence administrative, elle, reste subie.",
+    "processes": [
+      {
+        "id": "douane",
+        "label": "Déclaration en douane",
+        "volume": 300,
+        "minutes": 70,
+        "actors": 4,
+        "rework": 0.11,
+        "repetitive": 0.7,
+        "quickWins": [
+          "Lecture du connaissement et de la facture commerciale",
+          "Pré-remplissage de la déclaration depuis les pièces",
+          "Contrôle de cohérence avant dépôt pour éviter le rejet"
+        ]
+      },
+      {
+        "id": "expédition",
+        "label": "Documentation d'expédition",
+        "volume": 500,
+        "minutes": 30,
+        "actors": 3,
+        "rework": 0.1,
+        "repetitive": 0.75,
+        "quickWins": [
+          "Génération du jeu documentaire complet par expédition",
+          "Alerte sur pièce manquante avant depart",
+          "Notification automatique du client à chaque jalon"
+        ]
+      },
+      {
+        "id": "frais",
+        "label": "Réconciliation des frais",
+        "volume": 400,
+        "minutes": 25,
+        "actors": 3,
+        "rework": 0.12,
+        "repetitive": 0.8,
+        "quickWins": [
+          "Rapprochement des factures transporteur et des dossiers",
+          "Détection des écarts de taxation",
+          "Refacturation client générée automatiquement"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ecommerce",
+    "label": "E-commerce et retail",
+    "eta": 0.92,
+    "alpha": 0.1,
+    "wait": 3,
+    "cap": 0.9,
+    "hourlyCost": 20,
+    "constraint": "Données déjà structurées et accessibles par API : ici le plafond est technique, pas réglementaire.",
+    "processes": [
+      {
+        "id": "commandes",
+        "label": "Commandes et service client",
+        "volume": 2000,
+        "minutes": 7,
+        "actors": 2,
+        "rework": 0.06,
+        "repetitive": 0.85,
+        "quickWins": [
+          "Réponse immédiate aux demandes de suivi de commande",
+          "Escalade vers un humain sur les seuls cas sensibles",
+          "Synthèse quotidienne des motifs de contact"
+        ]
+      },
+      {
+        "id": "retours",
+        "label": "Gestion des retours",
+        "volume": 400,
+        "minutes": 15,
+        "actors": 3,
+        "rework": 0.1,
+        "repetitive": 0.75,
+        "quickWins": [
+          "Étiquette de retour emise à la demande du client",
+          "Contrôle d'éligibilité automatique",
+          "Remboursement déclenché à la réception constatée"
+        ]
+      },
+      {
+        "id": "catalogue",
+        "label": "Mise à jour du catalogue",
+        "volume": 600,
+        "minutes": 20,
+        "actors": 2,
+        "rework": 0.08,
+        "repetitive": 0.85,
+        "quickWins": [
+          "Import et normalisation des fiches fournisseur",
+          "Rédaction des descriptions et des attributs manquants",
+          "Détection des ruptures et des écarts de prix"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "industrie",
+    "label": "Industrie et BTP",
+    "eta": 0.62,
+    "alpha": 0.2,
+    "wait": 20,
+    "cap": 0.65,
+    "hourlyCost": 27,
+    "constraint": "Entrées terrain non structurées : la première étape est de capturer proprement, pas d'automatiser.",
+    "processes": [
+      {
+        "id": "chantier",
+        "label": "Rapports de chantier",
+        "volume": 300,
+        "minutes": 30,
+        "actors": 3,
+        "rework": 0.15,
+        "repetitive": 0.6,
+        "quickWins": [
+          "Saisie terrain guidée depuis le téléphone, hors connexion",
+          "Rapport mis en forme et diffusé automatiquement",
+          "Consolidation hebdomadaire par chantier"
+        ]
+      },
+      {
+        "id": "devis",
+        "label": "Demandes de devis fournisseurs",
+        "volume": 150,
+        "minutes": 50,
+        "actors": 3,
+        "rework": 0.12,
+        "repetitive": 0.65,
+        "quickWins": [
+          "Consultation envoyée simultanément aux fournisseurs retenus",
+          "Tableau comparatif construit dès réception des offres",
+          "Relance automatique des non-répondants"
+        ]
+      },
+      {
+        "id": "qualite",
+        "label": "Suivi des non-conformités",
+        "volume": 200,
+        "minutes": 45,
+        "actors": 4,
+        "rework": 0.14,
+        "repetitive": 0.55,
+        "quickWins": [
+          "Déclaration depuis le terrain avec photo horodatée",
+          "Affectation automatique au responsable concerné",
+          "Relance jusqu'à la levée documentée"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "conseil",
+    "label": "Agence et conseil",
+    "eta": 0.72,
+    "alpha": 0.25,
+    "wait": 6,
+    "cap": 0.7,
+    "hourlyCost": 35,
+    "constraint": "Production hétérogène : l'automatisation vise l'assemblage et la mise en forme, jamais le fond.",
+    "processes": [
+      {
+        "id": "ao",
+        "label": "Réponses aux appels d'offres",
+        "volume": 25,
+        "minutes": 480,
+        "actors": 4,
+        "rework": 0.1,
+        "repetitive": 0.45,
+        "quickWins": [
+          "Extraction des exigences et de la grille d'évaluation",
+          "Assemblage des références et CV depuis votre bibliothèque",
+          "Contrôle de complétude avant dépôt"
+        ]
+      },
+      {
+        "id": "reporting",
+        "label": "Reporting client mensuel",
+        "volume": 60,
+        "minutes": 120,
+        "actors": 2,
+        "rework": 0.08,
+        "repetitive": 0.75,
+        "quickWins": [
+          "Collecte automatique des données sur toutes les sources",
+          "Rapport généré à votre charte, prêt à commenter",
+          "Alerte sur les écarts significatifs avant envoi"
+        ]
+      },
+      {
+        "id": "prospection",
+        "label": "Prospection et qualification",
+        "volume": 500,
+        "minutes": 15,
+        "actors": 2,
+        "rework": 0.15,
+        "repetitive": 0.75,
+        "quickWins": [
+          "Construction de la liste cible et enrichissement",
+          "Vérification des contacts avant campagne",
+          "Qualification des reponses et prise de rendez-vous"
+        ]
+      }
+    ]
+  }
+];
+var SIZES = [
+  {
+    "id": "tpe",
+    "label": "TPE",
+    "hint": "moins de 20 personnes",
+    "waitMul": 0.5,
+    "etaMul": 0.92,
+    "effortMul": 0.7
+  },
+  {
+    "id": "pme",
+    "label": "PME",
+    "hint": "20 à 250 personnes",
+    "waitMul": 1,
+    "etaMul": 1,
+    "effortMul": 1
+  },
+  {
+    "id": "eti",
+    "label": "ETI",
+    "hint": "plus de 250 personnes",
+    "waitMul": 1.6,
+    "etaMul": 1.06,
+    "effortMul": 1.8
+  }
+];
+
+/* Constantes transverses */
+var BASE = {
+  reworkReduction: 0.70,   /* baisse des erreurs, proportionnelle à l'automatisation */
+  hoursPerDay: 7,          /* heures ouvrées par jour */
+  hoursPerFte: 150,        /* heures mensuelles d'un ETP */
+  runCostPerCase: 0.12,    /* coût d'exécution API/infra par dossier */
+  fixedMonthlyCost: 70,    /* coût fixe mensuel d'exploitation */
+  dayRate: 380             /* taux journalier retenu pour estimer la charge projet */
+};
+var ETA_CEILING = 0.95;
+
+/* =======================================================================
+   MOTEUR
+   ======================================================================= */
+function resolveAssumptions(sector, size, ov){
+  ov = ov || {};
+  return {
+    eta:   ov.eta   != null ? ov.eta   : Math.min(sector.eta * size.etaMul, ETA_CEILING),
+    alpha: ov.alpha != null ? ov.alpha : sector.alpha,
+    wait:  ov.wait  != null ? ov.wait  : sector.wait * size.waitMul,
+    cap:   ov.cap   != null ? ov.cap   : sector.cap,
+    dayRate: ov.dayRate != null ? ov.dayRate : BASE.dayRate
+  };
+}
+
+function compute(inp, a, effortMul){
+  var raw = inp.repetitive * a.eta;
+  var rate = Math.min(raw, a.cap);
+  var capped = raw > a.cap + 1e-9;
+
+  var mBefore = inp.minutes * (1 + inp.rework);
+  var reworkAfter = inp.rework * (1 - BASE.reworkReduction * rate);
+  var mAfter = (inp.minutes * (1 - rate) + a.alpha * inp.minutes * rate) * (1 + reworkAfter);
+
+  var hops = Math.max(inp.actors - 1, 0);
+  var cycleBefore = mBefore / 60 + hops * a.wait;
+  var cycleAfter  = mAfter / 60 + hops * a.wait * (1 - rate);
+
+  var hBefore = inp.volume * mBefore / 60;
+  var hAfter  = inp.volume * mAfter / 60;
+  var freed = hBefore - hAfter;
+
+  var costBefore = (mBefore / 60) * inp.hourlyCost;
+  var costAfter  = (mAfter / 60) * inp.hourlyCost + BASE.runCostPerCase;
+
+  var saving = freed * inp.hourlyCost - (inp.volume * BASE.runCostPerCase + BASE.fixedMonthlyCost);
+  var effortDays = (5 + 3 * hops + 10 * inp.repetitive) * effortMul;
+  var projectCost = effortDays * a.dayRate;
+
+  var index = Math.round(rate * 100);
+  var verdict;
+  if (capped) verdict = "Plafonné par la contrainte du secteur";
+  else if (index < 25) verdict = "Faible — le gain viendra d'une réorganisation";
+  else if (index < 45) verdict = "Partiel — cibler la saisie et les vérifications";
+  else if (index < 65) verdict = "Élevé — automatisation par étapes";
+  else verdict = "Très élevé — candidat prioritaire";
+
+  return {
+    index: index, capped: capped, verdict: verdict,
+    cycleDaysBefore: cycleBefore / BASE.hoursPerDay,
+    cycleDaysAfter: cycleAfter / BASE.hoursPerDay,
+    cycleReduction: cycleBefore > 0 ? 1 - cycleAfter / cycleBefore : 0,
+    hoursFreed: freed,
+    fteFreed: freed / BASE.hoursPerFte,
+    costBefore: costBefore, costAfter: costAfter,
+    projectCost: projectCost,
+    payback: saving > 0 ? projectCost / saving : null
+  };
+}
+
+/* =======================================================================
+   INTERFACE
+   ======================================================================= */
+var F = {
+  int: function(n){ return Math.round(n).toLocaleString("fr-FR"); },
+  one: function(n){ return n.toFixed(1); },
+  two: function(n){ return n.toFixed(2); },
+  pct: function(n){ return Math.round(n * 100) + " %"; }
+};
+
+var SLIDERS = [
+  { key:"volume",     label:"Volume mensuel",                    min:10, max:3000, step:10,  scope:"company", fmt:function(v){return F.int(v)+" dossiers";} },
+  { key:"minutes",    label:"Temps par dossier",                 min:2,  max:480,  step:1,   scope:"process", fmt:function(v){return F.int(v)+" min";} },
+  { key:"actors",     label:"Intervenants dans la chaîne",       min:1,  max:8,    step:1,   scope:"process", fmt:function(v){return String(v);} },
+  { key:"hourlyCost", label:"Coût horaire chargé",               min:8,  max:300,  step:1,   scope:"company", fmt:function(v){return F.int(v)+" "+DEVISE;} },
+  { key:"rework",     label:"Taux de reprise",                   min:0,  max:0.35, step:0.01,scope:"process", fmt:function(v){return F.pct(v);} },
+  { key:"repetitive", label:"Part répétitive plutôt que jugement",min:0, max:1,    step:0.05,scope:"process", fmt:function(v){return F.pct(v);} }
+];
+
+var ASSUMPTIONS = [
+  { key:"eta",     label:"Efficacité sur la part répétitive", min:0.30, max:0.95, step:0.01, pct:true },
+  { key:"alpha",   label:"Revue humaine résiduelle",          min:0,    max:0.60, step:0.01, pct:true },
+  { key:"cap",     label:"Plafond du secteur",                min:0.20, max:1,    step:0.05, pct:true },
+  { key:"wait",    label:"Attente par transfert (h)",         min:0,    max:40,   step:0.5,  pct:false },
+  { key:"dayRate", label:"Taux journalier projet",            min:150,  max:900,  step:10,   pct:false }
+];
+
+var QS = { volume:"v", minutes:"m", actors:"n", hourlyCost:"c", rework:"r", repetitive:"q" };
+
+var state = { sector:null, process:null, size:"pme", inputs:null, touched:{}, ov:{} };
+
+function sectorById(id){ for (var i=0;i<SECTORS.length;i++) if (SECTORS[i].id===id) return SECTORS[i]; return SECTORS[0]; }
+function sizeById(id){ for (var i=0;i<SIZES.length;i++) if (SIZES[i].id===id) return SIZES[i]; return SIZES[1]; }
+function processById(sector, id){ for (var i=0;i<sector.processes.length;i++) if (sector.processes[i].id===id) return sector.processes[i]; return sector.processes[0]; }
+
+function presetFor(sectorId, processId){
+  var s = sectorById(sectorId), p = processById(s, processId);
+  return { volume:p.volume, minutes:p.minutes, actors:p.actors, hourlyCost:s.hourlyCost, rework:p.rework, repetitive:p.repetitive };
+}
+
+function readUrl(){
+  var u = new URLSearchParams(location.search);
+  var sid = u.get("s");
+  if (!sid) return false;
+  var found = false;
+  for (var i=0;i<SECTORS.length;i++) if (SECTORS[i].id===sid) found = true;
+  if (!found) return false;
+  var s = sectorById(sid);
+  state.sector = sid;
+  state.process = processById(s, u.get("p") || s.processes[0].id).id;
+  state.size = u.get("z") || "pme";
+  state.inputs = presetFor(state.sector, state.process);
+  for (var k in QS){
+    var raw = u.get(QS[k]);
+    if (raw === null) continue;
+    var n = Number(raw);
+    if (isFinite(n)) { state.inputs[k] = n; state.touched[k] = true; }
+  }
+  return true;
+}
+
+function writeUrl(){
+  var u = new URLSearchParams();
+  u.set("s", state.sector); u.set("p", state.process); u.set("z", state.size);
+  for (var k in state.touched) if (state.touched[k]) u.set(QS[k], String(state.inputs[k]));
+  history.replaceState(null, "", "?" + u.toString());
+}
+
+function el(id){ return document.getElementById(id); }
+
+function buildSelects(){
+  var sec = el("sector");
+  sec.innerHTML = "";
+  SECTORS.forEach(function(s){
+    var o = document.createElement("option");
+    o.value = s.id; o.textContent = s.label;
+    if (s.id === state.sector) o.selected = true;
+    sec.appendChild(o);
+  });
+  buildProcesses();
+}
+
+function buildProcesses(){
+  var s = sectorById(state.sector), pr = el("process");
+  pr.innerHTML = "";
+  s.processes.forEach(function(p){
+    var o = document.createElement("option");
+    o.value = p.id; o.textContent = p.label;
+    if (p.id === state.process) o.selected = true;
+    pr.appendChild(o);
+  });
+}
+
+function buildSizes(){
+  var c = el("sizes");
+  c.innerHTML = "";
+  SIZES.forEach(function(z){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("aria-pressed", z.id === state.size ? "true" : "false");
+    b.innerHTML = z.label + "<small>" + z.hint + "</small>";
+    b.addEventListener("click", function(){ state.size = z.id; buildSizes(); render(); });
+    c.appendChild(b);
+  });
+}
+
+function buildSliders(){
+  var c = el("sliders");
+  c.innerHTML = "";
+  SLIDERS.forEach(function(s){
+    var row = document.createElement("div");
+    row.className = "slider";
+    row.innerHTML =
+      '<div class="slider-head"><label for="sl-'+s.key+'">'+s.label+'<span class="tag" id="tag-'+s.key+'" style="display:none">ajusté</span></label>'+
+      '<span class="num" id="out-'+s.key+'" style="font-size:14px;font-weight:500"></span></div>'+
+      '<input id="sl-'+s.key+'" type="range" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'">';
+    c.appendChild(row);
+    var input = el("sl-"+s.key);
+    input.addEventListener("input", function(){
+      state.inputs[s.key] = Number(input.value);
+      state.touched[s.key] = true;
+      render();
+    });
+  });
+}
+
+function buildAssumptions(){
+  var c = el("assumptions");
+  c.innerHTML = "";
+  ASSUMPTIONS.forEach(function(a){
+    var row = document.createElement("div");
+    row.className = "slider";
+    row.innerHTML =
+      '<div class="slider-head"><label for="as-'+a.key+'">'+a.label+'</label>'+
+      '<span class="num" id="aout-'+a.key+'" style="font-size:14px"></span></div>'+
+      '<input id="as-'+a.key+'" type="range" min="'+a.min+'" max="'+a.max+'" step="'+a.step+'">';
+    c.appendChild(row);
+    var input = el("as-"+a.key);
+    input.addEventListener("input", function(){ state.ov[a.key] = Number(input.value); render(); });
+  });
+  el("constants").textContent =
+    "Constantes transverses : réduction des erreurs " + F.pct(BASE.reworkReduction) +
+    ", journée de " + BASE.hoursPerDay + " h ouvrées, " + BASE.hoursPerFte + " h par ETP mensuel, " +
+    BASE.runCostPerCase.toFixed(2) + " " + DEVISE + " de coût d'exécution par dossier et " +
+    BASE.fixedMonthlyCost + " " + DEVISE + " de coût fixe mensuel.";
+}
+
+/** Change de secteur ou de processus : les paramètres d'entreprise déjà réglés survivent. */
+function reload(newSector, newProcess){
+  var base = presetFor(newSector, newProcess);
+  var keep = {};
+  ["volume","hourlyCost"].forEach(function(k){
+    if (state.touched[k]) { base[k] = state.inputs[k]; keep[k] = true; }
+  });
+  state.sector = newSector;
+  state.process = newProcess;
+  state.inputs = base;
+  state.touched = keep;
+  state.ov = {};
+}
+
+function render(){
+  var sector = sectorById(state.sector);
+  var size = sizeById(state.size);
+  var proc = processById(sector, state.process);
+  var a = resolveAssumptions(sector, size, state.ov);
+  var r = compute(state.inputs, a, size.effortMul);
+  var preset = presetFor(state.sector, state.process);
+
+  SLIDERS.forEach(function(s){
+    var v = state.inputs[s.key];
+    el("sl-"+s.key).value = v;
+    el("out-"+s.key).textContent = s.fmt(v);
+    var modified = state.touched[s.key] && Math.abs(v - preset[s.key]) > 1e-9;
+    el("tag-"+s.key).style.display = modified ? "" : "none";
+  });
+  var anyTouched = false;
+  for (var k in state.touched) if (state.touched[k]) anyTouched = true;
+  el("reset").style.display = anyTouched ? "" : "none";
+
+  ASSUMPTIONS.forEach(function(x){
+    el("as-"+x.key).value = a[x.key];
+    el("aout-"+x.key).textContent = x.pct ? F.pct(a[x.key]) : F.int(a[x.key]) + (x.key === "dayRate" ? " " + DEVISE : "");
+  });
+
+  var capPct = Math.round(a.cap * 100);
+  el("idx").textContent = r.index;
+  el("gauge").setAttribute("aria-valuenow", r.index);
+  el("fill").style.width = r.index + "%";
+  el("fill").className = "gauge-fill" + (r.capped ? " capped" : "");
+  el("forbidden").style.width = (100 - capPct) + "%";
+  el("tick").style.left = capPct + "%";
+  el("verdict").textContent = r.verdict;
+  el("constraint").textContent = sector.constraint + (r.capped ? " Plafond appliqué : " + capPct + " %." : "");
+
+  el("m1").textContent = F.one(r.cycleDaysAfter) + " j";
+  el("m1b").innerHTML = "contre " + F.one(r.cycleDaysBefore) + " j <span class=\"delta\">\u2212" + Math.round(r.cycleReduction * 100) + " %</span>";
+  el("m2").textContent = F.int(r.hoursFreed) + " h";
+  el("m2b").textContent = F.two(r.fteFreed) + " ETP libéré";
+  el("m3").textContent = F.two(r.costAfter) + " " + DEVISE;
+  el("m3b").textContent = "contre " + F.two(r.costBefore) + " " + DEVISE + " aujourd'hui";
+  el("m4").textContent = r.payback === null ? "n/a" : (r.payback < 1 ? "< 1 mois" : F.one(r.payback) + " mois");
+  el("m4b").textContent = r.payback === null
+    ? "gain insuffisant à ce volume"
+    : "projet estimé " + F.int(Math.round(r.projectCost / 500) * 500) + " " + DEVISE;
+
+  el("winsTitle").textContent = "Par où commencer — " + proc.label.toLowerCase();
+  var w = el("wins");
+  w.innerHTML = "";
+  proc.quickWins.forEach(function(t){
+    var li = document.createElement("li");
+    li.textContent = t;
+    w.appendChild(li);
+  });
+
+  writeUrl();
+}
+
+/* Démarrage */
+if (!readUrl()){
+  state.sector = "comptabilite";
+  state.process = sectorById(state.sector).processes[0].id;
+  state.inputs = presetFor(state.sector, state.process);
+}
+
+buildSelects(); buildSizes(); buildSliders(); buildAssumptions();
+
+el("sector").addEventListener("change", function(){
+  var s = sectorById(this.value);
+  reload(this.value, s.processes[0].id);
+  buildProcesses(); render();
+});
+el("process").addEventListener("change", function(){
+  reload(state.sector, this.value);
+  render();
+});
+el("reset").addEventListener("click", function(){
+  state.inputs = presetFor(state.sector, state.process);
+  state.touched = {}; state.ov = {};
+  render();
+});
+el("copy").addEventListener("click", function(){
+  var b = this;
+  navigator.clipboard && navigator.clipboard.writeText(location.href).then(function(){
+    b.textContent = "Lien copié";
+    setTimeout(function(){ b.textContent = "Copier le lien de cette simulation"; }, 2200);
+  });
+});
+el("contact").href = CONTACT;
+
+render();
+</script>
+</body>
+</html>
