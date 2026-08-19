@@ -81,7 +81,45 @@ details[open] summary::after{content:" \2212"}
   .sim-dot{width:7px;height:7px;background:var(--petrol);border-radius:50%;box-shadow:0 0 8px var(--petrol);flex-shrink:0}
   .sim-back{color:var(--muted);font-family:var(--mono);font-size:11px;text-decoration:none;letter-spacing:.04em}
   .sim-back:hover{color:var(--ink)}
-  @media (max-width:680px){.sim-nav{padding:14px 18px 0}.sim-back{font-size:10px}}
+  @media (max-width:680px){
+  .sim-nav{padding:12px 16px 0;flex-wrap:wrap;align-items:center}
+  .sim-back{font-size:10px}
+  .sim-lang{order:3;width:100%;justify-content:flex-end;margin-top:8px}
+  .sim-lang .lang-btn{padding:5px 7px;font-size:10px}
+  .wrap{padding:28px 16px 56px}
+  h1{font-size:clamp(25px,8vw,34px);line-height:1.12}
+  .grid2{grid-template-columns:1fr;gap:10px}
+  .layout{gap:12px}
+  .sticky{position:static}
+  .panel{width:100%}
+  .readout{grid-template-columns:1fr 1fr}
+  .cell{padding:12px 11px;min-width:0}
+  .cell .val{font-size:21px;word-break:break-word}
+  .cell .before{font-size:10.5px;line-height:1.4}
+  .gauge-read{align-items:flex-start}
+  .gauge-read .num{font-size:25px!important}
+  .slider-head{gap:8px}
+  .slider-head label{font-size:13px}
+  .sizes{display:grid;grid-template-columns:repeat(2,1fr)}
+  .sizes button{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .sizes button:nth-child(2n){border-right:0}
+  .sizes button:nth-last-child(-n+2){border-bottom:0}
+  select,input[type=email]{height:42px;font-size:16px}
+  button{min-height:40px}
+  .note{font-size:12px}
+}
+@media (max-width:390px){
+  .readout{grid-template-columns:1fr}
+  .sizes{grid-template-columns:1fr 1fr}
+  .sim-brand{font-size:13px}
+}
+.sim-lang{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sim-lang .lang-btn{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;padding:5px 8px;border:1px solid var(--line);border-radius:var(--radius);background:transparent;color:var(--muted);cursor:pointer}
+.sim-lang .lang-btn:hover{color:var(--petrol);border-color:var(--petrol)}
+.sim-lang .lang-btn.active{color:var(--paper);background:var(--ink);border-color:var(--ink);font-weight:600}
+html[dir='rtl'] .sim-nav{direction:rtl}
+html[dir='rtl'] .sim-back{margin-left:auto;margin-right:0}
+html[dir='rtl'] .sim-lang{justify-content:flex-start}
 
 </style>
 </head>
@@ -90,46 +128,53 @@ details[open] summary::after{content:" \2212"}
   <a class="sim-brand" href="index.html" aria-label="Retour à l'accueil">
     <span class="sim-dot"></span>A. ADLANE
   </a>
-  <a class="sim-back" href="index.html">← Retour au site</a>
+  <a class="sim-back" href="index.html" data-i18n="nav.back">← Retour au site</a>
+  <div class="sim-lang" role="group" aria-label="Langue / Language">
+    <button type="button" class="lang-btn" data-lang="fr" aria-pressed="false">FR</button>
+    <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+    <button type="button" class="lang-btn" data-lang="ar" aria-pressed="false">AR</button>
+    <button type="button" class="lang-btn" data-lang="it" aria-pressed="false">IT</button>
+    <button type="button" class="lang-btn" data-lang="es" aria-pressed="false">ES</button>
+  </div>
 </header>
 <main class="wrap">
   <header style="margin-bottom:26px;max-width:660px">
-    <p class="eyebrow">Simulateur</p>
-    <h1>Ce que l'automatisation change réellement dans votre processus</h1>
-    <p style="color:var(--muted)">Le secteur calibre le modèle. Les curseurs l'ajustent à votre réalité. Aucun résultat n'est caché derrière un formulaire.</p>
+    <p class="eyebrow" data-i18n="title.eyebrow">Simulateur</p>
+    <h1 data-i18n="title.h1">Ce que l'automatisation change réellement dans votre processus</h1>
+    <p style="color:var(--muted)" data-i18n="title.lede">Le secteur calibre le modèle. Les curseurs l'ajustent à votre réalité. Aucun résultat n'est caché derrière un formulaire.</p>
   </header>
 
   <div class="layout">
     <!-- Colonne de réglage -->
     <div>
       <section class="panel" style="padding:16px">
-        <p class="eyebrow">Calibration</p>
+        <p class="eyebrow" data-i18n="calibration.title">Calibration</p>
         <div class="grid2" style="margin-top:10px">
           <div>
-            <label for="sector" style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px">Secteur</label>
+            <label for="sector" style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px" data-i18n="calibration.sector">Secteur</label>
             <select id="sector"></select>
           </div>
           <div>
-            <label for="process" style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px">Processus</label>
+            <label for="process" style="font-size:13px;color:var(--muted);display:block;margin-bottom:4px" data-i18n="calibration.process">Processus</label>
             <select id="process"></select>
           </div>
         </div>
-        <p style="font-size:13px;color:var(--muted);margin:14px 0 4px">Taille de la structure</p>
+        <p style="font-size:13px;color:var(--muted);margin:14px 0 4px" data-i18n="calibration.size">Taille de la structure</p>
         <div class="sizes" id="sizes"></div>
       </section>
 
       <section class="panel" style="padding:4px 16px 16px;margin-top:12px">
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px">
-          <p class="eyebrow">Vos chiffres</p>
-          <button type="button" id="reset" style="padding:4px 9px;font-size:12px;display:none">Revenir au preset</button>
+          <p class="eyebrow" data-i18n="inputs.title">Vos chiffres</p>
+          <button type="button" id="reset" style="padding:4px 9px;font-size:12px;display:none" data-i18n="inputs.reset">Revenir au preset</button>
         </div>
         <div id="sliders"></div>
       </section>
 
       <details class="panel" style="margin-top:12px">
-        <summary>Hypothèses du modèle</summary>
+        <summary data-i18n="assumptions.title">Hypothèses du modèle</summary>
         <div style="padding:0 16px 16px">
-          <p class="note" style="margin-bottom:12px">Ces coefficients viennent du profil sectoriel et de la taille. Corrigez-les si vous connaissez mieux votre terrain que nous.</p>
+          <p class="note" style="margin-bottom:12px" data-i18n="assumptions.lede">Ces coefficients viennent du profil sectoriel et de la taille. Corrigez-les si vous connaissez mieux votre terrain que nous.</p>
           <div id="assumptions"></div>
           <p class="note" id="constants" style="margin-top:10px"></p>
         </div>
@@ -141,7 +186,7 @@ details[open] summary::after{content:" \2212"}
       <section class="panel">
         <div style="padding:16px">
           <div class="gauge-read">
-            <p class="eyebrow">Indice d'automatisabilité</p>
+            <p class="eyebrow" data-i18n="results.index">Indice d'automatisabilité</p>
             <span class="num" style="font-size:30px;font-weight:500;line-height:1"><span id="idx">0</span><span style="font-size:14px;color:var(--muted)"> / 100</span></span>
           </div>
           <div class="gauge" id="gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-label="Indice d'automatisabilité">
@@ -154,19 +199,19 @@ details[open] summary::after{content:" \2212"}
         </div>
         <div class="readout">
           <div class="cell">
-            <p class="eyebrow">Délai de bout en bout</p>
+            <p class="eyebrow" data-i18n="results.cycle">Délai de bout en bout</p>
             <span class="val" id="m1"></span><span class="before" id="m1b"></span>
           </div>
           <div class="cell">
-            <p class="eyebrow">Heures libérées / mois</p>
+            <p class="eyebrow" data-i18n="results.hours">Heures libérées / mois</p>
             <span class="val" id="m2"></span><span class="before" id="m2b"></span>
           </div>
           <div class="cell">
-            <p class="eyebrow">Coût par dossier</p>
+            <p class="eyebrow" data-i18n="results.cost">Coût par dossier</p>
             <span class="val" id="m3"></span><span class="before" id="m3b"></span>
           </div>
           <div class="cell">
-            <p class="eyebrow">Retour sur investissement</p>
+            <p class="eyebrow" data-i18n="results.payback">Retour sur investissement</p>
             <span class="val" id="m4"></span><span class="before" id="m4b"></span>
           </div>
         </div>
@@ -178,11 +223,11 @@ details[open] summary::after{content:" \2212"}
       </section>
 
       <section class="panel" style="padding:16px;margin-top:12px">
-        <p class="eyebrow">Aller plus loin</p>
-        <p style="font-size:14px;margin:8px 0 12px">Ces chiffres décrivent un ordre de grandeur. Pour les confronter à votre terrain, envoyez-moi votre simulation.</p>
+        <p class="eyebrow" data-i18n="more.title">Aller plus loin</p>
+        <p style="font-size:14px;margin:8px 0 12px" data-i18n="more.lede">Ces chiffres décrivent un ordre de grandeur. Pour les confronter à votre terrain, envoyez-moi votre simulation.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <a class="primary" id="contact" href="#" style="padding:9px 16px;border-radius:var(--radius);font-size:14px">En parler de votre simulation</a>
-          <button type="button" id="copy">Copier le lien de cette simulation</button>
+          <button type="button" id="copy" data-i18n="more.copy">Copier le lien de cette simulation</button>
         </div>
       </section>
 
@@ -191,6 +236,18 @@ details[open] summary::after{content:" \2212"}
   </div>
 </main>
 
+<script>
+var SIM_LANG='fr';
+var SIM_I18N={
+fr:{title:{eyebrow:'Simulateur',h1:"Ce que l'automatisation change réellement dans votre processus",lede:"Le secteur calibre le modèle. Les curseurs l'ajustent à votre réalité. Aucun résultat n'est caché derrière un formulaire."},nav:{back:'← Retour au site'},calibration:{title:'Calibration',sector:'Secteur',process:'Processus',size:'Taille de la structure'},inputs:{title:'Vos chiffres',reset:'Revenir au preset'},assumptions:{title:'Hypothèses du modèle',lede:'Ces coefficients viennent du profil sectoriel et de la taille. Corrigez-les si vous connaissez mieux votre terrain que nous.'},results:{index:"Indice d'automatisabilité",cycle:'Délai de bout en bout',hours:'Heures libérées / mois',cost:'Coût par dossier',payback:'Retour sur investissement'},more:{title:'Aller plus loin',lede:'Ces chiffres décrivent un ordre de grandeur. Pour les confronter à votre terrain, envoyez-moi votre simulation.',contact:'En parler',copy:'Copier le lien de cette simulation'},labels:{volume:'Volume mensuel',minutes:'Temps par dossier',actors:'Intervenants dans la chaîne',hourlyCost:'Coût horaire chargé',rework:'Taux de reprise',repetitive:'Part répétitive plutôt que jugement',eta:'Efficacité sur la part répétitive',alpha:'Revue humaine résiduelle',cap:'Plafond du secteur',wait:'Attente par transfert (h)',dayRate:'Taux journalier projet'},units:{cases:'dossiers',min:'min',hours:'h',fte:'ETP libéré',vs:'contre',today:"aujourd'hui",estimated:'projet estimé',insufficient:'gain insuffisant à ce volume',adjusted:'ajusté',capped:'Plafond appliqué'},verdict:["Plafonné par la contrainte du secteur","Faible — le gain viendra d'une réorganisation","Partiel — cibler la saisie et les vérifications","Élevé — automatisation par étapes","Très élevé — candidat prioritaire"],wins:'Par où commencer — ',copyed:'Lien copié'},
+en:{title:{eyebrow:'Simulator',h1:'What automation really changes in your process',lede:'The sector calibrates the model. The sliders adapt it to your reality. No result is hidden behind a form.'},nav:{back:'← Back to site'},calibration:{title:'Calibration',sector:'Sector',process:'Process',size:'Company size'},inputs:{title:'Your numbers',reset:'Reset to preset'},assumptions:{title:'Model assumptions',lede:'These coefficients come from the sector and size profile. Adjust them if you know your reality better than we do.'},results:{index:'Automation potential',cycle:'End-to-end time',hours:'Hours freed / month',cost:'Cost per case',payback:'Return on investment'},more:{title:'Go further',lede:'These figures are estimates. Share your simulation to compare them with your actual process.',contact:'Talk about it',copy:'Copy simulation link'},labels:{volume:'Monthly volume',minutes:'Time per case',actors:'People in the chain',hourlyCost:'Loaded hourly cost',rework:'Rework rate',repetitive:'Repetitive share vs. judgment',eta:'Efficiency on repetitive work',alpha:'Residual human review',cap:'Sector ceiling',wait:'Wait per handoff (h)',dayRate:'Project day rate'},units:{cases:'cases',min:'min',hours:'h',fte:'FTE freed',vs:'vs.',today:'today',estimated:'estimated project',insufficient:'insufficient gain at this volume',adjusted:'adjusted',capped:'Cap applied'},verdict:['Capped by sector constraints','Low — gain will come from reorganization','Partial — target data entry and checks','High — automate in stages','Very high — priority candidate'],wins:'Where to start — ',copyed:'Link copied'},
+it:{title:{eyebrow:'Simulatore',h1:"Cosa cambia davvero l'automazione nel vostro processo",lede:'Il settore calibra il modello. I cursori lo adattano alla vostra realtà. Nessun risultato è nascosto dietro un modulo.'},nav:{back:'← Torna al sito'},calibration:{title:'Calibrazione',sector:'Settore',process:'Processo',size:'Dimensione della struttura'},inputs:{title:'I vostri numeri',reset:'Ripristina preset'},assumptions:{title:'Ipotesi del modello',lede:'Questi coefficienti derivano dal profilo di settore e dimensione. Correggeteli se conoscete meglio la vostra realtà.'},results:{index:'Indice di automatizzabilità',cycle:'Tempo end-to-end',hours:'Ore liberate / mese',cost:'Costo per pratica',payback:'Ritorno sull’investimento'},more:{title:'Andare oltre',lede:'Questi valori sono stime. Inviate la simulazione per confrontarli con il vostro processo reale.',contact:'Parliamone',copy:'Copia link della simulazione'},labels:{volume:'Volume mensile',minutes:'Tempo per pratica',actors:'Intervenienti nella catena',hourlyCost:'Costo orario caricato',rework:'Tasso di rilavorazione',repetitive:'Quota ripetitiva vs giudizio',eta:'Efficienza sulla parte ripetitiva',alpha:'Revisione umana residua',cap:'Limite del settore',wait:'Attesa per passaggio (h)',dayRate:'Tariffa giornaliera progetto'},units:{cases:'pratiche',min:'min',hours:'h',fte:'FTE liberato',vs:'contro',today:'oggi',estimated:'progetto stimato',insufficient:'guadagno insufficiente a questo volume',adjusted:'modificato',capped:'Limite applicato'},verdict:['Limitato dai vincoli del settore','Basso — il guadagno verrà dalla riorganizzazione','Parziale — puntare su inserimento e verifiche','Alto — automazione per fasi','Molto alto — candidato prioritario'],wins:'Da dove iniziare — ',copyed:'Link copiato'},
+es:{title:{eyebrow:'Simulador',h1:'Lo que realmente cambia la automatización en su proceso',lede:'El sector calibra el modelo. Los controles lo adaptan a su realidad. Ningún resultado está oculto tras un formulario.'},nav:{back:'← Volver al sitio'},calibration:{title:'Calibración',sector:'Sector',process:'Proceso',size:'Tamaño de la estructura'},inputs:{title:'Sus cifras',reset:'Volver al valor inicial'},assumptions:{title:'Hipótesis del modelo',lede:'Estos coeficientes proceden del perfil sectorial y del tamaño. Ajústelos si conoce mejor su realidad.'},results:{index:'Índice de automatización',cycle:'Tiempo de extremo a extremo',hours:'Horas liberadas / mes',cost:'Coste por expediente',payback:'Retorno de la inversión'},more:{title:'Ir más allá',lede:'Estas cifras son estimaciones. Envíe la simulación para compararlas con su proceso real.',contact:'Hablemos',copy:'Copiar enlace de la simulación'},labels:{volume:'Volumen mensual',minutes:'Tiempo por expediente',actors:'Intervinientes en la cadena',hourlyCost:'Coste horario cargado',rework:'Tasa de retrabajo',repetitive:'Parte repetitiva frente a juicio',eta:'Eficiencia en la parte repetitiva',alpha:'Revisión humana residual',cap:'Límite del sector',wait:'Espera por transferencia (h)',dayRate:'Tarifa diaria del proyecto'},units:{cases:'expedientes',min:'min',hours:'h',fte:'FTE liberado',vs:'frente a',today:'hoy',estimated:'proyecto estimado',insufficient:'ganancia insuficiente con este volumen',adjusted:'ajustado',capped:'Límite aplicado'},verdict:['Limitado por las restricciones del sector','Bajo — la mejora vendrá de una reorganización','Parcial — priorizar la introducción y las verificaciones','Alto — automatización por etapas','Muy alto — candidato prioritario'],wins:'Por dónde empezar — ',copyed:'Enlace copiado'},
+ar:{title:{eyebrow:'المحاكي',h1:'ما الذي تغيّره الأتمتة فعلياً في عملياتكم',lede:'يحدد القطاع معايرة النموذج، وتكيّف أشرطة التمرير القيم مع واقعكم. لا توجد نتائج مخفية خلف نموذج.'},nav:{back:'← العودة إلى الموقع'},calibration:{title:'المعايرة',sector:'القطاع',process:'العملية',size:'حجم المؤسسة'},inputs:{title:'أرقامكم',reset:'العودة إلى القيم الافتراضية'},assumptions:{title:'افتراضات النموذج',lede:'هذه المعاملات تأتي من ملف القطاع والحجم. عدّلوها إذا كنتم تعرفون واقعكم بشكل أدق.'},results:{index:'مؤشر قابلية الأتمتة',cycle:'المدة من البداية إلى النهاية',hours:'الساعات المحررة / شهر',cost:'التكلفة لكل ملف',payback:'العائد على الاستثمار'},more:{title:'للتعمق أكثر',lede:'هذه الأرقام تقديرية. أرسلوا المحاكاة لمقارنتها مع العملية الفعلية لديكم.',contact:'لنتحدث',copy:'نسخ رابط المحاكاة'},labels:{volume:'الحجم الشهري',minutes:'الوقت لكل ملف',actors:'عدد المتدخلين',hourlyCost:'التكلفة بالساعة',rework:'معدل إعادة العمل',repetitive:'الحصة التكرارية مقابل الحكم البشري',eta:'الكفاءة في الجزء التكراري',alpha:'المراجعة البشرية المتبقية',cap:'حد القطاع',wait:'الانتظار لكل إحالة (س)',dayRate:'السعر اليومي للمشروع'},units:{cases:'ملفات',min:'د',hours:'س',fte:'مكافئ موظف بدوام كامل محرر',vs:'مقابل',today:'حالياً',estimated:'تكلفة المشروع التقديرية',insufficient:'مكسب غير كافٍ بهذا الحجم',adjusted:'معدّل',capped:'تم تطبيق الحد'},verdict:['مقيّد بقيود القطاع','ضعيف — المكسب سيأتي من إعادة التنظيم','جزئي — استهدف الإدخال والتحقق','مرتفع — أتمتة على مراحل','مرتفع جداً — مرشح ذو أولوية'],wins:'من أين نبدأ — ',copyed:'تم نسخ الرابط'}};
+function simT(p){var o=SIM_I18N[SIM_LANG]||SIM_I18N.fr; return p.split('.').reduce(function(x,k){return x&&x[k]!=null?x[k]:null;},o)||'';}
+function simApply(lang){if(!SIM_I18N[lang])lang='fr';SIM_LANG=lang;document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(function(n){var v=simT(n.getAttribute('data-i18n'));if(v)n.textContent=v;});document.querySelectorAll('.sim-lang .lang-btn').forEach(function(b){var on=b.dataset.lang===lang;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});try{localStorage.setItem('site-lang',lang);}catch(e){}buildSizes();buildSliders();buildAssumptions();buildSelects();render();}
+function simInit(){var lang='fr';try{var s=localStorage.getItem('site-lang');if(SIM_I18N[s])lang=s;}catch(e){}document.querySelectorAll('.sim-lang .lang-btn').forEach(function(b){b.addEventListener('click',function(){simApply(this.dataset.lang);});});simApply(lang);}
+</script>
 <script>
 /* =======================================================================
    CONFIGURATION — modifiez ces deux lignes
@@ -903,7 +960,7 @@ function compute(inp, a, effortMul){
    INTERFACE
    ======================================================================= */
 var F = {
-  int: function(n){ return Math.round(n).toLocaleString("fr-FR"); },
+  int: function(n){ return Math.round(n).toLocaleString(SIM_LANG==='ar'?'ar-MA':SIM_LANG==='en'?'en-US':SIM_LANG==='it'?'it-IT':SIM_LANG==='es'?'es-ES':'fr-FR'); },
   one: function(n){ return n.toFixed(1); },
   two: function(n){ return n.toFixed(2); },
   pct: function(n){ return Math.round(n * 100) + " %"; }
@@ -1012,7 +1069,7 @@ function buildSliders(){
     var row = document.createElement("div");
     row.className = "slider";
     row.innerHTML =
-      '<div class="slider-head"><label for="sl-'+s.key+'">'+s.label+'<span class="tag" id="tag-'+s.key+'" style="display:none">ajusté</span></label>'+
+      '<div class="slider-head"><label for="sl-'+s.key+'">'+simT('labels.'+s.key)+'<span class="tag" id="tag-'+s.key+'" style="display:none">'+simT('units.adjusted')+'</span></label>'+
       '<span class="num" id="out-'+s.key+'" style="font-size:14px;font-weight:500"></span></div>'+
       '<input id="sl-'+s.key+'" type="range" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'">';
     c.appendChild(row);
@@ -1032,7 +1089,7 @@ function buildAssumptions(){
     var row = document.createElement("div");
     row.className = "slider";
     row.innerHTML =
-      '<div class="slider-head"><label for="as-'+a.key+'">'+a.label+'</label>'+
+      '<div class="slider-head"><label for="as-'+a.key+'">'+simT('labels.'+a.key)+'</label>'+
       '<span class="num" id="aout-'+a.key+'" style="font-size:14px"></span></div>'+
       '<input id="as-'+a.key+'" type="range" min="'+a.min+'" max="'+a.max+'" step="'+a.step+'">';
     c.appendChild(row);
@@ -1091,13 +1148,13 @@ function render(){
   el("fill").className = "gauge-fill" + (r.capped ? " capped" : "");
   el("forbidden").style.width = (100 - capPct) + "%";
   el("tick").style.left = capPct + "%";
-  el("verdict").textContent = r.verdict;
+  el("verdict").textContent = simT("verdict." + (r.capped?"0":r.index<25?"1":r.index<45?"2":r.index<65?"3":"4"));
   el("constraint").textContent = sector.constraint + (r.capped ? " Plafond appliqué : " + capPct + " %." : "");
 
   el("m1").textContent = F.one(r.cycleDaysAfter) + " j";
   el("m1b").innerHTML = "contre " + F.one(r.cycleDaysBefore) + " j <span class=\"delta\">\u2212" + Math.round(r.cycleReduction * 100) + " %</span>";
   el("m2").textContent = F.int(r.hoursFreed) + " h";
-  el("m2b").textContent = F.two(r.fteFreed) + " ETP libéré";
+  el("m2b").textContent = F.two(r.fteFreed) + " " + simT("units.fte");
   el("m3").textContent = F.two(r.costAfter) + " " + DEVISE;
   el("m3b").textContent = "contre " + F.two(r.costBefore) + " " + DEVISE + " aujourd'hui";
   el("m4").textContent = r.payback === null ? "n/a" : (r.payback < 1 ? "< 1 mois" : F.one(r.payback) + " mois");
@@ -1105,7 +1162,7 @@ function render(){
     ? "gain insuffisant à ce volume"
     : "projet estimé " + F.int(Math.round(r.projectCost / 500) * 500) + " " + DEVISE;
 
-  el("winsTitle").textContent = "Par où commencer — " + proc.label.toLowerCase();
+  el("winsTitle").textContent = simT("wins") + proc.label.toLowerCase();
   var w = el("wins");
   w.innerHTML = "";
   proc.quickWins.forEach(function(t){
@@ -1143,13 +1200,13 @@ el("reset").addEventListener("click", function(){
 el("copy").addEventListener("click", function(){
   var b = this;
   navigator.clipboard && navigator.clipboard.writeText(location.href).then(function(){
-    b.textContent = "Lien copié";
+    b.textContent = simT("copyed");
     setTimeout(function(){ b.textContent = "Copier le lien de cette simulation"; }, 2200);
   });
 });
 el("contact").href = CONTACT;
 
-render();
+simInit();
 </script>
 </body>
 </html>
