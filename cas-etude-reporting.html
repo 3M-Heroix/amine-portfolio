@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automatiser le reporting d'une société de gestion — Cas d'étude | Amine Adlane</title>
+<meta name="description" content="Cas d'étude : centralisation des données et industrialisation du reporting réglementaire et client d'une société de gestion d'actifs. Diagnostic, architecture, résultats et offre de transposition.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS — aligner ces valeurs sur celles d'index.html
+   ============================================================ */
+:root{
+  --ink:        #0F1D2B;   /* encre profonde, fond des blocs sombres */
+  --ink-soft:   #1B2E42;
+  --paper:      #F1F4F7;   /* fond de page, gris-bleu froid */
+  --paper-pure: #FFFFFF;
+  --rule:       #D3DCE4;   /* filets */
+  --text:       #16232F;
+  --text-mute:  #5B6E7F;
+  --accent:     #146F63;   /* vert-de-gris : liens, actions, "après" */
+  --accent-dk:  #0D4F47;
+  --brass:      #9A7B2E;   /* eyebrows, numérotation, données */
+  --heat-0:     #E7EDF2;
+  --heat-1:     #F3D9C6;
+  --heat-2:     #E9AE8A;
+  --heat-3:     #D97D57;
+  --heat-4:     #B94A2C;
+
+  --fs-display: clamp(2.3rem, 1.2rem + 4.2vw, 4.4rem);
+  --fs-h2:      clamp(1.55rem, 1.1rem + 1.7vw, 2.35rem);
+  --fs-h3:      1.06rem;
+  --maxw:       1120px;
+  --gutter:     clamp(1.15rem, 4vw, 3rem);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--text);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:1rem; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%}
+a{color:var(--accent); text-underline-offset:3px}
+:focus-visible{outline:2.5px solid var(--brass); outline-offset:3px; border-radius:2px}
+
+.wrap{max-width:var(--maxw); margin-inline:auto; padding-inline:var(--gutter)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- typographie utilitaire ---------- */
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace; font-size:.7rem; font-weight:500;
+  letter-spacing:.19em; text-transform:uppercase; color:var(--brass); margin:0 0 1rem;
+}
+.eyebrow--light{color:#C9A54E}
+h1,h2,h3{font-family:"IBM Plex Serif",Georgia,serif; font-weight:500; line-height:1.14; letter-spacing:-.015em; margin:0}
+h1{font-size:var(--fs-display)}
+h2{font-size:var(--fs-h2)}
+h3{font-size:var(--fs-h3); font-family:"IBM Plex Sans",sans-serif; font-weight:600; letter-spacing:0; line-height:1.35}
+.lede{font-size:clamp(1.02rem,.95rem + .35vw,1.22rem); color:var(--text-mute); max-width:60ch; margin:1.4rem 0 0}
+.mono{font-family:"IBM Plex Mono",monospace}
+
+/* ---------- barre de retour ---------- */
+.topbar{
+  border-bottom:1px solid var(--rule); background:var(--paper);
+  position:sticky; top:0; z-index:40; backdrop-filter:saturate(180%) blur(8px);
+}
+.topbar .wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem; height:56px}
+.back{
+  font-family:"IBM Plex Mono",monospace; font-size:.76rem; letter-spacing:.09em;
+  text-transform:uppercase; text-decoration:none; color:var(--text-mute);
+}
+.back:hover{color:var(--accent)}
+.topbar .sig{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--brass)}
+
+/* ---------- hero ---------- */
+.hero{background:var(--ink); color:#E8EEF3; padding:clamp(3.2rem,9vw,6rem) 0 0; position:relative; overflow:hidden}
+.hero::after{
+  content:""; position:absolute; inset:auto 0 0 0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(154,123,46,.55),transparent);
+}
+.hero h1{color:#FFF; max-width:19ch}
+.hero .lede{color:#9DB2C2; max-width:56ch}
+
+/* bandeau avant → après */
+.shift{
+  margin-top:clamp(2.4rem,6vw,3.6rem); display:grid; gap:1px;
+  grid-template-columns:1fr auto 1fr; background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.09); border-bottom:0;
+  border-radius:6px 6px 0 0; overflow:hidden;
+}
+.shift>div{background:var(--ink-soft); padding:1.5rem 1.4rem}
+.shift .arrow{
+  display:flex; align-items:center; justify-content:center; color:var(--brass);
+  font-family:"IBM Plex Mono",monospace; font-size:1.1rem; padding-inline:1.1rem;
+}
+.shift .tag{
+  font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.18em;
+  text-transform:uppercase; color:#7C93A6; display:block; margin-bottom:.6rem;
+}
+.shift .after .tag{color:#5FBFAE}
+.shift p{margin:0; font-size:.94rem; line-height:1.55; color:#CBD9E4}
+.shift .after p{color:#E8F3F0}
+@media(max-width:640px){
+  .shift{grid-template-columns:1fr; border-radius:6px 6px 0 0}
+  .shift .arrow{padding:.35rem 0; transform:rotate(90deg)}
+}
+
+/* fiche mission */
+.factsheet{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  border-top:1px solid rgba(255,255,255,.13); margin-top:clamp(2.6rem,7vw,4rem);
+}
+.factsheet div{padding:1.15rem 1.2rem 1.4rem; border-right:1px solid rgba(255,255,255,.09)}
+.factsheet div:last-child{border-right:0}
+.factsheet dt{
+  font-family:"IBM Plex Mono",monospace; font-size:.63rem; letter-spacing:.17em;
+  text-transform:uppercase; color:#6F8698; margin-bottom:.4rem;
+}
+.factsheet dd{margin:0; font-size:.9rem; color:#DDE7EE; line-height:1.45}
+
+/* ---------- sections ---------- */
+section{padding:clamp(3.2rem,8vw,5.4rem) 0}
+section+section{border-top:1px solid var(--rule)}
+.sec-head{max-width:64ch; margin-bottom:clamp(2rem,5vw,3rem)}
+.sec-head p{color:var(--text-mute); margin:.9rem 0 0}
+
+/* ---------- SIGNATURE : grille de chaleur ---------- */
+.heatwrap{overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:.5rem}
+table.heat{border-collapse:separate; border-spacing:3px; min-width:660px; width:100%}
+table.heat caption{
+  caption-side:bottom; text-align:left; padding-top:1.1rem;
+  font-size:.8rem; color:var(--text-mute); line-height:1.5;
+}
+table.heat th{font-weight:500; text-align:left; vertical-align:bottom}
+table.heat thead th{
+  font-family:"IBM Plex Mono",monospace; font-size:.63rem; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--text-mute); padding:0 .3rem .55rem; line-height:1.35;
+}
+table.heat thead th:first-child{width:31%}
+table.heat tbody th{
+  font-size:.85rem; color:var(--text); padding-right:1rem; line-height:1.3;
+  border-right:1px solid var(--rule);
+}
+table.heat td{
+  text-align:center; font-family:"IBM Plex Mono",monospace; font-size:.76rem;
+  font-weight:500; padding:.55rem .2rem; border-radius:3px; color:#3A2A22;
+  transition:transform .16s ease;
+}
+table.heat td:hover{transform:scale(1.09); position:relative; z-index:2}
+.h50{background:var(--heat-1)} .h60{background:var(--heat-2)}
+.h70{background:var(--heat-3); color:#FFF} .h80{background:var(--heat-4); color:#FFF}
+
+.legend{display:flex; flex-wrap:wrap; gap:1.1rem; margin-top:1.2rem; align-items:center}
+.legend span{display:flex; align-items:center; gap:.45rem; font-family:"IBM Plex Mono",monospace; font-size:.68rem; color:var(--text-mute); letter-spacing:.05em}
+.legend i{width:16px; height:16px; border-radius:3px; display:block}
+
+.reading{
+  margin-top:2.4rem; display:grid; gap:1.6rem;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+}
+.reading div{border-top:2px solid var(--brass); padding-top:.95rem}
+.reading h3{margin-bottom:.4rem}
+.reading p{margin:0; font-size:.9rem; color:var(--text-mute)}
+
+/* ---------- architecture en couches ---------- */
+.stack{display:grid; gap:0; border:1px solid var(--rule); border-radius:6px; overflow:hidden; background:var(--paper-pure)}
+.layer{display:grid; grid-template-columns:96px 1fr; border-bottom:1px solid var(--rule)}
+.layer:last-child{border-bottom:0}
+.layer .idx{
+  background:var(--ink); color:var(--brass); display:flex; align-items:center; justify-content:center;
+  font-family:"IBM Plex Mono",monospace; font-size:.78rem; letter-spacing:.1em;
+}
+.layer .body{padding:1.35rem 1.5rem}
+.layer h3{margin-bottom:.45rem}
+.layer p{margin:0 0 .8rem; font-size:.9rem; color:var(--text-mute); max-width:65ch}
+.chips{display:flex; flex-wrap:wrap; gap:.4rem; margin:0; padding:0; list-style:none}
+.chips li{
+  font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.03em;
+  border:1px solid var(--rule); background:var(--paper); color:var(--text-mute);
+  padding:.24rem .55rem; border-radius:3px; white-space:nowrap;
+}
+.chips li.hot{border-color:rgba(20,111,99,.35); color:var(--accent-dk); background:rgba(20,111,99,.07)}
+@media(max-width:600px){
+  .layer{grid-template-columns:1fr}
+  .layer .idx{justify-content:flex-start; padding:.5rem 1.5rem}
+}
+
+/* ---------- cartes de décision ---------- */
+.cards{display:grid; gap:1.15rem; grid-template-columns:repeat(auto-fit,minmax(265px,1fr))}
+.card{background:var(--paper-pure); border:1px solid var(--rule); border-radius:6px; padding:1.5rem 1.4rem}
+.card .q{
+  font-family:"IBM Plex Mono",monospace; font-size:.67rem; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--brass); margin:0 0 .7rem;
+}
+.card h3{margin-bottom:.55rem}
+.card p{margin:0; font-size:.89rem; color:var(--text-mute)}
+.card p+p{margin-top:.7rem}
+.card .out{
+  margin-top:1rem; padding-top:.85rem; border-top:1px dashed var(--rule);
+  font-size:.83rem; color:var(--accent-dk);
+}
+
+/* ---------- résultats ---------- */
+.results{display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.results div{background:var(--paper-pure); padding:1.5rem 1.35rem}
+.results .fig{
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:1.9rem;
+  color:var(--ink); line-height:1; display:block; margin-bottom:.55rem;
+}
+.results .fig small{font-size:.95rem; color:var(--text-mute); font-weight:400}
+.results p{margin:0; font-size:.86rem; color:var(--text-mute)}
+.caveat{margin-top:1.3rem; font-size:.8rem; color:var(--text-mute); max-width:70ch; font-style:italic}
+
+/* ---------- offre / transposition ---------- */
+.offer{background:var(--ink); color:#E8EEF3}
+.offer h2{color:#FFF}
+.offer .sec-head p{color:#9DB2C2}
+.phases{display:grid; gap:1px; background:rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.11); border-radius:6px; overflow:hidden;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.phase{background:var(--ink-soft); padding:1.6rem 1.45rem}
+.phase .when{
+  font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.16em;
+  text-transform:uppercase; color:#C9A54E; margin:0 0 .75rem;
+}
+.phase h3{color:#FFF; margin-bottom:.55rem}
+.phase p{margin:0 0 .9rem; font-size:.88rem; color:#A9BECD}
+.deliv{margin:0; padding:0; list-style:none; border-top:1px solid rgba(255,255,255,.11); padding-top:.85rem}
+.deliv li{font-size:.83rem; color:#CFDDE7; padding-left:1.05rem; position:relative; margin-bottom:.4rem}
+.deliv li::before{content:"—"; position:absolute; left:0; color:#5FBFAE}
+
+.today{margin-top:clamp(2.4rem,6vw,3.4rem); border-top:1px solid rgba(255,255,255,.13); padding-top:2rem}
+.today h3{color:#FFF; margin-bottom:1.2rem; font-size:1rem}
+.today ul{display:grid; gap:1.4rem; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); margin:0; padding:0; list-style:none}
+.today li strong{display:block; color:#5FBFAE; font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.13em; text-transform:uppercase; margin-bottom:.45rem; font-weight:500}
+.today li{font-size:.87rem; color:#A9BECD}
+
+/* ---------- CTA ---------- */
+.cta{text-align:left}
+.cta h2{max-width:20ch}
+.btns{display:flex; flex-wrap:wrap; gap:.8rem; margin-top:1.9rem}
+.btn{
+  display:inline-flex; align-items:center; gap:.5rem; text-decoration:none;
+  font-family:"IBM Plex Mono",monospace; font-size:.78rem; letter-spacing:.08em;
+  text-transform:uppercase; padding:.85rem 1.5rem; border-radius:4px; transition:.18s ease;
+}
+.btn-p{background:var(--accent); color:#FFF; border:1px solid var(--accent)}
+.btn-p:hover{background:var(--accent-dk); border-color:var(--accent-dk)}
+.btn-s{background:transparent; color:var(--text); border:1px solid var(--rule)}
+.btn-s:hover{border-color:var(--ink); background:var(--paper-pure)}
+
+footer{border-top:1px solid var(--rule); padding:2.2rem 0 3rem; font-size:.8rem; color:var(--text-mute)}
+footer .wrap{display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between}
+
+/* ---------- révélation au scroll ---------- */
+.rv{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease}
+.rv.in{opacity:1; transform:none}
+
+/* ---------- navigation partagée & mobile ---------- */
+.page-nav{display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+.page-nav a{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--text-mute)}
+.page-nav a:hover{color:var(--accent)}
+.lang-switch{display:flex;gap:.25rem;flex-wrap:wrap;justify-content:flex-end}
+.lang-btn{font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.04em;padding:.3rem .45rem;border:1px solid var(--rule);background:transparent;color:var(--text-mute);border-radius:3px;cursor:pointer}
+.lang-btn:hover,.lang-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(20,111,99,.06)}
+html[dir="rtl"]{direction:rtl}
+html[dir="rtl"] .topbar .wrap{flex-direction:row-reverse}
+html[dir="rtl"] .back{text-align:right}
+html[dir="rtl"] .today li strong{text-align:right}
+@media(max-width:760px){
+  .topbar .wrap{height:auto;min-height:56px;padding-top:.65rem;padding-bottom:.65rem;flex-wrap:wrap;align-items:center}
+  .back{order:1}
+  .page-nav{order:3;width:100%;justify-content:flex-start;gap:.8rem .9rem;padding-top:.35rem;border-top:1px solid var(--rule)}
+  .lang-switch{order:2;margin-left:auto}
+  .hero h1{font-size:clamp(2rem,10vw,3.2rem);max-width:100%}
+  .factsheet{grid-template-columns:1fr 1fr}
+  .factsheet div{border-right:0;border-bottom:1px solid rgba(255,255,255,.09);padding:.9rem .8rem 1rem}
+  .factsheet div:nth-child(odd){border-right:1px solid rgba(255,255,255,.09)}
+  .results{grid-template-columns:1fr 1fr}
+  .results div{padding:1.2rem 1rem}
+  .results .fig{font-size:1.55rem}
+  .btns{display:grid;grid-template-columns:1fr;gap:.65rem}
+  .btn{width:100%;justify-content:center;text-align:center}
+  .today ul{grid-template-columns:1fr}
+}
+@media(max-width:460px){
+  :root{--gutter:1rem}
+  .factsheet{grid-template-columns:1fr}
+  .factsheet div:nth-child(odd){border-right:0}
+  .results{grid-template-columns:1fr}
+  .page-nav{font-size:.62rem}
+  .page-nav a{font-size:.61rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rv{opacity:1; transform:none; transition:none}
+  table.heat td{transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="back" href="index.html" data-i18n="cs.nav.back">← Retour au site</a>
+    <nav class="page-nav" aria-label="Navigation">
+      <a href="cas-etude-reporting.html" data-i18n="cs.nav.case">Cas d'étude</a>
+      <a href="simulateur.html" data-i18n="cs.nav.simulator">Simulateur</a>
+      <a href="index.html#contact" data-i18n="cs.nav.contact">Contact</a>
+    </nav>
+    <div class="lang-switch" role="group" aria-label="Langue / Language">
+      <button type="button" class="lang-btn" data-lang="fr" aria-pressed="false">FR</button>
+      <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+      <button type="button" class="lang-btn" data-lang="ar" aria-pressed="false">AR</button>
+      <button type="button" class="lang-btn" data-lang="it" aria-pressed="false">IT</button>
+      <button type="button" class="lang-btn" data-lang="es" aria-pressed="false">ES</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow eyebrow--light" data-i18n="cs.hero.eyebrow">Société de gestion d'actifs · Casablanca · 2023</p>
+    <h1 data-i18n="cs.hero.title">Un reporting quotidien produit à la main. Puis plus du tout.</h1>
+    <p class="lede" data-i18n="cs.hero.lede">
+      Une société de gestion devait livrer des reportings quotidiens, hebdomadaires et semestriels
+      à ses clients et à son régulateur. Les données arrivaient de six endroits différents, dans six
+      formats différents, et se recollaient à la main. Mission de quatre mois pour supprimer la
+      ressaisie et rendre le processus reproductible.
+    </p>
+
+    <div class="shift">
+      <div class="before">
+        <span class="tag" data-i18n="cs.hero.before.tag">Avant</span>
+        <p data-i18n="cs.hero.before.text">Six sources hétérogènes — pages web, fichiers Excel, exports CSV, tables HTML, envois par mail. Consolidation manuelle, écarts entre départements, chaque rapport re-fabriqué de zéro.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="after">
+        <span class="tag" data-i18n="cs.hero.after.tag">Après</span>
+        <p data-i18n="cs.hero.after.text">Une chaîne unique : collecte automatisée, base centralisée, jeux de données normalisés, rapports générés à la demande avec des droits d'accès par métier.</p>
+      </div>
+    </div>
+
+    <dl class="factsheet">
+      <div><dt data-i18n="cs.facts.role.k">Rôle</dt><dd data-i18n="cs.facts.role.v">Consultant data — cabinet de conseil SI</dd></div>
+      <div><dt data-i18n="cs.facts.time.k">Durée</dt><dd data-i18n="cs.facts.time.v">4 mois — avril à août 2023</dd></div>
+      <div><dt data-i18n="cs.facts.scope.k">Périmètre</dt><dd data-i18n="cs.facts.scope.v">6 départements, 4 familles de rapports OPCVM</dd></div>
+      <div><dt data-i18n="cs.facts.stack.k">Stack</dt><dd data-i18n="cs.facts.stack.v">Python · SQL Server · IIS · Smart Report</dd></div>
+    </dl>
+  </div>
+</header>
+
+<!-- ══════════════ 1 · POINT DE DÉPART ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="cs.start.eyebrow">Le point de départ</p>
+      <h2 data-i18n="cs.start.title">Le reporting n'était pas un livrable. C'était une contrainte quotidienne.</h2>
+      <p data-i18n="cs.start.p1">
+        Dans une société de gestion, le reporting sert deux maîtres à la fois : le client, qui veut savoir
+        où en est son portefeuille, et le régulateur, qui veut des chiffres justes dans les délais. Les deux
+        exigences tombent sur les mêmes équipes, avec les mêmes données.
+      </p>
+      <p data-i18n="cs.start.p2">
+        La mission a démarré par un état des lieux mené département par département, en enregistrant
+        les écrans des utilisateurs pour comprendre où ils allaient chercher chaque chiffre. Le résultat
+        de ce recensement est la grille ci-dessous : neuf points de friction, notés par les six directions
+        concernées.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 · DIAGNOSTIC — SIGNATURE ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="cs.diag.eyebrow">Le diagnostic</p>
+      <h2 data-i18n="cs.diag.title">Où ça fait mal, et pour qui</h2>
+      <p data-i18n="cs.diag.p">
+        Chaque case indique l'intensité du problème ressentie par le département. Ces chiffres viennent
+        des entretiens menés pendant la mission — ils ne sortent pas d'un modèle générique.
+      </p>
+    </div>
+
+    <div class="heatwrap rv">
+      <table class="heat">
+        <caption data-i18n="cs.diag.caption">
+          Grille de friction — société de gestion d'actifs, 2023. Lecture : plus la case est foncée,
+          plus le département considère le sujet comme bloquant au quotidien.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col"><span class="sr">Point de friction</span></th>
+            <th scope="col" data-i18n="cs.table.back">Back<br>office</th>
+            <th scope="col" data-i18n="cs.table.middle">Middle office<br>Analystes</th>
+            <th scope="col" data-i18n="cs.table.actions">Front office<br>Actions</th>
+            <th scope="col" data-i18n="cs.table.money">Front office<br>Monétaire</th>
+            <th scope="col" data-i18n="cs.table.it">Direction<br>SI</th>
+            <th scope="col" data-i18n="cs.table.exec">Direction<br>générale</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Reporting manuel</th>
+            <td class="h70">70</td><td class="h80">80</td><td class="h80">80</td><td class="h70">70</td><td class="h80">80</td><td class="h70">70</td></tr>
+          <tr><th scope="row">Obligations réglementaires</th>
+            <td class="h70">70</td><td class="h80">80</td><td class="h80">80</td><td class="h80">80</td><td class="h70">70</td><td class="h80">80</td></tr>
+          <tr><th scope="row">Mise à jour des données en temps réel</th>
+            <td class="h70">70</td><td class="h70">70</td><td class="h80">80</td><td class="h80">80</td><td class="h80">80</td><td class="h70">70</td></tr>
+          <tr><th scope="row">Gestion des risques</th>
+            <td class="h60">60</td><td class="h70">70</td><td class="h70">70</td><td class="h70">70</td><td class="h60">60</td><td class="h70">70</td></tr>
+          <tr><th scope="row">Automatisation des processus</th>
+            <td class="h60">60</td><td class="h60">60</td><td class="h70">70</td><td class="h70">70</td><td class="h60">60</td><td class="h70">70</td></tr>
+          <tr><th scope="row">Incohérences des données</th>
+            <td class="h60">60</td><td class="h60">60</td><td class="h70">70</td><td class="h60">60</td><td class="h60">60</td><td class="h60">60</td></tr>
+          <tr><th scope="row">Intégration des données</th>
+            <td class="h50">50</td><td class="h50">50</td><td class="h60">60</td><td class="h60">60</td><td class="h60">60</td><td class="h50">50</td></tr>
+          <tr><th scope="row">Communication interne</th>
+            <td class="h50">50</td><td class="h50">50</td><td class="h60">60</td><td class="h60">60</td><td class="h60">60</td><td class="h50">50</td></tr>
+          <tr><th scope="row">Formation des utilisateurs</th>
+            <td class="h50">50</td><td class="h50">50</td><td class="h60">60</td><td class="h60">60</td><td class="h60">60</td><td class="h50">50</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legend rv">
+      <span><i style="background:var(--heat-1)"></i> <span data-i18n="cs.legend.50">50 — gênant</span></span>
+      <span><i style="background:var(--heat-2)"></i> <span data-i18n="cs.legend.60">60 — pénalisant</span></span>
+      <span><i style="background:var(--heat-3)"></i> <span data-i18n="cs.legend.70">70 — bloquant</span></span>
+      <span><i style="background:var(--heat-4)"></i> <span data-i18n="cs.legend.80">80 — critique</span></span>
+    </div>
+
+    <div class="reading">
+      <div class="rv">
+        <h3 data-i18n="cs.diag.r1.t">Le problème est transversal</h3>
+        <p data-i18n="cs.diag.r1.p">Aucune ligne n'est froide. Un correctif limité à un seul service n'aurait rien réglé : il fallait un socle commun.</p>
+      </div>
+      <div class="rv">
+        <h3 data-i18n="cs.diag.r2.t">Le front office paie le prix fort</h3>
+        <p data-i18n="cs.diag.r2.p">Les équipes qui devraient gérer passent leur temps à consolider. C'est là que l'automatisation libère le plus de valeur.</p>
+      </div>
+      <div class="rv">
+        <h3 data-i18n="cs.diag.r3.t">La conformité est le déclencheur</h3>
+        <p data-i18n="cs.diag.r3.p">La contrainte réglementaire est notée à 80 par la direction générale. C'est l'argument qui débloque un budget, pas le confort des équipes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 3 · ARCHITECTURE ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="cs.arch.eyebrow">La solution</p>
+      <h2 data-i18n="cs.arch.title">Quatre couches, un seul flux</h2>
+      <p data-i18n="cs.arch.p">
+        Le principe : chaque donnée entre une fois, est stockée une fois, et ressort dans autant de
+        rapports que nécessaire. Rien ne transite par un poste de travail.
+      </p>
+    </div>
+
+    <div class="stack rv">
+      <div class="layer">
+        <div class="idx" aria-hidden="true">01</div>
+        <div class="body">
+          <h3 data-i18n="cs.arch.l1.t">Cartographier avant de coder</h3>
+          <p data-i18n="cs.arch.l1.p">
+            Chaque source a été inventoriée avec les équipes : nom de la donnée, origine, département
+            propriétaire, format, fréquence de publication, lien exact. Ce document est devenu la référence
+            de la mission — et il a été rempli <em>par</em> les métiers, pas à leur place.
+          </p>
+          <ul class="chips">
+            <li>Entretiens par département</li><li>Enregistrement d'écran</li><li>Registre des sources partagé</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="idx" aria-hidden="true">02</div>
+        <div class="body">
+          <h3 data-i18n="cs.arch.l2.t">Collecte automatisée</h3>
+          <p data-i18n="cs.arch.l2.p">
+            Un script Python structuré en classes, une par type de source : tables HTML, téléchargements
+            de fichiers, pages à rendu JavaScript, calendriers de dividendes, historiques de volumes.
+            Chaque parseur normalise vers un même format tabulaire avant écriture.
+          </p>
+          <ul class="chips">
+            <li class="hot">requests</li><li class="hot">BeautifulSoup</li><li class="hot">Selenium</li>
+            <li class="hot">pandas</li><li class="hot">pyodbc</li><li>journalisation des erreurs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="idx" aria-hidden="true">03</div>
+        <div class="body">
+          <h3 data-i18n="cs.arch.l3.t">Socle de données centralisé</h3>
+          <p data-i18n="cs.arch.l3.p">
+            Tables normalisées sur SQL Server, alignées sur le vocabulaire métier plutôt que sur la
+            structure des fichiers d'origine. Un serveur IIS local reproduisait l'environnement du client
+            pour développer et tester sans jamais toucher à la production.
+          </p>
+          <ul class="chips">
+            <li>Actif_net_par_catégorie_OPCVM</li><li>Indices_De_Performance_OPCVM</li>
+            <li>Actif_Total_Par_Catégorie_De_Valeurs</li><li>Souscriptions_et_rachats</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="idx" aria-hidden="true">04</div>
+        <div class="body">
+          <h3 data-i18n="cs.arch.l4.t">Restitution et habilitations</h3>
+          <p data-i18n="cs.arch.l4.p">
+            Connexion directe de l'outil de reporting au socle, jeux de données par famille de rapport,
+            et gestion des droits par profil : rédaction pour les producteurs de rapports, lecture seule
+            pour les consommateurs. Les rapports deviennent des gabarits, plus des fichiers.
+          </p>
+          <ul class="chips">
+            <li>Datasets paramétrés</li><li>Rapports interactifs</li><li>Rôles &amp; permissions</li><li>Export &amp; diffusion</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 4 · DÉCISIONS ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="cs.dec.eyebrow">Décisions structurantes</p>
+      <h2 data-i18n="cs.dec.title">Trois arbitrages qui ont déterminé le résultat</h2>
+      <p data-i18n="cs.dec.p">
+        Ce sont rarement les lignes de code qui font la différence sur ce type de mission, mais les
+        choix pris avant de les écrire.
+      </p>
+    </div>
+
+    <div class="cards">
+      <article class="card rv">
+        <p class="q" data-i18n="cs.dec.c1.q">Arbitrage 1</p>
+        <h3 data-i18n="cs.dec.c1.t">Épouser l'existant plutôt que l'idéal</h3>
+        <p data-i18n="cs.dec.c1.p1">La base centralisée avait démarré sous MySQL, choix par défaut. Une visite sur site a montré que le client opérait déjà SQL Server.</p>
+        <p data-i18n="cs.dec.c1.p2">Bascule assumée vers SQL Server : intégration native à l'infrastructure, et surtout des équipes internes déjà capables de maintenir la solution après mon départ.</p>
+        <p class="out" data-i18n="cs.dec.c1.out">→ La reprise en main compte plus que l'élégance technique.</p>
+      </article>
+
+      <article class="card rv">
+        <p class="q" data-i18n="cs.dec.c2.q">Arbitrage 2</p>
+        <h3 data-i18n="cs.dec.c2.t">Un miroir de production, pas un bac à sable</h3>
+        <p data-i18n="cs.dec.c2.p1">Développer directement sur le serveur du client aurait perturbé l'exploitation et créé une dépendance d'accès.</p>
+        <p data-i18n="cs.dec.c2.p2">Un serveur IIS local reproduisant l'environnement cible a permis d'itérer vite, de déboguer dans des conditions réalistes et de supprimer les mauvaises surprises au déploiement.</p>
+        <p class="out" data-i18n="cs.dec.c2.out">→ Zéro interruption de service pendant les quatre mois.</p>
+      </article>
+
+      <article class="card rv">
+        <p class="q" data-i18n="cs.dec.c3.q">Arbitrage 3</p>
+        <h3 data-i18n="cs.dec.c3.t">Faire remplir la cartographie par les métiers</h3>
+        <p data-i18n="cs.dec.c3.p1">Le registre des sources aurait pu être rédigé seul, plus vite. Il a été construit avec les départements, puis complété par eux.</p>
+        <p data-i18n="cs.dec.c3.p2">Effet secondaire décisif : les équipes se sont approprié le projet au lieu de le subir. Les incohérences de données ont été résolues à la source, pas patchées en aval.</p>
+        <p class="out" data-i18n="cs.dec.c3.out">→ L'adoption se prépare pendant le cadrage, pas à la livraison.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 5 · RÉSULTATS ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="cs.res.eyebrow">Ce que ça a changé</p>
+      <h2 data-i18n="cs.res.title">Résultats de la mission</h2>
+    </div>
+
+    <div class="results rv">
+      <div>
+        <span class="fig">6 <small>→ 1</small></span>
+        <p data-i18n="cs.res.k1">Six sources hétérogènes consolidées dans un socle unique, interrogeable par tous les départements.</p>
+      </div>
+      <div>
+        <span class="fig">0</span>
+        <p data-i18n="cs.res.k2">Ressaisie manuelle sur le périmètre couvert — et donc plus d'erreurs de recopie sur ces données.</p>
+      </div>
+      <div>
+        <span class="fig">−30<small> %</small></span>
+        <p data-i18n="cs.res.k3">Délai de production du reporting, estimation établie en fin de mission sur le périmètre traité.</p>
+      </div>
+      <div>
+        <span class="fig">4</span>
+        <p data-i18n="cs.res.k4">Familles de rapports OPCVM industrialisées : actif net, performance, actif par catégorie, souscriptions et rachats.</p>
+      </div>
+    </div>
+
+    <p class="caveat" data-i18n="cs.res.caveat">
+      Le gain de délai est une estimation de fin de mission, pas une mesure auditée. Je préfère l'annoncer
+      ainsi : sur ce type de projet, les chiffres invérifiables abîment plus la confiance qu'ils ne
+      convainquent. Les gains non chiffrables — traçabilité de chaque donnée, conformité facilitée,
+      charge retirée aux équipes front office — ont pesé au moins autant.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ 6 · TRANSPOSITION ══════════════ -->
+<section class="offer">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow eyebrow--light" data-i18n="cs.off.eyebrow">Pour une société de gestion aujourd'hui</p>
+      <h2 data-i18n="cs.off.title">Comment je transpose cette mission chez vous</h2>
+      <p data-i18n="cs.off.p">
+        Si votre équipe consolide encore des fichiers à la main avant chaque échéance, le schéma est
+        presque toujours le même. Voici la façon dont j'aborderais l'intervention, en dix semaines.
+      </p>
+    </div>
+
+    <div class="phases">
+      <div class="phase rv">
+        <p class="when" data-i18n="cs.off.p1.when">Semaines 1–2 · Audit</p>
+        <h3 data-i18n="cs.off.p1.t">Cartographier le flux réel</h3>
+        <p data-i18n="cs.off.p1.p">Entretiens par département, suivi d'un cycle de reporting complet de bout en bout, chiffrage du temps réellement passé.</p>
+        <ul class="deliv">
+          <li data-i18n="cs.off.p1.d1">Registre des sources et des propriétaires</li>
+          <li data-i18n="cs.off.p1.d2">Grille de friction chiffrée par service</li>
+          <li data-i18n="cs.off.p1.d3">Périmètre priorisé et estimation du gain</li>
+        </ul>
+      </div>
+
+      <div class="phase rv">
+        <p class="when" data-i18n="cs.off.p2.when">Semaines 3–6 · Socle</p>
+        <h3 data-i18n="cs.off.p2.t">Automatiser la collecte</h3>
+        <p data-i18n="cs.off.p2.p">Connecteurs sur vos systèmes existants, contrôles de cohérence à l'entrée, base centralisée alignée sur votre vocabulaire métier.</p>
+        <ul class="deliv">
+          <li data-i18n="cs.off.p2.d1">Pipelines d'ingestion planifiés et journalisés</li>
+          <li data-i18n="cs.off.p2.d2">Règles de qualité et alertes en cas d'écart</li>
+          <li data-i18n="cs.off.p2.d3">Modèle de données documenté</li>
+        </ul>
+      </div>
+
+      <div class="phase rv">
+        <p class="when" data-i18n="cs.off.p3.when">Semaines 7–10 · Restitution</p>
+        <h3 data-i18n="cs.off.p3.t">Livrer, former, se retirer</h3>
+        <p data-i18n="cs.off.p3.p">Gabarits de rapports client et réglementaires, droits d'accès par profil, puis transfert de compétence à vos équipes.</p>
+        <ul class="deliv">
+          <li data-i18n="cs.off.p3.d1">Rapports générés à la demande</li>
+          <li data-i18n="cs.off.p3.d2">Habilitations par métier</li>
+          <li data-i18n="cs.off.p3.d3">Documentation d'exploitation et formation</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="today rv">
+      <h3 data-i18n="cs.off.today.t">Ce que je ferais différemment de 2023</h3>
+      <ul>
+        <li><strong data-i18n="cs.off.today.a.k">API d'abord</strong><span data-i18n="cs.off.today.a.v">Les dépositaires et fournisseurs de données exposent aujourd'hui des API. Le scraping devient le recours, plus le point de départ.</span></li>
+        <li><strong data-i18n="cs.off.today.b.k">Orchestration visible</strong><span data-i18n="cs.off.today.b.v">Les flux tournent sous n8n ou Power Automate : vos équipes voient ce qui s'exécute, quand, et ce qui a échoué.</span></li>
+        <li><strong data-i18n="cs.off.today.c.k">Contrôles automatisés</strong><span data-i18n="cs.off.today.c.v">Détection d'écarts et de valeurs aberrantes avant publication, plutôt qu'une relecture humaine après coup.</span></li>
+        <li><strong data-i18n="cs.off.today.d.k">Rédaction assistée</strong><span data-i18n="cs.off.today.d.v">Génération d'un premier jet de commentaire de gestion à partir des chiffres, relu et validé par le gérant.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CTA ══════════════ -->
+<section class="cta">
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="cs.cta.eyebrow">Étape suivante</p>
+    <h2 data-i18n="cs.cta.title">Estimez le gain sur votre propre processus</h2>
+    <p class="lede" data-i18n="cs.cta.p">
+      Le simulateur reprend la logique de ce diagnostic : vous décrivez votre processus, il chiffre
+      le potentiel d'automatisation, le délai de bout en bout et les heures libérées. Cinq minutes,
+      sans inscription.
+    </p>
+    <div class="btns">
+      <a class="btn btn-p" href="simulateur.html" data-i18n="cs.cta.b1">Ouvrir le simulateur</a>
+      <a class="btn btn-s" href="mailto:adlane-amine@hotmail.fr?subject=Audit%20reporting%20-%20soci%C3%A9t%C3%A9%20de%20gestion" data-i18n="cs.cta.b2">Demander un audit</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span data-i18n="cs.foot.left">Amine Adlane — automatisation des processus &amp; systèmes d'information</span>
+    <span data-i18n="cs.foot.right">Cas d'étude établi à partir du rapport de mission 2023. Nom du client omis.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var items = document.querySelectorAll('.rv');
+  if(!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  items.forEach(function(el, i){
+    el.style.transitionDelay = Math.min(i % 4, 3) * 60 + 'ms';
+    io.observe(el);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var T = {"fr":{"cs.nav.back":"← Retour au site","cs.nav.case":"Cas d'étude","cs.nav.simulator":"Simulateur","cs.nav.contact":"Contact","cs.hero.eyebrow":"Société de gestion d'actifs · Casablanca · 2023","cs.hero.title":"Un reporting quotidien produit à la main. Puis plus du tout.","cs.hero.lede":"Une société de gestion devait livrer des reportings quotidiens, hebdomadaires et semestriels à ses clients et à son régulateur. Les données arrivaient de six endroits différents, dans six formats différents, et se recollaient à la main. Mission de quatre mois pour supprimer la ressaisie et rendre le processus reproductible.","cs.hero.before.tag":"Avant","cs.hero.before.text":"Six sources hétérogènes — pages web, fichiers Excel, exports CSV, tables HTML, envois par mail. Consolidation manuelle, écarts entre départements, chaque rapport re-fabriqué de zéro.","cs.hero.after.tag":"Après","cs.hero.after.text":"Une chaîne unique : collecte automatisée, base centralisée, jeux de données normalisés, rapports générés à la demande avec des droits d’accès par métier.","cs.facts.role.k":"Rôle","cs.facts.role.v":"Consultant data — cabinet de conseil SI","cs.facts.time.k":"Durée","cs.facts.time.v":"4 mois — avril à août 2023","cs.facts.scope.k":"Périmètre","cs.facts.scope.v":"6 départements, 4 familles de rapports OPCVM","cs.facts.stack.k":"Stack","cs.facts.stack.v":"Python · SQL Server · IIS · Smart Report","cs.start.eyebrow":"Le point de départ","cs.start.title":"Le reporting n'était pas un livrable. C'était une contrainte quotidienne.","cs.start.p1":"Dans une société de gestion, le reporting sert deux maîtres à la fois : le client, qui veut savoir où en est son portefeuille, et le régulateur, qui veut des chiffres justes dans les délais. Les deux exigences tombent sur les mêmes équipes, avec les mêmes données.","cs.start.p2":"La mission a démarré par un état des lieux mené département par département, en enregistrant les écrans des utilisateurs pour comprendre où ils allaient chercher chaque chiffre. Le résultat de ce recensement est la grille ci-dessous : neuf points de friction, notés par les six directions concernées.","cs.diag.eyebrow":"Le diagnostic","cs.diag.title":"Où ça fait mal, et pour qui","cs.diag.p":"Chaque case indique l'intensité du problème ressentie par le département. Ces chiffres viennent des entretiens menés pendant la mission — ils ne sortent pas d'un modèle générique.","cs.diag.caption":"Grille de friction — société de gestion d’actifs, 2023. Lecture : plus la case est foncée, plus le département considère le sujet comme bloquant au quotidien.","cs.diag.r1.t":"Le problème est transversal","cs.diag.r1.p":"Aucune ligne n'est froide. Un correctif limité à un seul service n'aurait rien réglé : il fallait un socle commun.","cs.diag.r2.t":"Le front office paie le prix fort","cs.diag.r2.p":"Les équipes qui devraient gérer passent leur temps à consolider. C'est là que l'automatisation libère le plus de valeur.","cs.diag.r3.t":"La conformité est le déclencheur","cs.diag.r3.p":"La contrainte réglementaire est notée à 80 par la direction générale. C'est l'argument qui débloque un budget, pas le confort des équipes.","cs.arch.eyebrow":"La solution","cs.arch.title":"Quatre couches, un seul flux","cs.arch.p":"Le principe : chaque donnée entre une fois, est stockée une fois, et ressort dans autant de rapports que nécessaire. Rien ne transite par un poste de travail.","cs.arch.l1.t":"Cartographier avant de coder","cs.arch.l1.p":"Chaque source a été inventoriée avec les équipes : nom de la donnée, origine, département propriétaire, format, fréquence de publication, lien exact. Ce document est devenu la référence de la mission — et il a été rempli par les métiers, pas à leur place.","cs.arch.l2.t":"Collecte automatisée","cs.arch.l2.p":"Un script Python structuré en classes, une par type de source : tables HTML, téléchargements de fichiers, pages à rendu JavaScript, calendriers de dividendes, historiques de volumes. Chaque parseur normalise vers un même format tabulaire avant écriture.","cs.arch.l3.t":"Socle de données centralisé","cs.arch.l3.p":"Tables normalisées sur SQL Server, alignées sur le vocabulaire métier plutôt que sur la structure des fichiers d’origine. Un serveur IIS local reproduisait l’environnement du client pour développer et tester sans jamais toucher à la production.","cs.arch.l4.t":"Restitution et habilitations","cs.arch.l4.p":"Connexion directe de l’outil de reporting au socle, jeux de données par famille de rapport, et gestion des droits par profil : rédaction pour les producteurs de rapports, lecture seule pour les consommateurs. Les rapports deviennent des gabarits, plus des fichiers.","cs.dec.eyebrow":"Décisions structurantes","cs.dec.title":"Trois arbitrages qui ont déterminé le résultat","cs.dec.p":"Ce sont rarement les lignes de code qui font la différence sur ce type de mission, mais les choix pris avant de les écrire.","cs.dec.c1.q":"Arbitrage 1","cs.dec.c1.t":"Épouser l'existant plutôt que l'idéal","cs.dec.c1.p1":"La base centralisée avait démarré sous MySQL, choix par défaut. Une visite sur site a montré que le client opérait déjà SQL Server.","cs.dec.c1.p2":"Bascule assumée vers SQL Server : intégration native à l’infrastructure, et surtout des équipes internes déjà capables de maintenir la solution après mon départ.","cs.dec.c1.out":"→ La reprise en main compte plus que l’élégance technique.","cs.dec.c2.q":"Arbitrage 2","cs.dec.c2.t":"Un miroir de production, pas un bac à sable","cs.dec.c2.p1":"Développer directement sur le serveur du client aurait perturbé l’exploitation et créé une dépendance d’accès.","cs.dec.c2.p2":"Un serveur IIS local reproduisant l’environnement cible a permis d’itérer vite, de déboguer dans des conditions réalistes et de supprimer les mauvaises surprises au déploiement.","cs.dec.c2.out":"→ Zéro interruption de service pendant les quatre mois.","cs.dec.c3.q":"Arbitrage 3","cs.dec.c3.t":"Faire remplir la cartographie par les métiers","cs.dec.c3.p1":"Le registre des sources aurait pu être rédigé seul, plus vite. Il a été construit avec les départements, puis complété par eux.","cs.dec.c3.p2":"Effet secondaire décisif : les équipes se sont approprié le projet au lieu de le subir. Les incohérences de données ont été résolues à la source, pas patchées en aval.","cs.dec.c3.out":"→ L’adoption se prépare pendant le cadrage, pas à la livraison.","cs.res.eyebrow":"Ce que ça a changé","cs.res.title":"Résultats de la mission","cs.res.k1":"Six sources hétérogènes consolidées dans un socle unique, interrogeable par tous les départements.","cs.res.k2":"Ressaisie manuelle sur le périmètre couvert — et donc plus d’erreurs de recopie sur ces données.","cs.res.k3":"Délai de production du reporting, estimation établie en fin de mission sur le périmètre traité.","cs.res.k4":"Familles de rapports OPCVM industrialisées : actif net, performance, actif par catégorie, souscriptions et rachats.","cs.res.caveat":"Le gain de délai est une estimation de fin de mission, pas une mesure auditée. Je préfère l’annoncer ainsi : sur ce type de projet, les chiffres invérifiables abîment plus la confiance qu’ils ne convainquent. Les gains non chiffrables — traçabilité de chaque donnée, conformité facilitée, charge retirée aux équipes front office — ont pesé au moins autant.","cs.off.eyebrow":"Pour une société de gestion aujourd'hui","cs.off.title":"Comment je transpose cette mission chez vous","cs.off.p":"Si votre équipe consolide encore des fichiers à la main avant chaque échéance, le schéma est presque toujours le même. Voici la façon dont j'aborderais l'intervention, en dix semaines.","cs.off.p1.when":"Semaines 1–2 · Audit","cs.off.p1.t":"Cartographier le flux réel","cs.off.p1.p":"Entretiens par département, suivi d'un cycle de reporting complet de bout en bout, chiffrage du temps réellement passé.","cs.off.p1.d1":"Registre des sources et des propriétaires","cs.off.p1.d2":"Grille de friction chiffrée par service","cs.off.p1.d3":"Périmètre priorisé et estimation du gain","cs.off.p2.when":"Semaines 3–6 · Socle","cs.off.p2.t":"Automatiser la collecte","cs.off.p2.p":"Connecteurs sur vos systèmes existants, contrôles de cohérence à l’entrée, base centralisée alignée sur votre vocabulaire métier.","cs.off.p2.d1":"Pipelines d’ingestion planifiés et journalisés","cs.off.p2.d2":"Règles de qualité et alertes en cas d’écart","cs.off.p2.d3":"Modèle de données documenté","cs.off.p3.when":"Semaines 7–10 · Restitution","cs.off.p3.t":"Livrer, former, se retirer","cs.off.p3.p":"Gabarits de rapports client et réglementaires, droits d’accès par profil, puis transfert de compétence à vos équipes.","cs.off.p3.d1":"Rapports générés à la demande","cs.off.p3.d2":"Habilitations par métier","cs.off.p3.d3":"Documentation d’exploitation et formation","cs.off.today.t":"Ce que je ferais différemment de 2023","cs.off.today.a.k":"API d’abord","cs.off.today.a.v":"Les dépositaires et fournisseurs de données exposent aujourd’hui des API. Le scraping devient le recours, plus le point de départ.","cs.off.today.b.k":"Orchestration visible","cs.off.today.b.v":"Les flux tournent sous n8n ou Power Automate : vos équipes voient ce qui s’exécute, quand, et ce qui a échoué.","cs.off.today.c.k":"Contrôles automatisés","cs.off.today.c.v":"Détection d’écarts et de valeurs aberrantes avant publication, plutôt qu’une relecture humaine après coup.","cs.off.today.d.k":"Rédaction assistée","cs.off.today.d.v":"Génération d’un premier jet de commentaire de gestion à partir des chiffres, relu et validé par le gérant.","cs.cta.eyebrow":"Étape suivante","cs.cta.title":"Estimez le gain sur votre propre processus","cs.cta.p":"Le simulateur reprend la logique de ce diagnostic : vous décrivez votre processus, il chiffre le potentiel d’automatisation, le délai de bout en bout et les heures libérées. Cinq minutes, sans inscription.","cs.cta.b1":"Ouvrir le simulateur","cs.cta.b2":"Demander un audit","cs.foot.left":"Amine Adlane — automatisation des processus & systèmes d’information","cs.foot.right":"Cas d’étude établi à partir du rapport de mission 2023. Nom du client omis.","cs.table.back":"Back office","cs.table.middle":"Middle office / analystes","cs.table.actions":"Front office / actions","cs.table.money":"Front office / monétaire","cs.table.it":"Direction SI","cs.table.exec":"Direction générale","cs.legend.50":"50 — gênant","cs.legend.60":"60 — pénalisant","cs.legend.70":"70 — bloquant","cs.legend.80":"80 — critique"},"en":{"cs.nav.back":"← Back to site","cs.nav.case":"Case study","cs.nav.simulator":"Simulator","cs.nav.contact":"Contact","cs.hero.eyebrow":"Asset management firm · Casablanca · 2023","cs.hero.title":"Daily reporting was produced by hand. Then it wasn’t.","cs.hero.lede":"An asset management firm had to deliver daily, weekly and semi-annual reports to clients and its regulator. Data arrived from six different places, in six different formats, and was manually stitched together. Four-month mission to eliminate re-entry and make the process repeatable.","cs.hero.before.tag":"Before","cs.hero.before.text":"Six heterogeneous sources — web pages, Excel files, CSV exports, HTML tables, email attachments. Manual consolidation, discrepancies between departments, every report rebuilt from scratch.","cs.hero.after.tag":"After","cs.hero.after.text":"One pipeline: automated collection, centralized database, normalized datasets, reports generated on demand with role-based access.","cs.facts.role.k":"Role","cs.facts.role.v":"Data consultant — IT consulting firm","cs.facts.time.k":"Duration","cs.facts.time.v":"4 months — April to August 2023","cs.facts.scope.k":"Scope","cs.facts.scope.v":"6 departments, 4 UCITS report families","cs.facts.stack.k":"Stack","cs.facts.stack.v":"Python · SQL Server · IIS · Smart Report","cs.start.eyebrow":"Starting point","cs.start.title":"Reporting wasn’t a deliverable. It was a daily constraint.","cs.start.p1":"In asset management, reporting serves two masters at once: the client, who wants to know where the portfolio stands, and the regulator, who wants accurate figures on time. Both demands hit the same teams, with the same data.","cs.start.p2":"The mission began with a department-by-department assessment, recording user screens to understand where each figure was sourced. The result was the grid below: nine friction points scored by the six departments involved.","cs.diag.eyebrow":"Diagnosis","cs.diag.title":"Where it hurts, and for whom","cs.diag.p":"Each cell shows the intensity of the problem felt by the department. These figures come from interviews conducted during the mission — they are not from a generic model.","cs.diag.caption":"Friction grid — asset management firm, 2023. The darker the cell, the more the department considered the issue blocking day-to-day work.","cs.diag.r1.t":"The problem is transversal","cs.diag.r1.p":"No row is cold. A fix limited to one team would not have solved it: a common foundation was needed.","cs.diag.r2.t":"Front office pays the highest price","cs.diag.r2.p":"Teams that should be managing portfolios spend their time consolidating data. That is where automation releases the most value.","cs.diag.r3.t":"Compliance is the trigger","cs.diag.r3.p":"The regulatory constraint is rated 80 by executive management. That is what unlocks a budget, not team comfort.","cs.arch.eyebrow":"Solution","cs.arch.title":"Four layers, one flow","cs.arch.p":"The principle: each datum enters once, is stored once, and can feed as many reports as needed. Nothing goes through an employee workstation.","cs.arch.l1.t":"Map before coding","cs.arch.l1.p":"Each source was inventoried with the teams: data name, origin, owning department, format, publication frequency and exact link. This document became the mission reference — completed by the business, not for them.","cs.arch.l2.t":"Automated collection","cs.arch.l2.p":"A class-based Python script, one class per source type: HTML tables, file downloads, JavaScript-rendered pages, dividend calendars, volume histories. Each parser normalizes to the same tabular format before writing.","cs.arch.l3.t":"Centralized data foundation","cs.arch.l3.p":"Normalized SQL Server tables aligned to business vocabulary rather than source-file structure. A local IIS server mirrored the client environment for development and testing without touching production.","cs.arch.l4.t":"Reporting and permissions","cs.arch.l4.p":"Direct connection from the reporting tool to the data foundation, datasets by report family, and profile-based permissions: editors for report producers, read-only for consumers. Reports become templates, not files.","cs.dec.eyebrow":"Key decisions","cs.dec.title":"Three trade-offs shaped the result","cs.dec.p":"On this kind of mission, the difference rarely comes from lines of code, but from the choices made before writing them.","cs.dec.c1.q":"Trade-off 1","cs.dec.c1.t":"Fit the existing environment, not the ideal one","cs.dec.c1.p1":"The centralized database had started in MySQL by default. An on-site visit showed the client already operated SQL Server.","cs.dec.c1.p2":"A deliberate move to SQL Server meant native infrastructure integration and, most importantly, internal teams already able to maintain the solution after I left.","cs.dec.c1.out":"→ Ownership matters more than technical elegance.","cs.dec.c2.q":"Trade-off 2","cs.dec.c2.t":"A production mirror, not a sandbox","cs.dec.c2.p1":"Developing directly on the client server would have disrupted operations and created an access dependency.","cs.dec.c2.p2":"A local IIS server mirroring the target environment enabled fast iteration, realistic debugging and fewer surprises at deployment.","cs.dec.c2.out":"→ Zero service interruption during the four months.","cs.dec.c3.q":"Trade-off 3","cs.dec.c3.t":"Have the business fill the source map","cs.dec.c3.p1":"The source register could have been written alone, faster. It was built with the departments, then completed by them.","cs.dec.c3.p2":"Decisive side effect: teams adopted the project instead of enduring it. Data inconsistencies were fixed at the source, not patched downstream.","cs.dec.c3.out":"→ Adoption is prepared during framing, not at delivery.","cs.res.eyebrow":"What changed","cs.res.title":"Mission results","cs.res.k1":"Six heterogeneous sources consolidated into one foundation, queryable by every department.","cs.res.k2":"Manual re-entry across the covered scope — and therefore no more copy errors on those data.","cs.res.k3":"Reporting production time, estimated at the end of the mission for the covered scope.","cs.res.k4":"Four UCITS report families industrialized: net assets, performance, assets by category, subscriptions and redemptions.","cs.res.caveat":"The time gain is an end-of-mission estimate, not an audited measurement. I prefer to state it this way: on this kind of project, unverifiable figures hurt trust more than they persuade. The unquantified gains — data traceability, easier compliance, front-office workload removed — mattered at least as much.","cs.off.eyebrow":"For an asset manager today","cs.off.title":"How I would transpose this mission to your environment","cs.off.p":"If your team still consolidates files manually before every deadline, the pattern is almost always the same. Here is how I would approach the intervention, in ten weeks.","cs.off.p1.when":"Weeks 1–2 · Audit","cs.off.p1.t":"Map the real flow","cs.off.p1.p":"Department interviews, one complete reporting cycle followed end-to-end, and measurement of the actual time spent.","cs.off.p1.d1":"Source and ownership register","cs.off.p1.d2":"Friction grid by department","cs.off.p1.d3":"Prioritized scope and estimated gain","cs.off.p2.when":"Weeks 3–6 · Foundation","cs.off.p2.t":"Automate collection","cs.off.p2.p":"Connectors to your existing systems, consistency checks on input, centralized database aligned with your business vocabulary.","cs.off.p2.d1":"Scheduled, logged ingestion pipelines","cs.off.p2.d2":"Quality rules and deviation alerts","cs.off.p2.d3":"Documented data model","cs.off.p3.when":"Weeks 7–10 · Reporting","cs.off.p3.t":"Deliver, train, step back","cs.off.p3.p":"Client and regulatory report templates, role-based access, then knowledge transfer to your teams.","cs.off.p3.d1":"Reports generated on demand","cs.off.p3.d2":"Business-role permissions","cs.off.p3.d3":"Operating documentation and training","cs.off.today.t":"What I would do differently from 2023","cs.off.today.a.k":"API first","cs.off.today.a.v":"Custodians and data providers expose APIs today. Scraping becomes the fallback, not the starting point.","cs.off.today.b.k":"Visible orchestration","cs.off.today.b.v":"Flows run through n8n or Power Automate: your teams can see what runs, when, and what failed.","cs.off.today.c.k":"Automated controls","cs.off.today.c.v":"Detect deviations and outliers before publication instead of relying on human review afterwards.","cs.off.today.d.k":"Assisted drafting","cs.off.today.d.v":"Generate a first draft of management commentary from the figures, reviewed and approved by the portfolio manager.","cs.cta.eyebrow":"Next step","cs.cta.title":"Estimate the gain on your own process","cs.cta.p":"The simulator follows the logic of this diagnosis: describe your process, and it estimates automation potential, end-to-end time and hours freed. Five minutes, no sign-up.","cs.cta.b1":"Open the simulator","cs.cta.b2":"Request an audit","cs.foot.left":"Amine Adlane — process automation & information systems","cs.foot.right":"Case study based on the 2023 mission report. Client name omitted.","cs.table.back":"Back office","cs.table.middle":"Middle office / analysts","cs.table.actions":"Front office / equities","cs.table.money":"Front office / money market","cs.table.it":"IT department","cs.table.exec":"Executive management","cs.legend.50":"50 — troublesome","cs.legend.60":"60 — penalizing","cs.legend.70":"70 — blocking","cs.legend.80":"80 — critical"},"it":{"cs.nav.back":"← Torna al sito","cs.nav.case":"Caso di studio","cs.nav.simulator":"Simulatore","cs.nav.contact":"Contatti","cs.hero.eyebrow":"Società di gestione · Casablanca · 2023","cs.hero.title":"Il reporting quotidiano era prodotto a mano. Poi non più.","cs.hero.lede":"Una società di gestione doveva produrre report giornalieri, settimanali e semestrali per clienti e regolatore. I dati arrivavano da sei fonti diverse, in sei formati diversi, e venivano ricomposti manualmente. Missione di quattro mesi per eliminare il reinserimento e rendere il processo ripetibile.","cs.hero.before.tag":"Prima","cs.hero.before.text":"Sei fonti eterogenee — pagine web, file Excel, export CSV, tabelle HTML, email. Consolidamento manuale, discrepanze tra reparti, ogni report ricreato da zero.","cs.hero.after.tag":"Dopo","cs.hero.after.text":"Un’unica catena: raccolta automatizzata, database centralizzato, dataset normalizzati, report generati su richiesta con accessi per ruolo.","cs.facts.role.k":"Ruolo","cs.facts.role.v":"Data consultant — società di consulenza IT","cs.facts.time.k":"Durata","cs.facts.time.v":"4 mesi — aprile-agosto 2023","cs.facts.scope.k":"Perimetro","cs.facts.scope.v":"6 reparti, 4 famiglie di report UCITS","cs.facts.stack.k":"Stack","cs.facts.stack.v":"Python · SQL Server · IIS · Smart Report","cs.start.eyebrow":"Punto di partenza","cs.start.title":"Il reporting non era un deliverable. Era un vincolo quotidiano.","cs.start.p1":"Nell’asset management, il reporting deve soddisfare due esigenze: il cliente vuole sapere come procede il portafoglio, il regolatore vuole dati corretti nei tempi. Le due richieste ricadono sugli stessi team, con gli stessi dati.","cs.start.p2":"La missione è iniziata con un’analisi reparto per reparto, registrando gli schermi degli utenti per capire dove cercavano ogni dato. Il risultato è la griglia sotto: nove punti di attrito valutati dai sei reparti coinvolti.","cs.diag.eyebrow":"Diagnosi","cs.diag.title":"Dove fa male, e per chi","cs.diag.p":"Ogni cella indica l’intensità del problema percepita dal reparto. I valori provengono dalle interviste svolte durante la missione, non da un modello generico.","cs.diag.caption":"Griglia di attrito — società di gestione, 2023. Più scura è la cella, più il tema è considerato bloccante nel lavoro quotidiano.","cs.diag.r1.t":"Il problema è trasversale","cs.diag.r1.p":"Nessuna riga è fredda. Un correttivo limitato a un solo servizio non avrebbe risolto il problema: serviva una base comune.","cs.diag.r2.t":"Il front office paga il prezzo più alto","cs.diag.r2.p":"Le squadre che dovrebbero gestire i portafogli passano il tempo a consolidare dati. È qui che l’automazione libera più valore.","cs.diag.r3.t":"La compliance è il fattore scatenante","cs.diag.r3.p":"Il vincolo normativo è valutato 80 dalla direzione generale. È ciò che sblocca il budget, non il comfort dei team.","cs.arch.eyebrow":"La soluzione","cs.arch.title":"Quattro livelli, un solo flusso","cs.arch.p":"Il principio: ogni dato entra una volta, viene memorizzato una volta e alimenta tutti i report necessari. Nulla passa dalla postazione di un dipendente.","cs.arch.l1.t":"Mappare prima di codificare","cs.arch.l1.p":"Ogni fonte è stata inventariata con i team: nome del dato, origine, reparto proprietario, formato, frequenza di pubblicazione e link esatto. Questo documento è diventato il riferimento della missione, compilato dai business team.","cs.arch.l2.t":"Raccolta automatizzata","cs.arch.l2.p":"Uno script Python strutturato per classi, una per tipo di fonte: tabelle HTML, download, pagine JavaScript, calendari dividendi, storico volumi. Ogni parser normalizza allo stesso formato tabellare prima della scrittura.","cs.arch.l3.t":"Base dati centralizzata","cs.arch.l3.p":"Tabelle SQL Server normalizzate, allineate al vocabolario business invece che alla struttura dei file originali. Un server IIS locale replicava l’ambiente del cliente per sviluppare e testare senza toccare la produzione.","cs.arch.l4.t":"Reporting e autorizzazioni","cs.arch.l4.p":"Connessione diretta dello strumento di reporting alla base, dataset per famiglia di report e permessi per profilo: modifica per chi produce report, sola lettura per i destinatari. I report diventano template, non file.","cs.dec.eyebrow":"Decisioni chiave","cs.dec.title":"Tre compromessi che hanno determinato il risultato","cs.dec.p":"In questo tipo di missione, la differenza raramente la fanno le righe di codice, ma le scelte prese prima di scriverle.","cs.dec.c1.q":"Compromesso 1","cs.dec.c1.t":"Aderire all’esistente, non all’ideale","cs.dec.c1.p1":"La base centralizzata era partita in MySQL, scelta predefinita. Una visita in sede ha mostrato che il cliente usava già SQL Server.","cs.dec.c1.p2":"Passaggio a SQL Server: integrazione nativa nell’infrastruttura e soprattutto team interni in grado di mantenere la soluzione dopo la mia partenza.","cs.dec.c1.out":"→ La presa in carico conta più dell’eleganza tecnica.","cs.dec.c2.q":"Compromesso 2","cs.dec.c2.t":"Un mirror della produzione, non un sandbox","cs.dec.c2.p1":"Sviluppare direttamente sul server del cliente avrebbe disturbato l’operatività e creato una dipendenza di accesso.","cs.dec.c2.p2":"Un server IIS locale che replicava l’ambiente target ha permesso di iterare rapidamente, eseguire debug realistico e ridurre le sorprese al deploy.","cs.dec.c2.out":"→ Nessuna interruzione di servizio durante i quattro mesi.","cs.dec.c3.q":"Compromesso 3","cs.dec.c3.t":"Far compilare la mappa delle fonti ai team business","cs.dec.c3.p1":"Il registro delle fonti avrebbe potuto essere scritto da solo, più velocemente. È stato costruito con i reparti e poi completato da loro.","cs.dec.c3.p2":"Effetto decisivo: i team hanno fatto proprio il progetto invece di subirlo. Le incoerenze sono state risolte alla fonte, non patchate a valle.","cs.dec.c3.out":"→ L’adozione si prepara nel framing, non alla consegna.","cs.res.eyebrow":"Cosa è cambiato","cs.res.title":"Risultati della missione","cs.res.k1":"Sei fonti eterogenee consolidate in una base unica, interrogabile da tutti i reparti.","cs.res.k2":"Nessun reinserimento manuale nell’ambito coperto e quindi nessun errore di copia su questi dati.","cs.res.k3":"Tempo di produzione del reporting, stima formulata a fine missione sull’ambito trattato.","cs.res.k4":"Quattro famiglie di report UCITS industrializzate: attivo netto, performance, attivo per categoria, sottoscrizioni e rimborsi.","cs.res.caveat":"Il guadagno di tempo è una stima di fine missione, non una misura auditata. Preferisco dirlo così: in progetti di questo tipo, numeri non verificabili danneggiano la fiducia più di quanto convincano. I benefici non quantificati — tracciabilità, compliance facilitata, carico tolto al front office — hanno pesato almeno altrettanto.","cs.off.eyebrow":"Per una società di gestione oggi","cs.off.title":"Come trasferirei questa missione nel vostro contesto","cs.off.p":"Se il vostro team consolida ancora file manualmente prima di ogni scadenza, lo schema è quasi sempre lo stesso. Ecco come imposterei l’intervento, in dieci settimane.","cs.off.p1.when":"Settimane 1–2 · Audit","cs.off.p1.t":"Mappare il flusso reale","cs.off.p1.p":"Interviste per reparto, un ciclo completo di reporting seguito end-to-end e misurazione del tempo realmente speso.","cs.off.p1.d1":"Registro delle fonti e dei responsabili","cs.off.p1.d2":"Griglia di attrito per reparto","cs.off.p1.d3":"Perimetro prioritario e stima del guadagno","cs.off.p2.when":"Settimane 3–6 · Base","cs.off.p2.t":"Automatizzare la raccolta","cs.off.p2.p":"Connettori ai sistemi esistenti, controlli di coerenza in ingresso, base centralizzata allineata al vocabolario business.","cs.off.p2.d1":"Pipeline di ingestione pianificate e registrate","cs.off.p2.d2":"Regole di qualità e alert sulle anomalie","cs.off.p2.d3":"Modello dati documentato","cs.off.p3.when":"Settimane 7–10 · Reporting","cs.off.p3.t":"Consegnare, formare, farsi da parte","cs.off.p3.p":"Template di report cliente e regolamentari, accessi per ruolo e trasferimento delle competenze al team.","cs.off.p3.d1":"Report generati su richiesta","cs.off.p3.d2":"Permessi per ruolo","cs.off.p3.d3":"Documentazione operativa e formazione","cs.off.today.t":"Cosa farei diversamente rispetto al 2023","cs.off.today.a.k":"API prima","cs.off.today.a.v":"Oggi depositari e fornitori dati espongono API. Lo scraping diventa il fallback, non il punto di partenza.","cs.off.today.b.k":"Orchestrazione visibile","cs.off.today.b.v":"I flussi girano su n8n o Power Automate: i team vedono cosa esegue, quando e cosa è fallito.","cs.off.today.c.k":"Controlli automatizzati","cs.off.today.c.v":"Rilevare scostamenti e outlier prima della pubblicazione, invece di rileggerli a posteriori.","cs.off.today.d.k":"Scrittura assistita","cs.off.today.d.v":"Generare una prima bozza del commento di gestione a partire dai dati, poi rivista e approvata dal gestore.","cs.cta.eyebrow":"Prossimo passo","cs.cta.title":"Stima il guadagno sul tuo processo","cs.cta.p":"Il simulatore riprende la logica di questa diagnosi: descrivi il processo e stima potenziale di automazione, tempi end-to-end e ore liberate. Cinque minuti, senza registrazione.","cs.cta.b1":"Apri il simulatore","cs.cta.b2":"Richiedi un audit","cs.foot.left":"Amine Adlane — automazione dei processi & sistemi informativi","cs.foot.right":"Caso di studio basato sul report di missione 2023. Nome del cliente omesso.","cs.table.back":"Back office","cs.table.middle":"Middle office / analisti","cs.table.actions":"Front office / azioni","cs.table.money":"Front office / monetario","cs.table.it":"Direzione IT","cs.table.exec":"Direzione generale","cs.legend.50":"50 — fastidioso","cs.legend.60":"60 — penalizzante","cs.legend.70":"70 — bloccante","cs.legend.80":"80 — critico"},"es":{"cs.nav.back":"← Volver al sitio","cs.nav.case":"Caso de estudio","cs.nav.simulator":"Simulador","cs.nav.contact":"Contacto","cs.hero.eyebrow":"Sociedad de gestión de activos · Casablanca · 2023","cs.hero.title":"El reporting diario se hacía a mano. Hasta que dejó de hacerse así.","cs.hero.lede":"Una sociedad de gestión debía entregar informes diarios, semanales y semestrales a clientes y regulador. Los datos llegaban de seis lugares distintos, en seis formatos distintos, y se unían manualmente. Misión de cuatro meses para eliminar la reintroducción y hacer el proceso reproducible.","cs.hero.before.tag":"Antes","cs.hero.before.text":"Seis fuentes heterogéneas — páginas web, Excel, exportaciones CSV, tablas HTML, correos. Consolidación manual, diferencias entre departamentos, cada informe rehecho desde cero.","cs.hero.after.tag":"Después","cs.hero.after.text":"Una única cadena: recopilación automatizada, base centralizada, datasets normalizados, informes generados bajo demanda con permisos por perfil.","cs.facts.role.k":"Rol","cs.facts.role.v":"Consultor de datos — consultora de SI","cs.facts.time.k":"Duración","cs.facts.time.v":"4 meses — abril a agosto de 2023","cs.facts.scope.k":"Alcance","cs.facts.scope.v":"6 departamentos, 4 familias de informes UCITS","cs.facts.stack.k":"Stack","cs.facts.stack.v":"Python · SQL Server · IIS · Smart Report","cs.start.eyebrow":"Punto de partida","cs.start.title":"El reporting no era un entregable. Era una restricción diaria.","cs.start.p1":"En la gestión de activos, el reporting debe satisfacer dos demandas: el cliente quiere saber cómo va su cartera y el regulador quiere cifras correctas a tiempo. Ambas recaen en los mismos equipos y con los mismos datos.","cs.start.p2":"La misión comenzó con un diagnóstico departamento por departamento, grabando las pantallas de los usuarios para entender de dónde obtenían cada cifra. El resultado fue la cuadrícula siguiente: nueve puntos de fricción valorados por los seis departamentos implicados.","cs.diag.eyebrow":"Diagnóstico","cs.diag.title":"Dónde duele y a quién","cs.diag.p":"Cada celda muestra la intensidad del problema percibido por el departamento. Estas cifras proceden de entrevistas realizadas durante la misión, no de un modelo genérico.","cs.diag.caption":"Cuadrícula de fricción — sociedad de gestión de activos, 2023. Cuanto más oscura la celda, más bloqueante se considera el tema en el día a día.","cs.diag.r1.t":"El problema es transversal","cs.diag.r1.p":"Ninguna fila está fría. Una corrección limitada a un solo servicio no habría resuelto el problema: hacía falta una base común.","cs.diag.r2.t":"El front office paga el precio más alto","cs.diag.r2.p":"Los equipos que deberían gestionar pasan el tiempo consolidando datos. Ahí es donde la automatización libera más valor.","cs.diag.r3.t":"La conformidad es el detonante","cs.diag.r3.p":"La restricción regulatoria recibe un 80 por parte de la dirección general. Eso es lo que desbloquea el presupuesto, no la comodidad de los equipos.","cs.arch.eyebrow":"La solución","cs.arch.title":"Cuatro capas, un solo flujo","cs.arch.p":"Principio: cada dato entra una vez, se almacena una vez y alimenta tantos informes como sean necesarios. Nada pasa por el puesto de trabajo de una persona.","cs.arch.l1.t":"Mapear antes de programar","cs.arch.l1.p":"Cada fuente se inventarió con los equipos: nombre del dato, origen, departamento propietario, formato, frecuencia de publicación y enlace exacto. El documento se convirtió en referencia de la misión y fue completado por el negocio.","cs.arch.l2.t":"Recogida automatizada","cs.arch.l2.p":"Un script Python estructurado por clases, una por tipo de fuente: tablas HTML, descargas, páginas con JavaScript, calendarios de dividendos e históricos de volumen. Cada parser normaliza al mismo formato tabular antes de escribir.","cs.arch.l3.t":"Base de datos centralizada","cs.arch.l3.p":"Tablas normalizadas en SQL Server, alineadas con el vocabulario del negocio en lugar de la estructura de los archivos originales. Un servidor IIS local reproducía el entorno del cliente para desarrollar y probar sin tocar producción.","cs.arch.l4.t":"Reporting y permisos","cs.arch.l4.p":"Conexión directa de la herramienta de reporting a la base, datasets por familia de informe y permisos por perfil: edición para productores y solo lectura para consumidores. Los informes se convierten en plantillas, no en archivos.","cs.dec.eyebrow":"Decisiones clave","cs.dec.title":"Tres decisiones que determinaron el resultado","cs.dec.p":"En este tipo de misión, rara vez son las líneas de código las que marcan la diferencia, sino las decisiones tomadas antes de escribirlas.","cs.dec.c1.q":"Decisión 1","cs.dec.c1.t":"Adaptarse a lo existente, no al ideal","cs.dec.c1.p1":"La base centralizada había empezado en MySQL como opción por defecto. Una visita in situ mostró que el cliente ya utilizaba SQL Server.","cs.dec.c1.p2":"Cambio decidido a SQL Server: integración nativa con la infraestructura y, sobre todo, equipos internos capaces de mantener la solución tras mi salida.","cs.dec.c1.out":"→ La autonomía pesa más que la elegancia técnica.","cs.dec.c2.q":"Decisión 2","cs.dec.c2.t":"Un espejo de producción, no un sandbox","cs.dec.c2.p1":"Desarrollar directamente en el servidor del cliente habría alterado la operación y creado una dependencia de acceso.","cs.dec.c2.p2":"Un servidor IIS local que reproducía el entorno objetivo permitió iterar rápido, depurar en condiciones realistas y reducir sorpresas en el despliegue.","cs.dec.c2.out":"→ Cero interrupciones de servicio durante los cuatro meses.","cs.dec.c3.q":"Decisión 3","cs.dec.c3.t":"Hacer que el negocio complete el mapa de fuentes","cs.dec.c3.p1":"El registro de fuentes podría haberse redactado solo, más rápido. Se construyó con los departamentos y luego lo completaron ellos.","cs.dec.c3.p2":"Efecto decisivo: los equipos hicieron suyo el proyecto en lugar de sufrirlo. Las incoherencias se resolvieron en origen, no con parches posteriores.","cs.dec.c3.out":"→ La adopción se prepara durante el encuadre, no en la entrega.","cs.res.eyebrow":"Lo que cambió","cs.res.title":"Resultados de la misión","cs.res.k1":"Seis fuentes heterogéneas consolidadas en una única base, consultable por todos los departamentos.","cs.res.k2":"Cero reintroducción manual en el alcance cubierto y, por tanto, menos errores de copia en esos datos.","cs.res.k3":"Tiempo de producción del reporting, estimación realizada al final de la misión sobre el alcance tratado.","cs.res.k4":"Cuatro familias de informes UCITS industrializadas: activo neto, rendimiento, activo por categoría, suscripciones y reembolsos.","cs.res.caveat":"La mejora de tiempo es una estimación al final de la misión, no una medición auditada. Prefiero decirlo así: en este tipo de proyecto, las cifras no verificables dañan más la confianza de lo que convencen. Los beneficios no cuantificados —trazabilidad, compliance facilitada, carga retirada al front office— pesaron al menos tanto.","cs.off.eyebrow":"Para una gestora hoy","cs.off.title":"Cómo trasladaría esta misión a su entorno","cs.off.p":"Si su equipo aún consolida archivos manualmente antes de cada fecha límite, el patrón casi siempre es el mismo. Así abordaría la intervención en diez semanas.","cs.off.p1.when":"Semanas 1–2 · Auditoría","cs.off.p1.t":"Mapear el flujo real","cs.off.p1.p":"Entrevistas por departamento, seguimiento de un ciclo completo de reporting de extremo a extremo y medición del tiempo real invertido.","cs.off.p1.d1":"Registro de fuentes y responsables","cs.off.p1.d2":"Matriz de fricción por servicio","cs.off.p1.d3":"Alcance priorizado y estimación del beneficio","cs.off.p2.when":"Semanas 3–6 · Base","cs.off.p2.t":"Automatizar la recogida","cs.off.p2.p":"Conectores con sistemas existentes, controles de coherencia de entrada y base centralizada alineada con su vocabulario de negocio.","cs.off.p2.d1":"Pipelines de ingestión planificados y registrados","cs.off.p2.d2":"Reglas de calidad y alertas ante desviaciones","cs.off.p2.d3":"Modelo de datos documentado","cs.off.p3.when":"Semanas 7–10 · Reporting","cs.off.p3.t":"Entregar, formar, retirarme","cs.off.p3.p":"Plantillas de informes de clientes y regulatorios, permisos por perfil y transferencia de conocimientos al equipo.","cs.off.p3.d1":"Informes generados bajo demanda","cs.off.p3.d2":"Permisos por función","cs.off.p3.d3":"Documentación operativa y formación","cs.off.today.t":"Qué haría diferente respecto a 2023","cs.off.today.a.k":"API primero","cs.off.today.a.v":"Hoy custodios y proveedores de datos exponen API. El scraping pasa a ser el recurso de respaldo, no el punto de partida.","cs.off.today.b.k":"Orquestación visible","cs.off.today.b.v":"Los flujos funcionan con n8n o Power Automate: su equipo ve qué se ejecuta, cuándo y qué falló.","cs.off.today.c.k":"Controles automatizados","cs.off.today.c.v":"Detección de desviaciones y valores atípicos antes de publicar, en lugar de revisar después.","cs.off.today.d.k":"Redacción asistida","cs.off.today.d.v":"Generación de un primer borrador del comentario de gestión a partir de las cifras, revisado y validado por el gestor.","cs.cta.eyebrow":"Siguiente paso","cs.cta.title":"Estime el beneficio en su propio proceso","cs.cta.p":"El simulador retoma la lógica de este diagnóstico: describa su proceso y estime el potencial de automatización, el tiempo de extremo a extremo y las horas liberadas. Cinco minutos, sin registro.","cs.cta.b1":"Abrir el simulador","cs.cta.b2":"Solicitar una auditoría","cs.foot.left":"Amine Adlane — automatización de procesos & sistemas de información","cs.foot.right":"Caso de estudio basado en el informe de misión de 2023. Nombre del cliente omitido.","cs.table.back":"Back office","cs.table.middle":"Middle office / analistas","cs.table.actions":"Front office / acciones","cs.table.money":"Front office / monetario","cs.table.it":"Dirección TI","cs.table.exec":"Dirección general","cs.legend.50":"50 — molesto","cs.legend.60":"60 — penalizante","cs.legend.70":"70 — bloqueante","cs.legend.80":"80 — crítico"},"ar":{"cs.nav.back":"→ العودة إلى الموقع","cs.nav.case":"دراسة الحالة","cs.nav.simulator":"المحاكي","cs.nav.contact":"تواصل","cs.hero.eyebrow":"شركة لإدارة الأصول · الدار البيضاء · 2023","cs.hero.title":"كان إعداد التقارير اليومية يتم يدوياً. ثم لم يعد كذلك.","cs.hero.lede":"كانت شركة لإدارة الأصول مطالبة بإعداد تقارير يومية وأسبوعية ونصف سنوية لعملائها وللجهة التنظيمية. كانت البيانات تصل من ستة مصادر مختلفة وبستة تنسيقات مختلفة، ثم تُجمع يدوياً. استغرقت المهمة أربعة أشهر لإلغاء إعادة الإدخال وجعل العملية قابلة للتكرار.","cs.hero.before.tag":"قبل","cs.hero.before.text":"ستة مصادر غير متجانسة — صفحات ويب، ملفات Excel، صادرات CSV، جداول HTML، ورسائل بريد. تجميع يدوي، فروق بين الأقسام، وكل تقرير يُعاد بناؤه من الصفر.","cs.hero.after.tag":"بعد","cs.hero.after.text":"سلسلة واحدة: جمع آلي، قاعدة بيانات مركزية، مجموعات بيانات موحدة، وتقارير تُنشأ عند الطلب مع صلاحيات حسب الدور.","cs.facts.role.k":"الدور","cs.facts.role.v":"استشاري بيانات — شركة استشارات نظم معلومات","cs.facts.time.k":"المدة","cs.facts.time.v":"4 أشهر — أبريل إلى أغسطس 2023","cs.facts.scope.k":"النطاق","cs.facts.scope.v":"6 أقسام، 4 عائلات من تقارير OPCVM","cs.facts.stack.k":"التقنيات","cs.facts.stack.v":"Python · SQL Server · IIS · Smart Report","cs.start.eyebrow":"نقطة الانطلاق","cs.start.title":"لم يكن إعداد التقارير مجرد مخرج. كان قيداً يومياً.","cs.start.p1":"في إدارة الأصول، يخدم إعداد التقارير مطلبين في الوقت نفسه: العميل يريد معرفة وضع محفظته، والجهة التنظيمية تريد أرقاماً صحيحة في الوقت المحدد. والمتطلبان يقعان على الفرق نفسها وبالبيانات نفسها.","cs.start.p2":"بدأت المهمة بجرد قسم تلو الآخر، مع تسجيل شاشات المستخدمين لفهم مصدر كل رقم. وكانت النتيجة الشبكة أدناه: تسع نقاط احتكاك قيّمها الأقسام الستة المعنية.","cs.diag.eyebrow":"التشخيص","cs.diag.title":"أين تكمن المشكلة ولدى من","cs.diag.p":"توضح كل خانة شدة المشكلة التي يشعر بها القسم. الأرقام ناتجة عن مقابلات أُجريت خلال المهمة وليست من نموذج عام.","cs.diag.caption":"شبكة الاحتكاك — شركة لإدارة الأصول، 2023. كلما كانت الخانة أغمق، اعتبر القسم الموضوع أكثر تعطيلًا للعمل اليومي.","cs.diag.r1.t":"المشكلة عابرة للأقسام","cs.diag.r1.p":"لا يوجد صف بارد. إصلاح محدود لقسم واحد لم يكن ليحل المشكلة؛ كان لا بد من أساس مشترك.","cs.diag.r2.t":"الواجهة الأمامية تدفع الثمن الأكبر","cs.diag.r2.p":"الفرق التي يفترض أن تدير المحافظ تقضي وقتها في تجميع البيانات. وهنا يحرر التشغيل الآلي أكبر قيمة.","cs.diag.r3.t":"الامتثال هو المحفز","cs.diag.r3.p":"حصل القيد التنظيمي على تقييم 80 من الإدارة العامة. هذا ما يفتح الميزانية، وليس راحة الفرق.","cs.arch.eyebrow":"الحل","cs.arch.title":"أربع طبقات، تدفق واحد","cs.arch.p":"المبدأ: كل معلومة تدخل مرة واحدة، وتُخزّن مرة واحدة، وتغذي العدد المطلوب من التقارير. لا شيء يمر عبر جهاز موظف.","cs.arch.l1.t":"رسم الخريطة قبل كتابة الكود","cs.arch.l1.p":"تم جرد كل مصدر مع الفرق: اسم البيانات، المصدر، القسم المالك، الصيغة، وتيرة النشر والرابط الدقيق. أصبح هذا المستند مرجع المهمة، وقد أكملته الفرق نفسها.","cs.arch.l2.t":"جمع آلي","cs.arch.l2.p":"سكريبت Python منظم على شكل فئات، فئة لكل نوع من المصادر: جداول HTML، تنزيل الملفات، صفحات JavaScript، جداول توزيعات الأرباح، وتاريخ الأحجام. كل محلل يحول البيانات إلى صيغة جدولية موحدة قبل الكتابة.","cs.arch.l3.t":"قاعدة بيانات مركزية","cs.arch.l3.p":"جداول موحدة على SQL Server متوافقة مع مفردات الأعمال بدلاً من بنية الملفات الأصلية. كان خادم IIS محلي يحاكي بيئة العميل للتطوير والاختبار دون لمس الإنتاج.","cs.arch.l4.t":"الإخراج والصلاحيات","cs.arch.l4.p":"ربط أداة التقارير مباشرة بالقاعدة، ومجموعات بيانات حسب عائلة التقرير، وصلاحيات حسب الملف الوظيفي: تحرير لمنتجي التقارير وقراءة فقط للمستهلكين. أصبحت التقارير قوالب وليست ملفات.","cs.dec.eyebrow":"قرارات محورية","cs.dec.title":"ثلاثة اختيارات حددت النتيجة","cs.dec.p":"في هذا النوع من المهام، نادراً ما تكون أسطر الكود هي الفارق؛ بل القرارات التي تُتخذ قبل كتابتها.","cs.dec.c1.q":"المفاضلة 1","cs.dec.c1.t":"الانسجام مع الموجود بدلاً من المثالي","cs.dec.c1.p1":"بدأت قاعدة البيانات المركزية على MySQL كخيار افتراضي. أظهرت زيارة الموقع أن العميل يستخدم SQL Server بالفعل.","cs.dec.c1.p2":"تم الانتقال إلى SQL Server بشكل مقصود: تكامل طبيعي مع البنية القائمة، والأهم أن الفرق الداخلية قادرة على صيانة الحل بعد مغادرتي.","cs.dec.c1.out":"← ملكية الحل أهم من الأناقة التقنية.","cs.dec.c2.q":"المفاضلة 2","cs.dec.c2.t":"مرآة للإنتاج وليست بيئة تجريبية","cs.dec.c2.p1":"كان التطوير مباشرة على خادم العميل سيؤثر على التشغيل ويخلق اعتماداً على الوصول.","cs.dec.c2.p2":"أتاح خادم IIS محلي يحاكي البيئة المستهدفة التكرار السريع والتصحيح في ظروف واقعية وتقليل المفاجآت عند النشر.","cs.dec.c2.out":"← صفر انقطاع للخدمة خلال الأشهر الأربعة.","cs.dec.c3.q":"المفاضلة 3","cs.dec.c3.t":"إشراك الفرق في تعبئة خريطة المصادر","cs.dec.c3.p1":"كان يمكن إعداد سجل المصادر بشكل منفرد وبسرعة أكبر. لكنه بُني مع الأقسام ثم استكملته الفرق بنفسها.","cs.dec.c3.p2":"الأثر الحاسم: تبنت الفرق المشروع بدلاً من تحمله. وتم حل تناقضات البيانات من المصدر لا بترقيعات لاحقة.","cs.dec.c3.out":"← يبدأ التبني أثناء التأطير، لا عند التسليم.","cs.res.eyebrow":"ما الذي تغير","cs.res.title":"نتائج المهمة","cs.res.k1":"تم توحيد ستة مصادر مختلفة في قاعدة واحدة يمكن لجميع الأقسام الاستعلام منها.","cs.res.k2":"لا إعادة إدخال يدوية ضمن النطاق المغطى، وبالتالي لا أخطاء نسخ على هذه البيانات.","cs.res.k3":"زمن إنتاج التقارير، وهو تقدير في نهاية المهمة ضمن النطاق المعالج.","cs.res.k4":"تمت أتمتة أربع عائلات من تقارير OPCVM: صافي الأصول، الأداء، الأصول حسب الفئة، والاكتتابات والاستردادات.","cs.res.caveat":"مكسب الوقت هو تقدير في نهاية المهمة وليس قياساً مدققاً. أفضل قول ذلك كما هو: في هذا النوع من المشاريع، الأرقام غير القابلة للتحقق تضر بالثقة أكثر مما تقنع. أما المكاسب غير القابلة للقياس — تتبع كل معلومة، تسهيل الامتثال، وإزالة العبء عن فرق الواجهة الأمامية — فكانت مهمة بالقدر نفسه تقريباً.","cs.off.eyebrow":"لشركة إدارة أصول اليوم","cs.off.title":"كيف أنقل هذه المهمة إلى بيئتكم","cs.off.p":"إذا كان فريقكم ما زال يجمع الملفات يدوياً قبل كل موعد نهائي، فالنمط غالباً واحد. هكذا سأتعامل مع التدخل خلال عشرة أسابيع.","cs.off.p1.when":"الأسبوعان 1–2 · تدقيق","cs.off.p1.t":"رسم التدفق الحقيقي","cs.off.p1.p":"مقابلات مع كل قسم، متابعة دورة تقارير كاملة من البداية إلى النهاية، وقياس الوقت الفعلي المبذول.","cs.off.p1.d1":"سجل المصادر والمالكين","cs.off.p1.d2":"شبكة احتكاك مقاسة لكل قسم","cs.off.p1.d3":"نطاق ذي أولوية وتقدير للمكسب","cs.off.p2.when":"الأسابيع 3–6 · الأساس","cs.off.p2.t":"أتمتة جمع البيانات","cs.off.p2.p":"موصلات للأنظمة الحالية، فحوص اتساق عند الإدخال، وقاعدة مركزية متوافقة مع مفردات العمل.","cs.off.p2.d1":"خطوط إدخال مجدولة وموثقة","cs.off.p2.d2":"قواعد جودة وتنبيهات عند الانحراف","cs.off.p2.d3":"نموذج بيانات موثق","cs.off.p3.when":"الأسابيع 7–10 · الإخراج","cs.off.p3.t":"التسليم والتدريب ثم الانسحاب","cs.off.p3.p":"قوالب تقارير العملاء والتقارير التنظيمية، صلاحيات حسب الدور، ثم نقل المعرفة إلى الفرق.","cs.off.p3.d1":"تقارير منشأة عند الطلب","cs.off.p3.d2":"صلاحيات حسب الوظيفة","cs.off.p3.d3":"توثيق التشغيل والتدريب","cs.off.today.t":"ما الذي سأفعله بشكل مختلف عن 2023","cs.off.today.a.k":"واجهة API أولاً","cs.off.today.a.v":"الجهات الحافظة ومورّدو البيانات يعرضون اليوم واجهات API. يصبح الاستخراج من الويب خياراً احتياطياً لا نقطة بداية.","cs.off.today.b.k":"تنسيق مرئي","cs.off.today.b.v":"تعمل التدفقات عبر n8n أو Power Automate، ويمكن للفرق رؤية ما يعمل ومتى وما الذي فشل.","cs.off.today.c.k":"ضوابط آلية","cs.off.today.c.v":"اكتشاف الانحرافات والقيم الشاذة قبل النشر بدلاً من مراجعتها يدوياً بعد ذلك.","cs.off.today.d.k":"صياغة مساعدة","cs.off.today.d.v":"إنشاء مسودة أولى لتعليق الإدارة اعتماداً على الأرقام، ثم مراجعتها والموافقة عليها من قبل مدير المحفظة.","cs.cta.eyebrow":"الخطوة التالية","cs.cta.title":"قدّر المكسب على عمليتك الخاصة","cs.cta.p":"يعتمد المحاكي منطق هذا التشخيص: صف عمليتك وسيحسب لك إمكانية الأتمتة، والمدة من البداية إلى النهاية، والساعات المحررة. خمس دقائق، بدون تسجيل.","cs.cta.b1":"فتح المحاكي","cs.cta.b2":"طلب تدقيق","cs.foot.left":"أمين عدلان — أتمتة العمليات ونظم المعلومات","cs.foot.right":"دراسة حالة مبنية على تقرير مهمة 2023. تم حذف اسم العميل.","cs.table.back":"المكتب الخلفي","cs.table.middle":"المكتب الأوسط / المحللون","cs.table.actions":"المكتب الأمامي / الأسهم","cs.table.money":"المكتب الأمامي / النقدية","cs.table.it":"إدارة نظم المعلومات","cs.table.exec":"الإدارة العامة","cs.legend.50":"50 — مزعج","cs.legend.60":"60 — مُعطّل","cs.legend.70":"70 — حاد","cs.legend.80":"80 — حرج"}};
+  function get(obj, path){
+    var cur=obj, parts=path.split('.');
+    for(var i=0;i<parts.length;i++){ if(cur==null) return null; cur=cur[parts[i]]; }
+    return cur;
+  }
+  function apply(lang){
+    if(!T[lang]) lang='fr';
+    var nodes=document.querySelectorAll('[data-i18n]');
+    for(var i=0;i<nodes.length;i++){
+      var key=nodes[i].getAttribute('data-i18n'), val=get(T[lang],key);
+      if(typeof val==='string') nodes[i].textContent=val;
+    }
+    document.documentElement.lang=lang;
+    document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
+    document.title = (lang==='fr') ? 'Automatiser le reporting d’une société de gestion — Cas d’étude | Amine Adlane' :
+      (lang==='en') ? 'Automating asset management reporting — Case study | Amine Adlane' :
+      (lang==='it') ? 'Automazione del reporting di una società di gestione — Caso di studio | Amine Adlane' :
+      (lang==='es') ? 'Automatización del reporting de una gestora — Caso de estudio | Amine Adlane' :
+      'أتمتة إعداد التقارير لشركة إدارة أصول — دراسة حالة | أمين عدلان';
+    var btns=document.querySelectorAll('.lang-btn');
+    for(var j=0;j<btns.length;j++){ var active=btns[j].getAttribute('data-lang')===lang; btns[j].classList.toggle('active',active); btns[j].setAttribute('aria-pressed',active?'true':'false'); }
+    try{localStorage.setItem('site-lang',lang);}catch(e){}
+  }
+  var bs=document.querySelectorAll('.lang-btn');
+  for(var i=0;i<bs.length;i++) bs[i].addEventListener('click',function(){apply(this.getAttribute('data-lang'));});
+  var lang='fr';
+  try{var saved=localStorage.getItem('site-lang'); if(saved && T[saved]) lang=saved;}catch(e){}
+  apply(lang);
+})();
+</script>
+</body>
+</html>
