@@ -76,29 +76,41 @@ details[open] summary::after{content:" \2212"}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 .sim-topbar{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.sim-nav-wrap{max-width:1180px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:18px}
-.sim-brand,.sim-topbar nav a{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--muted)}
-.sim-brand{color:var(--ink);font-weight:600}
-.sim-topbar nav{display:flex;gap:16px}
-.sim-topbar nav a:hover{color:var(--petrol)}
-.sim-langs{margin-left:auto;display:flex;gap:4px}
-.sim-lang{font-family:var(--mono);font-size:10px;padding:4px 6px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:2px;cursor:pointer}
+.sim-nav-wrap{max-width:1180px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:14px}
+.sim-brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--ink);font-weight:600;white-space:nowrap}
+.sim-nav{display:flex;align-items:center;gap:8px;margin-left:auto}
+.sim-nav>a,.sim-nav .case-dropdown-trigger{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;text-decoration:none}
+.sim-nav>a{padding:7px 9px;color:var(--muted)}
+.sim-nav>a:hover{color:var(--petrol)}
+.sim-nav .case-dropdown{display:block}
+.sim-nav .case-dropdown-trigger{color:var(--ochre);border-color:var(--ochre);background:transparent}
+.sim-nav .case-dropdown-menu{background:var(--surface);border-color:var(--line);width:280px}
+.sim-nav .case-dropdown-menu a{color:var(--ink);text-transform:none;font-family:var(--sans);letter-spacing:0}
+.sim-contact{padding:7px 10px!important;border:1px solid var(--petrol);border-radius:3px;color:var(--petrol)!important}
+.sim-langs{display:flex;gap:3px;margin-left:4px}
+.sim-lang{font-family:var(--mono);font-size:9px;padding:4px 6px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:2px;cursor:pointer}
 .sim-lang.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-@media(max-width:680px){
-  .sim-nav-wrap{padding:9px 14px;gap:10px;flex-wrap:wrap}
-  .sim-topbar nav{order:3;width:100%;gap:14px;border-top:1px solid var(--line-soft);padding-top:8px}
-  .sim-langs{margin-left:auto}
-  .wrap{padding-left:14px;padding-right:14px}
-}
+@media(max-width:860px){.sim-nav-wrap{padding:9px 14px;flex-wrap:wrap}.sim-nav{order:3;width:100%;margin-left:0;padding-top:8px;border-top:1px solid var(--line-soft);flex-wrap:wrap}.sim-nav>a,.sim-nav .case-dropdown{flex:1}.sim-nav>a{text-align:center}.sim-nav .case-dropdown-trigger{width:100%;justify-content:space-between}.sim-langs{margin-left:auto}.sim-brand{font-size:10px}}
+@media(max-width:520px){.sim-nav{display:grid;grid-template-columns:1fr 1fr;gap:6px}.sim-nav .case-dropdown,.sim-nav>a{min-width:0}.sim-nav>a:last-of-type{grid-column:1 / -1}.sim-langs{position:absolute;right:14px;top:9px}}
 </style>
 </head>
 <body>
 <header class="sim-topbar" aria-label="Navigation">
   <div class="sim-nav-wrap">
     <a href="index.html" class="sim-brand">A. ADLANE</a>
-    <nav>
-      <a href="cas-etude-reporting.html" data-sim-nav="case">Cas d'étude</a>
-      <a href="simulateur.html" data-sim-nav="sim">Simulateur</a>
+    <nav class="sim-nav">
+      <div class="case-dropdown">
+  <button type="button" class="case-dropdown-trigger" aria-expanded="false">
+    <span data-i18n="nav.caseStudies">Cas d'étude</span><span class="case-chevron" aria-hidden="true">⌄</span>
+  </button>
+  <div class="case-dropdown-menu" role="menu">
+    <a href="cas-etude-reporting.html" role="menuitem"><span class="case-menu-kicker" data-i18n="nav.csReportingKicker">01 · Data</span><span data-i18n="nav.csReporting">Reporting &amp; data</span></a>
+    <a href="cas-etude-acquisition.html" role="menuitem"><span class="case-menu-kicker" data-i18n="nav.csAcqKicker">02 · Acquisition</span><span data-i18n="nav.csAcquisition">Acquisition automatisée</span></a>
+    <a href="cas-etude-recrutement.html" role="menuitem"><span class="case-menu-kicker" data-i18n="nav.csRecruitKicker">03 · Talent</span><span data-i18n="nav.csRecruitment">Screening &amp; recrutement</span></a>
+  </div>
+</div>
+      <a href="index.html#contact" class="sim-contact" data-i18n="nav.contact">Contact</a>
+      <a href="simulateur.html" data-i18n="nav.simulator">Simulateur</a>
     </nav>
     <div class="sim-langs" role="group" aria-label="Langue / Language">
       <button type="button" class="sim-lang" data-lang="fr">FR</button><button type="button" class="sim-lang" data-lang="en">EN</button><button type="button" class="sim-lang" data-lang="ar">AR</button><button type="button" class="sim-lang" data-lang="it">IT</button><button type="button" class="sim-lang" data-lang="es">ES</button>
@@ -1169,10 +1181,22 @@ render();
 <script>
 (function(){
   var ui={fr:{case:"Cas d'étude",sim:"Simulateur",contact:"En parler",copy:"Copier le lien de cette simulation",copied:"Lien copié"},en:{case:"Case study",sim:"Simulator",contact:"Discuss it",copy:"Copy this simulation link",copied:"Link copied"},it:{case:"Caso di studio",sim:"Simulatore",contact:"Parliamone",copy:"Copia il link di questa simulazione",copied:"Link copiato"},es:{case:"Caso de estudio",sim:"Simulador",contact:"Hablar de ello",copy:"Copiar el enlace de esta simulación",copied:"Enlace copiado"},ar:{case:"دراسة الحالة",sim:"المحاكي",contact:"تحدث معي",copy:"نسخ رابط هذه المحاكاة",copied:"تم نسخ الرابط"}};
-  function apply(lang){if(!ui[lang])lang='fr';var n=document.querySelector('[data-sim-nav="case"]');if(n)n.textContent=ui[lang].case; n=document.querySelector('[data-sim-nav="sim"]');if(n)n.textContent=ui[lang].sim; n=document.getElementById('copy'); if(n && !n.dataset.busy)n.textContent=ui[lang].copy; n=document.getElementById('contact'); if(n)n.textContent=ui[lang].contact; document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('.sim-lang').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang)});try{localStorage.setItem('site-lang',lang)}catch(e){}}
+  function apply(lang){if(!ui[lang])lang='fr';document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';var n=document.querySelector('[data-sim-nav="case"]');if(n)n.textContent=ui[lang].case;n=document.querySelector('[data-sim-nav="sim"]');if(n)n.textContent=ui[lang].sim;n=document.getElementById('copy');if(n && !n.dataset.busy)n.textContent=ui[lang].copy;n=document.getElementById('contact');if(n)n.textContent=ui[lang].contact;document.querySelectorAll('.sim-lang').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang)});try{localStorage.setItem('site-lang',lang)}catch(e){}}
   document.querySelectorAll('.sim-lang').forEach(function(b){b.addEventListener('click',function(){apply(this.dataset.lang)})});
-  try{var l=localStorage.getItem('site-lang');apply(ui[l]?l:'fr')}catch(e){apply('fr')}
-  var c=document.getElementById('copy'); if(c){var old=c.onclick; c.addEventListener('click',function(){this.dataset.busy='1'; setTimeout(function(){c.dataset.busy='';var l=localStorage.getItem('site-lang')||'fr';c.textContent=ui[l]?ui[l].copy:ui.fr.copy},2400)})}
+  var c=document.getElementById('copy');if(c)c.addEventListener('click',function(){this.dataset.busy='1';setTimeout(function(){c.dataset.busy='';var l=localStorage.getItem('site-lang')||'fr';c.textContent=ui[l]?ui[l].copy:ui.fr.copy},2400)});
+  var l='fr';try{var saved=localStorage.getItem('site-lang');if(ui[saved])l=saved}catch(e){}apply(l);
+})();
+</script>
+<script>
+(function(){
+  var dropdown=document.querySelector('.case-dropdown');
+  if(!dropdown) return;
+  var trigger=dropdown.querySelector('.case-dropdown-trigger');
+  function close(){dropdown.removeAttribute('data-open');trigger.setAttribute('aria-expanded','false');}
+  trigger.addEventListener('click',function(e){e.stopPropagation();var open=dropdown.getAttribute('data-open')==='true';if(open) close();else{dropdown.setAttribute('data-open','true');trigger.setAttribute('aria-expanded','true');}});
+  document.addEventListener('click',function(){close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape') close();});
+  dropdown.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){close();});});
 })();
 </script>
 </body>

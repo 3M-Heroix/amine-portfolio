@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remplir l'agenda des business developers — Cas d'étude | Amine Adlane</title>
+<meta name="description" content="Cas d'étude : chaîne d'acquisition automatisée de bout en bout — sourcing, qualification, vérification, personnalisation, campagne, relances et prise de rendez-vous. Architecture, garde-fous, résultats et transposition pour une agence marketing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS — identiques à cas-etude-reporting.html (série)
+   ============================================================ */
+:root{
+  --ink:        #0F1D2B;
+  --ink-soft:   #1B2E42;
+  --paper:      #F1F4F7;
+  --paper-pure: #FFFFFF;
+  --rule:       #D3DCE4;
+  --text:       #16232F;
+  --text-mute:  #5B6E7F;
+  --accent:     #146F63;
+  --accent-dk:  #0D4F47;
+  --accent-tint:#E4EFED;
+  --brass:      #9A7B2E;
+  --brass-tint: #F4EBD6;
+
+  --fs-display: clamp(2.3rem, 1.2rem + 4.2vw, 4.4rem);
+  --fs-h2:      clamp(1.55rem, 1.1rem + 1.7vw, 2.35rem);
+  --fs-h3:      1.06rem;
+  --maxw:       1120px;
+  --gutter:     clamp(1.15rem, 4vw, 3rem);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--text);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:1rem; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent); text-underline-offset:3px}
+:focus-visible{outline:2.5px solid var(--brass); outline-offset:3px; border-radius:2px}
+.wrap{max-width:var(--maxw); margin-inline:auto; padding-inline:var(--gutter)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.7rem; font-weight:500;
+  letter-spacing:.19em; text-transform:uppercase; color:var(--brass); margin:0 0 1rem}
+.eyebrow--light{color:#C9A54E}
+h1,h2,h3{font-family:"IBM Plex Serif",Georgia,serif; font-weight:500; line-height:1.14; letter-spacing:-.015em; margin:0}
+h1{font-size:var(--fs-display)}
+h2{font-size:var(--fs-h2)}
+h3{font-size:var(--fs-h3); font-family:"IBM Plex Sans",sans-serif; font-weight:600; letter-spacing:0; line-height:1.35}
+.lede{font-size:clamp(1.02rem,.95rem + .35vw,1.22rem); color:var(--text-mute); max-width:60ch; margin:1.4rem 0 0}
+
+/* ---------- barre ---------- */
+.topbar{border-bottom:1px solid var(--rule); background:var(--paper); position:sticky; top:0; z-index:40;
+  backdrop-filter:saturate(180%) blur(8px)}
+.topbar .wrap{display:flex; align-items:center; justify-content:space-between; gap:1rem; height:56px}
+.back{font-family:"IBM Plex Mono",monospace; font-size:.76rem; letter-spacing:.09em;
+  text-transform:uppercase; text-decoration:none; color:var(--text-mute)}
+.back:hover{color:var(--accent)}
+.topbar .sig{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--brass)}
+
+
+.page-nav{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.page-nav .case-dropdown{display:block}
+.page-nav .case-dropdown .case-dropdown-trigger{font-size:.66rem;padding:.3rem .55rem}
+.page-nav .case-dropdown .case-dropdown-menu{background:var(--paper-pure);color:var(--text);width:270px}
+.page-nav .case-dropdown .case-dropdown-menu a{color:var(--text)}
+.page-nav .case-dropdown .case-dropdown-menu a:hover{background:var(--accent-tint);color:var(--accent-dk)}
+.top-contact{font-family:"IBM Plex Mono",monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:.42rem .7rem;border:1px solid var(--accent);border-radius:4px;color:var(--accent)!important;background:transparent}
+.top-contact:hover{background:var(--accent-tint)}
+@media(max-width:760px){.page-nav{width:100%;gap:.6rem .8rem}.page-nav .case-dropdown{width:auto;flex:1}.page-nav .case-dropdown .case-dropdown-trigger{width:100%;justify-content:space-between}.top-contact{margin-left:auto}}
+
+/* ---------- hero ---------- */
+.hero{background:var(--ink); color:#E8EEF3; padding:clamp(3.2rem,9vw,6rem) 0 0; position:relative; overflow:hidden}
+.hero::after{content:""; position:absolute; inset:auto 0 0 0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(154,123,46,.55),transparent)}
+.hero h1{color:#FFF; max-width:18ch}
+.hero .lede{color:#9DB2C2; max-width:56ch}
+
+.shift{margin-top:clamp(2.4rem,6vw,3.6rem); display:grid; gap:1px;
+  grid-template-columns:1fr auto 1fr; background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.09); border-bottom:0; border-radius:6px 6px 0 0; overflow:hidden}
+.shift>div{background:var(--ink-soft); padding:1.5rem 1.4rem}
+.shift .arrow{display:flex; align-items:center; justify-content:center; color:var(--brass);
+  font-family:"IBM Plex Mono",monospace; font-size:1.1rem; padding-inline:1.1rem}
+.shift .tag{font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.18em;
+  text-transform:uppercase; color:#7C93A6; display:block; margin-bottom:.6rem}
+.shift .after .tag{color:#5FBFAE}
+.shift p{margin:0; font-size:.94rem; line-height:1.55; color:#CBD9E4}
+.shift .after p{color:#E8F3F0}
+@media(max-width:640px){
+  .shift{grid-template-columns:1fr}
+  .shift .arrow{padding:.35rem 0; transform:rotate(90deg)}
+}
+
+.factsheet{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  border-top:1px solid rgba(255,255,255,.13); margin-top:clamp(2.6rem,7vw,4rem)}
+.factsheet div{padding:1.15rem 1.2rem 1.4rem; border-right:1px solid rgba(255,255,255,.09)}
+.factsheet div:last-child{border-right:0}
+.factsheet dt{font-family:"IBM Plex Mono",monospace; font-size:.63rem; letter-spacing:.17em;
+  text-transform:uppercase; color:#6F8698; margin-bottom:.4rem}
+.factsheet dd{margin:0; font-size:.9rem; color:#DDE7EE; line-height:1.45}
+
+/* ---------- sections ---------- */
+section{padding:clamp(3.2rem,8vw,5.4rem) 0}
+section+section{border-top:1px solid var(--rule)}
+.sec-head{max-width:64ch; margin-bottom:clamp(2rem,5vw,3rem)}
+.sec-head p{color:var(--text-mute); margin:.9rem 0 0}
+
+/* ---------- SIGNATURE : la ligne de relais ---------- */
+.tally{
+  display:flex; flex-wrap:wrap; gap:.4rem 1.6rem; margin-bottom:1.6rem;
+  font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--text-mute);
+}
+.tally b{color:var(--ink); font-weight:600}
+
+.relay{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--rule);
+  border:1px solid var(--rule); border-radius:6px; overflow:hidden}
+@media(max-width:860px){.relay{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.relay{grid-template-columns:1fr}}
+
+.node{background:var(--paper-pure); padding:1.35rem 1.25rem 1.5rem; position:relative; display:flex; flex-direction:column}
+.node .n{font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.14em; color:var(--text-mute); margin-bottom:.85rem}
+.node h3{margin-bottom:.45rem}
+.node p{margin:0 0 1.05rem; font-size:.85rem; color:var(--text-mute); flex:1}
+.badge{font-family:"IBM Plex Mono",monospace; font-size:.63rem; letter-spacing:.14em; text-transform:uppercase;
+  padding:.28rem .6rem; border-radius:3px; align-self:flex-start; border:1px solid transparent}
+.badge.m{background:var(--accent-tint); color:var(--accent-dk); border-color:rgba(20,111,99,.22)}
+.badge.h{background:var(--brass-tint); color:#6E5518; border-color:rgba(154,123,46,.3)}
+.node.human{background:#FBF7EE}
+.node.human::before{content:""; position:absolute; inset:0 auto 0 0; width:3px; background:var(--brass)}
+.node.goal{background:var(--ink)}
+.node.goal .n{color:#7C93A6}
+.node.goal h3{color:#FFF}
+.node.goal p{color:#A9BECD}
+.node.goal .badge.h{background:rgba(201,165,78,.18); color:#E0C579; border-color:rgba(201,165,78,.4)}
+
+.relay-note{margin-top:1.3rem; font-size:.85rem; color:var(--text-mute); max-width:70ch}
+
+/* ---------- couches techniques ---------- */
+.stack{display:grid; border:1px solid var(--rule); border-radius:6px; overflow:hidden; background:var(--paper-pure)}
+.layer{display:grid; grid-template-columns:96px 1fr; border-bottom:1px solid var(--rule)}
+.layer:last-child{border-bottom:0}
+.layer .idx{background:var(--ink); color:var(--brass); display:flex; align-items:center; justify-content:center;
+  font-family:"IBM Plex Mono",monospace; font-size:.78rem; letter-spacing:.1em}
+.layer .body{padding:1.35rem 1.5rem}
+.layer h3{margin-bottom:.45rem}
+.layer p{margin:0 0 .8rem; font-size:.9rem; color:var(--text-mute); max-width:65ch}
+.chips{display:flex; flex-wrap:wrap; gap:.4rem; margin:0; padding:0; list-style:none}
+.chips li{font-family:"IBM Plex Mono",monospace; font-size:.68rem; border:1px solid var(--rule);
+  background:var(--paper); color:var(--text-mute); padding:.24rem .55rem; border-radius:3px; white-space:nowrap}
+.chips li.hot{border-color:rgba(20,111,99,.35); color:var(--accent-dk); background:rgba(20,111,99,.07)}
+@media(max-width:600px){
+  .layer{grid-template-columns:1fr}
+  .layer .idx{justify-content:flex-start; padding:.5rem 1.5rem}
+}
+
+/* ---------- garde-fous ---------- */
+.cards{display:grid; gap:1.15rem; grid-template-columns:repeat(auto-fit,minmax(255px,1fr))}
+.card{background:var(--paper-pure); border:1px solid var(--rule); border-radius:6px; padding:1.5rem 1.4rem}
+.card .q{font-family:"IBM Plex Mono",monospace; font-size:.67rem; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--brass); margin:0 0 .7rem}
+.card h3{margin-bottom:.55rem}
+.card p{margin:0; font-size:.89rem; color:var(--text-mute)}
+.card p+p{margin-top:.7rem}
+.card .out{margin-top:1rem; padding-top:.85rem; border-top:1px dashed var(--rule); font-size:.83rem; color:var(--accent-dk)}
+
+/* ---------- résultats : tableau avant/après ---------- */
+.ba{width:100%; border-collapse:collapse; background:var(--paper-pure); border:1px solid var(--rule); border-radius:6px; overflow:hidden}
+.ba caption{caption-side:bottom; text-align:left; padding-top:1.1rem; font-size:.8rem; color:var(--text-mute); line-height:1.5}
+.ba th,.ba td{text-align:left; padding:.95rem 1.1rem; border-bottom:1px solid var(--rule); font-size:.89rem}
+.ba tr:last-child td{border-bottom:0}
+.ba thead th{font-family:"IBM Plex Mono",monospace; font-size:.64rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-mute); font-weight:500; background:var(--paper)}
+.ba tbody th{font-weight:500; color:var(--text)}
+.ba .was{font-family:"IBM Plex Mono",monospace; color:var(--text-mute)}
+.ba .now{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--accent-dk)}
+.tablewrap{overflow-x:auto}
+.ba{min-width:560px}
+.caveat{margin-top:1.4rem; font-size:.8rem; color:var(--text-mute); max-width:72ch; font-style:italic}
+
+/* ---------- offre ---------- */
+.offer{background:var(--ink); color:#E8EEF3}
+.offer h2{color:#FFF}
+.offer .sec-head p{color:#9DB2C2}
+.phases{display:grid; gap:1px; background:rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.11);
+  border-radius:6px; overflow:hidden; grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.phase{background:var(--ink-soft); padding:1.6rem 1.45rem}
+.phase .when{font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.16em;
+  text-transform:uppercase; color:#C9A54E; margin:0 0 .75rem}
+.phase h3{color:#FFF; margin-bottom:.55rem}
+.phase p{margin:0 0 .9rem; font-size:.88rem; color:#A9BECD}
+.deliv{margin:0; padding:0; list-style:none; border-top:1px solid rgba(255,255,255,.11); padding-top:.85rem}
+.deliv li{font-size:.83rem; color:#CFDDE7; padding-left:1.05rem; position:relative; margin-bottom:.4rem}
+.deliv li::before{content:"—"; position:absolute; left:0; color:#5FBFAE}
+.today{margin-top:clamp(2.4rem,6vw,3.4rem); border-top:1px solid rgba(255,255,255,.13); padding-top:2rem}
+.today h3{color:#FFF; margin-bottom:1.2rem; font-size:1rem}
+.today ul{display:grid; gap:1.4rem; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); margin:0; padding:0; list-style:none}
+.today li{font-size:.87rem; color:#A9BECD}
+.today li strong{display:block; color:#5FBFAE; font-family:"IBM Plex Mono",monospace; font-size:.7rem;
+  letter-spacing:.13em; text-transform:uppercase; margin-bottom:.45rem; font-weight:500}
+
+/* ---------- CTA ---------- */
+.btns{display:flex; flex-wrap:wrap; gap:.8rem; margin-top:1.9rem}
+.btn{display:inline-flex; align-items:center; gap:.5rem; text-decoration:none;
+  font-family:"IBM Plex Mono",monospace; font-size:.78rem; letter-spacing:.08em;
+  text-transform:uppercase; padding:.85rem 1.5rem; border-radius:4px; transition:.18s ease}
+.btn-p{background:var(--accent); color:#FFF; border:1px solid var(--accent)}
+.btn-p:hover{background:var(--accent-dk); border-color:var(--accent-dk)}
+.btn-s{background:transparent; color:var(--text); border:1px solid var(--rule)}
+.btn-s:hover{border-color:var(--ink); background:var(--paper-pure)}
+.cta h2{max-width:20ch}
+
+footer{border-top:1px solid var(--rule); padding:2.2rem 0 3rem; font-size:.8rem; color:var(--text-mute)}
+footer .wrap{display:flex; flex-wrap:wrap; gap:1rem; justify-content:space-between}
+
+.rv{opacity:0; transform:translateY(14px); transition:opacity .6s ease, transform .6s ease}
+.rv.in{opacity:1; transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .rv{opacity:1; transform:none; transition:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="back" href="index.html" data-i18n="ca.nav.back">← Retour au site</a>
+    <nav class="page-nav" aria-label="Navigation">
+      <div class="case-dropdown">
+  <button type="button" class="case-dropdown-trigger" aria-expanded="false">
+    <span data-i18n="nav.caseStudies">Cas d'étude</span><span class="case-chevron" aria-hidden="true">⌄</span>
+  </button>
+  <div class="case-dropdown-menu" role="menu">
+    <a href="cas-etude-reporting.html" role="menuitem"><span class="case-menu-kicker" data-i18n="nav.csReportingKicker">01 · Data</span><span data-i18n="nav.csReporting">Reporting &amp; data</span></a>
+    <a href="cas-etude-acquisition.html" role="menuitem"><span class="case-menu-kicker" data-i18n="nav.csAcqKicker">02 · Acquisition</span><span data-i18n="nav.csAcquisition">Acquisition automatisée</span></a>
+    <a href="cas-etude-recrutement.html" role="menuitem"><span class="case-menu-kicker" data-i18n="nav.csRecruitKicker">03 · Talent</span><span data-i18n="nav.csRecruitment">Screening &amp; recrutement</span></a>
+  </div>
+</div>
+      <a href="simulateur.html" data-i18n="nav.simulator">Simulateur</a>
+      <a href="index.html#contact" class="top-contact" data-i18n="nav.contact">Contact</a>
+    </nav>
+    <div class="lang-switch" role="group" aria-label="Langue / Language">
+      <button type="button" class="lang-btn" data-lang="fr" aria-pressed="false">FR</button><button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button><button type="button" class="lang-btn" data-lang="ar" aria-pressed="false">AR</button><button type="button" class="lang-btn" data-lang="it" aria-pressed="false">IT</button><button type="button" class="lang-btn" data-lang="es" aria-pressed="false">ES</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow eyebrow--light" data-i18n="ca.hero.eyebrow">Services professionnels · Turin &amp; international · 2025</p>
+    <h1 data-i18n="ca.hero.title">De la donnée brute au rendez-vous dans l'agenda.</h1>
+    <p class="lede" data-i18n="ca.hero.lede">
+      Les business developers passaient l'essentiel de leur temps à fabriquer des listes,
+      nettoyer des adresses et recopier des messages. Le temps réellement passé à parler à
+      des prospects était résiduel. J'ai construit la chaîne qui inverse ce rapport : huit
+      étapes, dont deux seulement demandent une intervention humaine.
+    </p>
+
+    <div class="shift">
+      <div class="before">
+        <span class="tag" data-i18n="ca.hero.before.tag">Avant</span>
+        <p data-i18n="ca.hero.before.text">Extraction de listes à la main, vérification d'adresses au cas par cas, messages copiés-collés depuis un modèle, relances oubliées, suivi éclaté sur plusieurs tableurs. Aucune visibilité sur ce qui marchait.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="after">
+        <span class="tag" data-i18n="ca.hero.after.tag">Après</span>
+        <p data-i18n="ca.hero.after.text">Une chaîne orchestrée : sourcing, qualification, vérification, personnalisation, envoi, relances conditionnelles et proposition de créneaux. Le business developer valide le message, puis prend le call.</p>
+      </div>
+    </div>
+
+    <dl class="factsheet">
+      <div><dt data-i18n="ca.facts.role.k">Rôle</dt><dd data-i18n="ca.facts.role.v">IT Manager &amp; Lead Automation Engineer</dd></div>
+      <div><dt data-i18n="ca.facts.time.k">Durée</dt><dd data-i18n="ca.facts.time.v">6 mois — portefeuille de 14 chantiers</dd></div>
+      <div><dt data-i18n="ca.facts.scope.k">Périmètre</dt><dd data-i18n="ca.facts.scope.v">Acquisition B2B, deux marques, sourcing international</dd></div>
+      <div><dt data-i18n="ca.facts.stack.k">Stack</dt><dd data-i18n="ca.facts.stack.v">n8n · Python · React · Node · serveur auto-hébergé</dd></div>
+    </dl>
+  </div>
+</header>
+
+<!-- ══════════════ 1 · POINT DE DÉPART ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="ca.start.eyebrow">Le point de départ</p>
+      <h2 data-i18n="ca.start.title">Un commercial qui prépare des listes n'est pas un commercial.</h2>
+      <p data-i18n="ca.start.p1">
+        Le diagnostic initial a identifié quatre goulots d'étranglement dans l'activité du cabinet.
+        Trois touchaient directement le développement commercial : la constitution des listes de
+        prospects, la vérification des adresses avant envoi, et l'absence totale de visibilité sur
+        l'état du pipeline — les données vivaient dans des tableurs déconnectés, sans source unique.
+      </p>
+      <p data-i18n="ca.start.p2">
+        Le coût n'était pas seulement du temps perdu. Un taux de rebond de 15 à 20 % abîme la
+        réputation d'expéditeur, ce qui dégrade la délivrabilité des campagnes suivantes. Chaque
+        envoi mal préparé rendait le suivant moins efficace.
+      </p>
+      <p data-i18n="ca.start.p3">
+        La contrainte de départ était budgétaire : une structure de cette taille ne pouvait pas
+        s'offrir une suite commerciale intégrée. La réponse a donc été construite sur des briques
+        no-code et low-code, orchestrées sur une infrastructure interne.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 2 · SIGNATURE : LA LIGNE DE RELAIS ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="ca.relay.eyebrow">La chaîne</p>
+      <h2 data-i18n="ca.relay.title">Où la machine passe le relais à l'humain</h2>
+      <p data-i18n="ca.relay.p">
+        C'est la question que pose tout dirigeant devant un projet d'automatisation commerciale :
+        est-ce que mes prospects vont recevoir des messages de robot ? La réponse tient dans le
+        placement des deux points de contrôle humains.
+      </p>
+    </div>
+
+    <p class="tally rv">
+      <span><b>8</b> étapes</span>
+      <span><b>2</b> interventions humaines</span>
+      <span><b>0</b> ressaisie</span>
+    </p>
+
+    <div class="relay">
+      <div class="node rv">
+        <span class="n">01</span>
+        <h3 data-i18n="ca.relay.n1.t">Sourcing</h3>
+        <p data-i18n="ca.relay.n1.p">Extraction de prospects depuis les bases publiques sectorielles et les exports de plateformes commerciales, par ville et par secteur.</p>
+        <span class="badge m" data-i18n="badge.machine">Machine</span>
+      </div>
+      <div class="node rv">
+        <span class="n">02</span>
+        <h3 data-i18n="ca.relay.n2.t">Qualification</h3>
+        <p data-i18n="ca.relay.n2.p">Application de règles d'éligibilité explicites — certifications détenues, ancienneté, périmètre — pour ne garder que les profils qui correspondent à l'offre.</p>
+        <span class="badge m" data-i18n="badge.machine">Machine</span>
+      </div>
+      <div class="node rv">
+        <span class="n">03</span>
+        <h3 data-i18n="ca.relay.n3.t">Vérification</h3>
+        <p data-i18n="ca.relay.n3.p">Contrôle en masse de la validité des adresses via API, dans la limite du quota quotidien. Les adresses risquées sont écartées avant tout envoi.</p>
+        <span class="badge m" data-i18n="badge.machine">Machine</span>
+      </div>
+      <div class="node rv">
+        <span class="n">04</span>
+        <h3 data-i18n="ca.relay.n4.t">Personnalisation</h3>
+        <p data-i18n="ca.relay.n4.p">Un scraper collecte des éléments concrets sur le site du prospect ; un modèle de langage rédige un message qui s'appuie dessus, pas un modèle à trous.</p>
+        <span class="badge m" data-i18n="badge.machine">Machine</span>
+      </div>
+
+      <div class="node human rv">
+        <span class="n">05</span>
+        <h3 data-i18n="ca.relay.n5.t">Validation</h3>
+        <p data-i18n="ca.relay.n5.p">Le business developer relit le ciblage et les messages avant lancement. Rien ne part sans accord humain — c'est le premier des deux relais.</p>
+        <span class="badge h" data-i18n="badge.human">Humain</span>
+      </div>
+
+      <div class="node rv">
+        <span class="n">06</span>
+        <h3 data-i18n="ca.relay.n6.t">Campagne</h3>
+        <p data-i18n="ca.relay.n6.p">Envoi cadencé via la plateforme d'outreach, avec échauffement du domaine et volumes maîtrisés pour protéger la réputation d'expéditeur.</p>
+        <span class="badge m" data-i18n="badge.machine">Machine</span>
+      </div>
+      <div class="node rv">
+        <span class="n">07</span>
+        <h3 data-i18n="ca.relay.n7.t">Relance conditionnelle</h3>
+        <p data-i18n="ca.relay.n7.p">Le système attend une réaction. Pas de réponse, la séquence de relance se déclenche ; réponse détectée, elle s'arrête net et le contact remonte au commercial.</p>
+        <span class="badge m" data-i18n="badge.machine">Machine</span>
+      </div>
+      <div class="node rv">
+        <span class="n">08</span>
+        <h3 data-i18n="ca.relay.n8.t">Prise de rendez-vous</h3>
+        <p data-i18n="ca.relay.n8.p">Interrogation du calendrier sur quinze jours, envoi des créneaux disponibles au prospect, création de l'événement dès qu'il choisit. Aucun aller-retour de mails.</p>
+        <span class="badge m" data-i18n="badge.machine">Machine</span>
+      </div>
+    </div>
+
+    <div class="relay" style="margin-top:1px; grid-template-columns:1fr">
+      <div class="node goal rv">
+        <span class="n">→ Terminus</span>
+        <h3 data-i18n="ca.relay.n9.t">La conversation</h3>
+        <p data-i18n="ca.relay.n9.p">Le second relais humain, et le seul qui compte vraiment. Le business developer arrive au rendez-vous avec un prospect vérifié, qualifié, déjà exposé à une proposition écrite qui parle de son entreprise. Tout ce qui précède n'existe que pour rendre ce moment plus fréquent.</p>
+        <span class="badge h" data-i18n="badge.human">Humain</span>
+      </div>
+    </div>
+
+    <p class="relay-note rv" data-i18n="ca.relay.note">
+      Le choix de garder l'humain à l'étape 05 est délibéré. Techniquement, la chaîne peut envoyer
+      sans validation. Commercialement, c'est une mauvaise idée : le jour où un message maladroit
+      part à mille contacts, c'est la marque qui paie, pas l'automatisation.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ 3 · SOUS LE CAPOT ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="ca.arch.eyebrow">Sous le capot</p>
+      <h2 data-i18n="ca.arch.title">Quatre blocs techniques</h2>
+      <p data-i18n="ca.arch.p">
+        L'orchestrateur central coordonne des composants sur mesure et des services externes.
+        Chaque bloc est modélisé en BPMN avant d'être construit — le schéma sert autant à
+        développer qu'à expliquer le système aux équipes qui l'utiliseront.
+      </p>
+    </div>
+
+    <div class="stack rv">
+      <div class="layer">
+        <div class="idx" aria-hidden="true">01</div>
+        <div class="body">
+          <h3 data-i18n="ca.arch.l1.t">Extraction et qualification</h3>
+          <p data-i18n="ca.arch.l1.p">
+            Deux scripts Python séparés selon le principe de responsabilité unique : le premier
+            interroge les bases publiques et agrège les fiches ; le second ouvre les documents
+            associés, en extrait les certifications, applique les règles d'éligibilité et écrit
+            le résultat. Le traitement concurrent des téléchargements a fait passer l'opération
+            d'une journée à un quart d'heure.
+          </p>
+          <ul class="chips">
+            <li class="hot">Python</li><li class="hot">pypdf</li><li class="hot">ThreadPoolExecutor</li>
+            <li>Sauvegardes intermédiaires</li><li>Formulaire de déclenchement</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="idx" aria-hidden="true">02</div>
+        <div class="body">
+          <h3 data-i18n="ca.arch.l2.t">Hygiène de la base</h3>
+          <p data-i18n="ca.arch.l2.p">
+            Vérification en masse des adresses par API, déclenchable manuellement ou par
+            planification. Le workflow surveille son propre quota de crédits pour ne jamais
+            se bloquer en milieu de traitement, et journalise chaque étape — ce qui rend le
+            processus auditable après coup.
+          </p>
+          <ul class="chips">
+            <li class="hot">n8n</li><li class="hot">API de vérification</li><li>Gestion des quotas</li>
+            <li>Reprise sur erreur</li><li>Journalisation</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="idx" aria-hidden="true">03</div>
+        <div class="body">
+          <h3 data-i18n="ca.arch.l3.t">Rédaction et diffusion</h3>
+          <p data-i18n="ca.arch.l3.p">
+            Un scraper maison récupère de la matière sur le site du prospect. Un modèle de langage
+            compose le message à partir de cette matière et des données de la fiche. Les contacts
+            validés partent vers la plateforme d'outreach par API, avec une séquence multi-touches
+            et une logique de relance pilotée par l'engagement réel du destinataire.
+          </p>
+          <ul class="chips">
+            <li class="hot">Scraper sur mesure</li><li class="hot">LLM</li><li class="hot">Plateforme d'outreach</li>
+            <li>Séquences multi-touches</li><li>Arrêt sur réponse</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="layer">
+        <div class="idx" aria-hidden="true">04</div>
+        <div class="body">
+          <h3 data-i18n="ca.arch.l4.t">Pilotage et infrastructure</h3>
+          <p data-i18n="ca.arch.l4.p">
+            Un tableau de bord sur mesure remplace les tableurs : liste filtrable des leads,
+            entonnoir de vérification, courbes d'acquisition, taux d'ouverture et de réponse,
+            fiche détaillée par contact. Le tout tourne sur un serveur interne conteneurisé,
+            ce qui garde les données à la maison et le coût d'exploitation prévisible.
+          </p>
+          <ul class="chips">
+            <li class="hot">React</li><li class="hot">Node · Express</li><li class="hot">PostgreSQL</li>
+            <li>Docker</li><li>Nginx Proxy Manager</li><li>Synchronisation temps réel</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 4 · GARDE-FOUS ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="ca.safe.eyebrow">Garde-fous</p>
+      <h2 data-i18n="ca.safe.title">Ce qui empêche la chaîne de se retourner contre vous</h2>
+      <p data-i18n="ca.safe.p">
+        Une machine à envoyer des mails mal conçue détruit une réputation d'expéditeur en une
+        semaine et expose à un risque réglementaire. Quatre protections ont été intégrées dès
+        la conception, pas ajoutées après coup.
+      </p>
+    </div>
+
+    <div class="cards">
+      <article class="card rv">
+        <p class="q" data-i18n="ca.safe.c1.q">Délivrabilité</p>
+        <h3 data-i18n="ca.safe.c1.t">Filtrer avant d'envoyer, pas après</h3>
+        <p data-i18n="ca.safe.c1.p">Les adresses invalides ou à risque sont écartées en amont de la campagne. La réputation du domaine expéditeur reste intacte, et les campagnes suivantes conservent leur taux d'arrivée en boîte de réception.</p>
+        <p class="out" data-i18n="ca.safe.c1.out">→ Rebond ramené sous 2 %, contre 15 à 20 % avant.</p>
+      </article>
+
+      <article class="card rv">
+        <p class="q" data-i18n="ca.safe.c2.q">Conformité</p>
+        <h3 data-i18n="ca.safe.c2.t">RGPD et prospection à froid par défaut</h3>
+        <p data-i18n="ca.safe.c2.p">La chaîne a été configurée pour respecter le RGPD et les règles encadrant le cold email : traitement documenté, désinscription honorée, données limitées à ce qui sert la prospection.</p>
+        <p class="out" data-i18n="ca.safe.c2.out">→ Le sujet se traite au cadrage, pas devant l'autorité de contrôle.</p>
+      </article>
+
+      <article class="card rv">
+        <p class="q" data-i18n="ca.safe.c3.q">Traçabilité</p>
+        <h3 data-i18n="ca.safe.c3.t">Chaque étape laisse une trace</h3>
+        <p data-i18n="ca.safe.c3.p">Vérification, envoi, relance, réponse : tout est journalisé. On peut reconstituer l'historique d'un contact, expliquer pourquoi il a été sollicité, et diagnostiquer une campagne qui sous-performe au lieu de la deviner.</p>
+        <p class="out" data-i18n="ca.safe.c3.out">→ Un pipeline qu'on peut auditer est un pipeline qu'on peut améliorer.</p>
+      </article>
+
+      <article class="card rv">
+        <p class="q" data-i18n="ca.safe.c4.q">Maîtrise des coûts</p>
+        <h3 data-i18n="ca.safe.c4.t">Les quotas surveillés par le système</h3>
+        <p data-i18n="ca.safe.c4.p">Les API facturées au crédit sont consommées sous plafond quotidien, contrôlé par le workflow lui-même. L'orchestrateur est auto-hébergé, ce qui supprime la facturation par utilisateur des suites commerciales.</p>
+        <p class="out" data-i18n="ca.safe.c4.out">→ Le coût de la prospection ne croît pas avec la taille de l'équipe.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 5 · RÉSULTATS ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow" data-i18n="ca.res.eyebrow">Ce que ça a changé</p>
+      <h2 data-i18n="ca.res.title">Mesures avant / après</h2>
+    </div>
+
+    <div class="tablewrap rv">
+      <table class="ba">
+        <caption data-i18n="ca.res.caption">
+          Relevés de fin de projet sur les processus automatisés. Les valeurs « avant » sont des
+          moyennes constatées sur le fonctionnement manuel antérieur.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Processus</th>
+            <th scope="col">Indicateur</th>
+            <th scope="col">Avant</th>
+            <th scope="col">Après</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Extraction de prospects</th>
+            <td>Temps pour 1 000 fiches</td>
+            <td class="was">&gt; 8 h</td>
+            <td class="now">~15 min</td>
+          </tr>
+          <tr>
+            <th scope="row">Vérification des adresses</th>
+            <td>Taux de rebond des campagnes</td>
+            <td class="was">15 – 20 %</td>
+            <td class="now">&lt; 2 %</td>
+          </tr>
+          <tr>
+            <th scope="row">Production de contenu</th>
+            <td>Temps par publication</td>
+            <td class="was">20 – 30 min</td>
+            <td class="now">&lt; 2 min</td>
+          </tr>
+          <tr>
+            <th scope="row">Suivi du pipeline</th>
+            <td>Visibilité sur l'état des leads</td>
+            <td class="was">Tableurs séparés</td>
+            <td class="now">Temps réel</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="caveat" data-i18n="ca.res.caveat">
+      Deux précisions d'honnêteté. Ces chiffres mesurent l'efficacité opérationnelle de la chaîne,
+      pas le taux de conversion commercial — celui-ci dépend de l'offre et du marché, pas de
+      l'outillage. Et les valeurs « avant » sont des estimations issues des entretiens avec les
+      équipes, pas des relevés instrumentés : personne ne chronométrait le travail manuel avant
+      qu'on décide de le supprimer.
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════ 6 · TRANSPOSITION ══════════════ -->
+<section class="offer">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="eyebrow eyebrow--light" data-i18n="ca.off.eyebrow">Pour une agence marketing</p>
+      <h2 data-i18n="ca.off.title">Ce que je transpose chez vous</h2>
+      <p data-i18n="ca.off.p">
+        Une agence a un avantage structurel sur le cabinet d'origine : la chaîne se construit une
+        fois et se réplique sur chaque client. Ce qui était un outil interne devient une capacité
+        que vous vendez — ou un centre de coût que vous divisez par le nombre de comptes.
+      </p>
+    </div>
+
+    <div class="phases">
+      <div class="phase rv">
+        <p class="when" data-i18n="ca.off.p1.when">Semaines 1–2 · Cadrage</p>
+        <h3 data-i18n="ca.off.p1.t">Modéliser le processus réel</h3>
+        <p data-i18n="ca.off.p1.p">Cartographie BPMN de votre chaîne actuelle, audit de la base de contacts et de la réputation de vos domaines, définition des règles de qualification.</p>
+        <ul class="deliv">
+          <li data-i18n="ca.off.p1.d1">Schéma du processus cible, validé par vos équipes</li>
+          <li data-i18n="ca.off.p1.d2">État de santé de la base et des domaines expéditeurs</li>
+          <li data-i18n="ca.off.p1.d3">Critères d'éligibilité écrits, par segment</li>
+        </ul>
+      </div>
+
+      <div class="phase rv">
+        <p class="when" data-i18n="ca.off.p2.when">Semaines 3–7 · Construction</p>
+        <h3 data-i18n="ca.off.p2.t">Monter la chaîne sur un premier compte</h3>
+        <p data-i18n="ca.off.p2.p">Un client pilote, de bout en bout, jusqu'au rendez-vous pris. C'est la seule façon de valider la chaîne entière plutôt que des morceaux qui marchent séparément.</p>
+        <ul class="deliv">
+          <li data-i18n="ca.off.p2.d1">Sourcing et qualification automatisés</li>
+          <li data-i18n="ca.off.p2.d2">Vérification, personnalisation, séquences et relances</li>
+          <li data-i18n="ca.off.p2.d3">Prise de créneau connectée aux agendas commerciaux</li>
+        </ul>
+      </div>
+
+      <div class="phase rv">
+        <p class="when" data-i18n="ca.off.p3.when">Semaines 8–12 · Industrialisation</p>
+        <h3 data-i18n="ca.off.p3.t">Répliquer, mesurer, transmettre</h3>
+        <p data-i18n="ca.off.p3.p">Duplication de la chaîne sur les autres comptes avec leurs propres règles, tableau de bord par client, et transfert de compétence à vos équipes.</p>
+        <ul class="deliv">
+          <li data-i18n="ca.off.p3.d1">Gabarit réplicable par client</li>
+          <li data-i18n="ca.off.p3.d2">Tableau de bord partageable, aux couleurs de l'agence</li>
+          <li data-i18n="ca.off.p3.d3">Documentation d'exploitation et formation</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="today rv">
+      <h3 data-i18n="ca.off.today.t">Les quatre gains propres à une agence</h3>
+      <ul>
+        <li><strong data-i18n="ca.off.today.a.k">Un livrable client</strong><span data-i18n="ca.off.today.a.v">Le tableau de bord devient une preuve de travail que vous montrez en comité, à la place d'un export mensuel fabriqué à la main.</span></li>
+        <li><strong data-i18n="ca.off.today.b.k">Marge sur le volume</strong><span data-i18n="ca.off.today.b.v">Le coût de production d'une campagne cesse d'être proportionnel au nombre de contacts traités. C'est là que la marge se crée.</span></li>
+        <li><strong data-i18n="ca.off.today.c.k">Cloisonnement par compte</strong><span data-i18n="ca.off.today.c.v">Domaines, quotas et bases séparés par client, pour qu'un incident sur un compte n'atteigne jamais les autres.</span></li>
+        <li><strong data-i18n="ca.off.today.d.k">Un argument commercial</strong><span data-i18n="ca.off.today.d.v">La chaîne elle-même se vend : elle démontre ce que vous savez faire avant même d'en avoir parlé.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CTA ══════════════ -->
+<section class="cta">
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="ca.cta.eyebrow">Étape suivante</p>
+    <h2 data-i18n="ca.cta.title">Combien votre chaîne actuelle vous coûte-t-elle ?</h2>
+    <p class="lede" data-i18n="ca.cta.p">
+      Le simulateur chiffre le potentiel d'automatisation de votre processus, le délai de bout en
+      bout et les heures libérées. Décrivez votre chaîne d'acquisition, il vous donne un ordre de
+      grandeur en cinq minutes.
+    </p>
+    <div class="btns">
+      <a class="btn btn-p" href="simulateur.html" data-i18n="ca.cta.b1">Ouvrir le simulateur</a>
+      <a class="btn btn-s" href="mailto:adlane-amine@hotmail.fr?subject=Cha%C3%AEne%20d%27acquisition%20-%20agence" data-i18n="ca.cta.b2">Parler du projet</a>
+      <a class="btn btn-s" href="cas-etude-reporting.html" data-i18n="ca.cta.b3">Autre cas d'étude</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span data-i18n="ca.foot.left">Amine Adlane — automatisation des processus &amp; systèmes d'information</span>
+    <span data-i18n="ca.foot.right">Cas d'étude établi à partir des travaux de thèse 2025. Noms des clients omis.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var items = document.querySelectorAll('.rv');
+  if(!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    items.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  items.forEach(function(el, i){
+    el.style.transitionDelay = Math.min(i % 4, 3) * 60 + 'ms';
+    io.observe(el);
+  });
+})();
+</script>
+
+<script>
+(function(){
+ var T={"fr": {"nav.back": "← Retour au site", "nav.simulator": "Simulateur", "nav.contact": "Contact", "nav.caseStudies": "Cas d'étude", "nav.csReporting": "Reporting & data", "nav.csAcquisition": "Acquisition automatisée", "nav.csRecruitment": "Screening & recrutement", "nav.csReportingKicker": "01 · Data", "nav.csAcqKicker": "02 · Acquisition", "nav.csRecruitKicker": "03 · Talent", "ca.hero.title": "De la donnée brute au rendez-vous dans l’agenda.", "ca.start.title": "Un commercial qui prépare des listes n’est pas un commercial.", "ca.relay.title": "Où la machine passe le relais à l’humain", "ca.arch.title": "Quatre blocs techniques", "ca.safe.title": "Ce qui empêche la chaîne de se retourner contre vous", "ca.res.title": "Mesures avant / après", "ca.off.title": "Ce que je transpose chez vous", "ca.cta.title": "Combien votre chaîne actuelle vous coûte-t-elle ?", "ca.hero.eyebrow": "Services professionnels · Turin & international · 2025", "ca.hero.lede": "Les business developers passaient l’essentiel de leur temps à fabriquer des listes, nettoyer des adresses et recopier des messages. Le temps réellement passé à parler à des prospects était résiduel. J’ai construit la chaîne qui inverse ce rapport : huit étapes, dont deux seulement demandent une intervention humaine.", "ca.hero.before.tag": "Avant", "ca.hero.after.tag": "Après", "ca.start.eyebrow": "Le point de départ", "ca.relay.eyebrow": "La chaîne", "ca.arch.eyebrow": "Sous le capot", "ca.safe.eyebrow": "Garde-fous", "ca.res.eyebrow": "Ce que ça a changé", "ca.off.eyebrow": "Pour une agence marketing", "ca.cta.eyebrow": "Étape suivante", "ca.nav.back": "← Retour au site", "ca.cta.b1": "Ouvrir le simulateur", "ca.cta.b2": "Parler du projet", "ca.cta.b3": "Autre cas d’étude", "ca.foot.left": "Amine Adlane — automatisation des processus & systèmes d’information", "ca.foot.right": "Cas d’étude établi à partir des travaux de thèse 2025. Noms des clients omis.", "ca.relay.n1.t": "Sourcing", "ca.relay.n2.t": "Qualification", "ca.relay.n3.t": "Vérification", "ca.relay.n4.t": "Personnalisation", "ca.relay.n5.t": "Validation", "ca.relay.n6.t": "Campagne", "ca.relay.n7.t": "Relance conditionnelle", "ca.relay.n8.t": "Prise de rendez-vous", "ca.relay.n9.t": "La conversation", "ca.arch.l1.t": "Extraction et qualification", "ca.arch.l2.t": "Hygiène de la base", "ca.arch.l3.t": "Rédaction et diffusion", "ca.arch.l4.t": "Pilotage et infrastructure"}, "en": {"nav.back": "← Back to site", "nav.simulator": "Simulator", "nav.contact": "Contact", "nav.caseStudies": "Case studies", "nav.csReporting": "Reporting & data", "nav.csAcquisition": "Automated acquisition", "nav.csRecruitment": "Screening & recruiting", "nav.csReportingKicker": "01 · Data", "nav.csAcqKicker": "02 · Acquisition", "nav.csRecruitKicker": "03 · Talent", "ca.hero.title": "From raw data to a meeting in the calendar.", "ca.start.title": "A salesperson who spends the day building lists is not selling.", "ca.relay.title": "Where the machine hands the process back to a human", "ca.arch.title": "Four technical building blocks", "ca.safe.title": "What keeps the system from working against you", "ca.res.title": "Before / after measures", "ca.off.title": "How I would transpose it to your business", "ca.cta.title": "What is your current process really costing you?", "ca.hero.eyebrow": "Professional services · Turin & international · 2025", "ca.hero.lede": "Business developers spent most of their time building lists, cleaning addresses and copying messages. Very little time was left for actual conversations. I built the chain that reverses this balance: eight steps, only two requiring human intervention.", "ca.hero.before.tag": "Before", "ca.hero.after.tag": "After", "ca.start.eyebrow": "Starting point", "ca.relay.eyebrow": "The chain", "ca.arch.eyebrow": "Under the hood", "ca.safe.eyebrow": "Guardrails", "ca.res.eyebrow": "What changed", "ca.off.eyebrow": "For a marketing agency", "ca.cta.eyebrow": "Next step", "ca.nav.back": "← Back to site", "ca.cta.b1": "Open the simulator", "ca.cta.b2": "Discuss the project", "ca.cta.b3": "Another case study", "ca.foot.left": "Amine Adlane — process automation & information systems", "ca.foot.right": "Case study based on 2025 thesis work. Client names omitted.", "ca.relay.n1.t": "Sourcing", "ca.relay.n2.t": "Qualification", "ca.relay.n3.t": "Verification", "ca.relay.n4.t": "Personalization", "ca.relay.n5.t": "Validation", "ca.relay.n6.t": "Campaign", "ca.relay.n7.t": "Conditional follow-up", "ca.relay.n8.t": "Meeting booking", "ca.relay.n9.t": "The conversation", "ca.arch.l1.t": "Extraction and qualification", "ca.arch.l2.t": "Database hygiene", "ca.arch.l3.t": "Writing and distribution", "ca.arch.l4.t": "Operations and infrastructure"}, "it": {"nav.back": "← Torna al sito", "nav.simulator": "Simulatore", "nav.contact": "Contatti", "nav.caseStudies": "Casi di studio", "nav.csReporting": "Reporting & dati", "nav.csAcquisition": "Acquisizione automatizzata", "nav.csRecruitment": "Screening & recruiting", "nav.csReportingKicker": "01 · Dati", "nav.csAcqKicker": "02 · Acquisition", "nav.csRecruitKicker": "03 · Talent", "ca.hero.title": "Dai dati grezzi al meeting in calendario.", "ca.start.title": "Un commerciale che passa il giorno a costruire liste non sta vendendo.", "ca.relay.title": "Dove la macchina passa il testimone all’essere umano", "ca.arch.title": "Quattro blocchi tecnici", "ca.safe.title": "Ciò che impedisce alla catena di ritorcersi contro di voi", "ca.res.title": "Misure prima / dopo", "ca.off.title": "Come trasferirei questo approccio nella vostra azienda", "ca.cta.title": "Quanto vi costa davvero il vostro processo attuale?", "ca.hero.eyebrow": "Servizi professionali · Torino & internazionale · 2025", "ca.hero.lede": "I business developer dedicavano gran parte del tempo a creare liste, pulire indirizzi e copiare messaggi. Il tempo realmente dedicato ai prospect era minimo. Ho costruito una catena che ribalta questo rapporto: otto fasi, solo due con intervento umano.", "ca.hero.before.tag": "Prima", "ca.hero.after.tag": "Dopo", "ca.start.eyebrow": "Il punto di partenza", "ca.relay.eyebrow": "La catena", "ca.arch.eyebrow": "Sotto il cofano", "ca.safe.eyebrow": "Vincoli di sicurezza", "ca.res.eyebrow": "Cosa è cambiato", "ca.off.eyebrow": "Per un’agenzia marketing", "ca.cta.eyebrow": "Prossimo passo", "ca.nav.back": "← Torna al sito", "ca.cta.b1": "Apri il simulatore", "ca.cta.b2": "Parliamo del progetto", "ca.cta.b3": "Un altro caso di studio", "ca.foot.left": "Amine Adlane — automazione dei processi e sistemi informativi", "ca.foot.right": "Caso di studio basato sul lavoro di tesi 2025. Nomi dei clienti omessi.", "ca.relay.n1.t": "Sourcing", "ca.relay.n2.t": "Qualificazione", "ca.relay.n3.t": "Verifica", "ca.relay.n4.t": "Personalizzazione", "ca.relay.n5.t": "Validazione", "ca.relay.n6.t": "Campagna", "ca.relay.n7.t": "Follow-up condizionale", "ca.relay.n8.t": "Prenotazione dell’appuntamento", "ca.relay.n9.t": "La conversazione", "ca.arch.l1.t": "Estrazione e qualificazione", "ca.arch.l2.t": "Igiene della base dati", "ca.arch.l3.t": "Redazione e diffusione", "ca.arch.l4.t": "Gestione e infrastruttura"}, "es": {"nav.back": "← Volver al sitio", "nav.simulator": "Simulador", "nav.contact": "Contacto", "nav.caseStudies": "Casos de estudio", "nav.csReporting": "Reporting y datos", "nav.csAcquisition": "Adquisición automatizada", "nav.csRecruitment": "Screening y selección", "nav.csReportingKicker": "01 · Datos", "nav.csAcqKicker": "02 · Adquisición", "nav.csRecruitKicker": "03 · Talento", "ca.hero.title": "De los datos brutos a la reunión en la agenda.", "ca.start.title": "Un comercial que prepara listas todo el día no está vendiendo.", "ca.relay.title": "Dónde la máquina devuelve el control al humano", "ca.arch.title": "Cuatro bloques técnicos", "ca.safe.title": "Lo que evita que la cadena se vuelva contra vosotros", "ca.res.title": "Medidas antes / después", "ca.off.title": "Cómo trasladaría este enfoque a vuestra empresa", "ca.cta.title": "¿Cuánto os cuesta realmente vuestro proceso actual?", "ca.hero.eyebrow": "Servicios profesionales · Turín e internacional · 2025", "ca.hero.lede": "Los business developers dedicaban la mayor parte del tiempo a crear listas, limpiar direcciones y copiar mensajes. Quedaba muy poco tiempo para hablar con prospectos. Construí la cadena que invierte esa proporción: ocho etapas, solo dos con intervención humana.", "ca.hero.before.tag": "Antes", "ca.hero.after.tag": "Después", "ca.start.eyebrow": "El punto de partida", "ca.relay.eyebrow": "La cadena", "ca.arch.eyebrow": "Bajo el capó", "ca.safe.eyebrow": "Salvaguardas", "ca.res.eyebrow": "Lo que cambió", "ca.off.eyebrow": "Para una agencia de marketing", "ca.cta.eyebrow": "Siguiente paso", "ca.nav.back": "← Volver al sitio", "ca.cta.b1": "Abrir el simulador", "ca.cta.b2": "Hablar del proyecto", "ca.cta.b3": "Otro caso de estudio", "ca.foot.left": "Amine Adlane — automatización de procesos y sistemas de información", "ca.foot.right": "Caso de estudio basado en el trabajo de tesis de 2025. Nombres de clientes omitidos.", "ca.relay.n1.t": "Sourcing", "ca.relay.n2.t": "Cualificación", "ca.relay.n3.t": "Verificación", "ca.relay.n4.t": "Personalización", "ca.relay.n5.t": "Validación", "ca.relay.n6.t": "Campaña", "ca.relay.n7.t": "Seguimiento condicional", "ca.relay.n8.t": "Reserva de reunión", "ca.relay.n9.t": "La conversación", "ca.arch.l1.t": "Extracción y cualificación", "ca.arch.l2.t": "Higiene de la base", "ca.arch.l3.t": "Redacción y difusión", "ca.arch.l4.t": "Gestión e infraestructura"}, "ar": {"nav.back": "→ العودة إلى الموقع", "nav.simulator": "المحاكي", "nav.contact": "تواصل", "nav.caseStudies": "دراسات الحالة", "nav.csReporting": "التقارير والبيانات", "nav.csAcquisition": "اكتساب العملاء آلياً", "nav.csRecruitment": "الفرز والتوظيف", "nav.csReportingKicker": "01 · بيانات", "nav.csAcqKicker": "02 · استحواذ", "nav.csRecruitKicker": "03 · مواهب", "ca.hero.title": "من البيانات الخام إلى اجتماع في التقويم.", "ca.start.title": "مندوب المبيعات الذي يقضي يومه في إعداد القوائم لا يبيع.", "ca.relay.title": "أين تسلّم الآلة المهمة إلى الإنسان", "ca.arch.title": "أربع لبنات تقنية", "ca.safe.title": "ما يمنع السلسلة من الانقلاب ضدكم", "ca.res.title": "مقاييس قبل / بعد", "ca.off.title": "كيف أنقل هذا النهج إلى شركتكم", "ca.cta.title": "كم تكلّفكم عمليتكم الحالية فعلياً؟", "ca.hero.eyebrow": "خدمات مهنية · تورينو ودولي · 2025", "ca.hero.lede": "كان مطورو الأعمال يقضون معظم وقتهم في إعداد القوائم وتنظيف العناوين ونسخ الرسائل. وكان الوقت المتبقي للتحدث مع العملاء المحتملين محدوداً. بنيت سلسلة تعكس هذا التوازن: ثماني مراحل، اثنتان فقط تتطلبان تدخلاً بشرياً.", "ca.hero.before.tag": "قبل", "ca.hero.after.tag": "بعد", "ca.start.eyebrow": "نقطة الانطلاق", "ca.relay.eyebrow": "السلسلة", "ca.arch.eyebrow": "تحت الغطاء", "ca.safe.eyebrow": "ضوابط الحماية", "ca.res.eyebrow": "ما الذي تغير", "ca.off.eyebrow": "لوكالة تسويق", "ca.cta.eyebrow": "الخطوة التالية", "ca.nav.back": "→ العودة إلى الموقع", "ca.cta.b1": "فتح المحاكي", "ca.cta.b2": "تحدث عن المشروع", "ca.cta.b3": "دراسة حالة أخرى", "ca.foot.left": "أمين عدلان — أتمتة العمليات ونظم المعلومات", "ca.foot.right": "دراسة حالة مبنية على أعمال أطروحة 2025. تم حذف أسماء العملاء.", "ca.relay.n1.t": "البحث عن العملاء", "ca.relay.n2.t": "التأهيل", "ca.relay.n3.t": "التحقق", "ca.relay.n4.t": "التخصيص", "ca.relay.n5.t": "المراجعة", "ca.relay.n6.t": "الحملة", "ca.relay.n7.t": "المتابعة المشروطة", "ca.relay.n8.t": "حجز الموعد", "ca.relay.n9.t": "المحادثة", "ca.arch.l1.t": "الاستخراج والتأهيل", "ca.arch.l2.t": "نظافة قاعدة البيانات", "ca.arch.l3.t": "الكتابة والتوزيع", "ca.arch.l4.t": "الإدارة والبنية التحتية"}};
+ function get(o,p){var c=o,ps=p.split('.');for(var i=0;i<ps.length;i++){if(c==null)return null;c=c[ps[i]];}return c;}
+ Object.keys(T).forEach(function(lang){T[lang]["badge.machine"]={fr:"Machine",en:"Machine",it:"Macchina",es:"Máquina",ar:"آلة"}[lang];T[lang]["badge.human"]={fr:"Humain",en:"Human",it:"Umano",es:"Humano",ar:"إنسان"}[lang];});
+ function apply(lang){if(!T[lang])lang='fr';document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(function(n){var v=get(T[lang],n.getAttribute('data-i18n'));if(typeof v==='string')n.textContent=v;});document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);b.setAttribute('aria-pressed',b.dataset.lang===lang?'true':'false')});try{localStorage.setItem('site-lang',lang)}catch(e){}}
+ document.querySelectorAll('.lang-btn').forEach(function(b){b.addEventListener('click',function(){apply(this.dataset.lang)})});
+ var start='fr';try{var saved=localStorage.getItem('site-lang');if(T[saved])start=saved}catch(e){}apply(start);
+})();
+</script>
+<script>
+(function(){
+  var dropdown=document.querySelector('.case-dropdown');
+  if(!dropdown) return;
+  var trigger=dropdown.querySelector('.case-dropdown-trigger');
+  function close(){dropdown.removeAttribute('data-open');trigger.setAttribute('aria-expanded','false');}
+  trigger.addEventListener('click',function(e){e.stopPropagation();var open=dropdown.getAttribute('data-open')==='true';if(open) close();else{dropdown.setAttribute('data-open','true');trigger.setAttribute('aria-expanded','true');}});
+  document.addEventListener('click',function(){close();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape') close();});
+  dropdown.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){close();});});
+})();
+</script>
+</body>
+</html>
