@@ -120,9 +120,11 @@
   }
   .nav-featured > a.case-link{color:var(--amber);border:1px solid rgba(242,166,90,.5);background:rgba(242,166,90,.06);}
   .nav-featured > a.sim-link{color:var(--navy-deep);background:var(--cyan);border:1px solid var(--cyan);}
+  .nav-featured > a.stack-link{color:var(--cyan);border:1px solid rgba(95,212,196,.38);background:rgba(95,212,196,.06);}
   .nav-featured > a:hover{transform:translateY(-1px);}
   .nav-featured > a.case-link:hover{background:rgba(242,166,90,.12);}
   .nav-featured > a.sim-link:hover{background:var(--cyan-bright);}
+  .nav-featured > a.stack-link:hover{background:rgba(95,212,196,.12);}
   .nav-actions{gap:8px;flex:0 0 auto;white-space:nowrap;}
   .nav-cta{
     font-family:var(--mono); font-size:11.5px; color:#DDE7EE; background:var(--ink-soft); border:1px solid var(--line);
@@ -185,6 +187,7 @@
   html[data-theme="light"] .nav-primary a{color:var(--muted)}
   html[data-theme="light"] .nav-featured > a.case-link{color:#8C6514;border-color:rgba(154,123,46,.45);background:rgba(154,123,46,.05)}
   html[data-theme="light"] .nav-featured > a.sim-link{color:#fff;background:#0b8f83;border-color:#0b8f83}
+  html[data-theme="light"] .nav-featured > a.stack-link{color:#0b7c72;border-color:rgba(11,143,131,.35);background:rgba(11,143,131,.05)}
   html[data-theme="light"] .nav-cta{color:#0b6f66;background:transparent;border-color:#0b8f83}
   html[data-theme="light"] .nav-cta:hover{background:rgba(11,143,131,.08)}
 
@@ -565,7 +568,6 @@ html[dir="rtl"] .case-dropdown-menu a{text-align:right}
         <a href="#marche" data-i18n="nav.marche">Tendances</a>
         <a href="#experience" data-i18n="nav.exp">Expérience</a>
         <a href="#competences" data-i18n="nav.comp">Compétences</a>
-        <a href="stack.html" data-i18n="nav.stack">Stack</a>
         <a href="#formation" data-i18n="nav.form">Formation</a>
       </div>
       <div class="nav-featured">
@@ -579,6 +581,7 @@ html[dir="rtl"] .case-dropdown-menu a{text-align:right}
     <a href="cas-etude-recrutement.html" role="menuitem"><span class="case-menu-kicker" data-i18n="nav.csRecruitKicker">03 · Talent</span><span data-i18n="nav.csRecruitment">Screening &amp; recrutement</span></a>
   </div>
 </div>
+        <a class="stack-link" href="stack/" data-i18n="nav.stack">Stack</a>
         <a class="sim-link" href="simulateur.html" data-i18n="nav.simulator">Simulateur</a>
       </div>
       <div class="nav-actions">
