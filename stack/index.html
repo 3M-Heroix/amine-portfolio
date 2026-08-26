@@ -1,1 +1,811 @@
+<!DOCTYPE html>
 
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Stack open source — Amine Adlane</title>
+<meta content="Sept outils open source auto-hébergeables — Supabase, Docling, Qdrant, LangChain, PyTorch, OpenClaw, YetiForce : ce qu'ils font, ce qu'ils remplacent, ce qu'ils apportent en entreprise." data-stack-attr="content:meta.desc" name="description"/>
+<link href="/favicon.ico" rel="icon"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@300;400;500;600&amp;family=IBM+Plex+Serif:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   TOKENS — à aligner sur index.html avant mise en ligne
+   ============================================================ */
+:root{
+  --ink:#1D2B4C;
+  --ink-soft:#5B6579;
+  --ink-faint:#8A93A3;
+  --paper:#F7F6F2;
+  --card:#FFFFFF;
+  --line:rgba(29,43,76,.14);
+  --line-soft:rgba(29,43,76,.07);
+  --accent:#10B5C2;
+  --brass:#CB8719;
+
+  --serif:"IBM Plex Serif",Georgia,serif;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  --shell:1180px;
+  --gut:clamp(20px,5vw,48px);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-weight:300;font-size:17px;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+.shell{max-width:var(--shell);margin:0 auto;padding:0 var(--gut)}
+
+.eyebrow{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);
+  margin:0 0 14px;
+}
+.eyebrow--accent{color:var(--accent)}
+
+/* ============================================================
+   NAV — alignée sur la navigation principale du site
+   ============================================================ */
+.nav{position:sticky;top:0;z-index:120;background:rgba(247,246,242,.92);backdrop-filter:blur(12px) saturate(140%);border-bottom:1px solid var(--line-soft)}
+.nav__grid{width:100%;max-width:none;margin:0;padding:10px clamp(14px,2.2vw,34px);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(12px,1.8vw,24px)}
+.nav__brand{font-family:var(--serif);font-weight:600;font-size:17px;text-decoration:none;white-space:nowrap}
+.nav__links{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:clamp(7px,1vw,14px);list-style:none}
+.nav__primary,.nav__featured,.nav__actions{display:flex;align-items:center;gap:8px}
+.nav__primary{min-width:0;flex:1;justify-content:flex-end;gap:clamp(8px,1.35vw,24px)}
+.nav__primary a,.nav__featured a,.nav__actions a{font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;text-decoration:none;white-space:nowrap}
+.nav__primary a{color:var(--ink-soft);padding:6px 1px;border-bottom:1px solid transparent}
+.nav__primary a:hover{color:var(--ink);border-color:var(--accent)}
+.nav__featured{padding-left:12px;border-left:1px solid var(--line-soft);flex:0 0 auto}
+.nav__featured>a{padding:8px 10px;border-radius:3px;font-weight:600}
+.nav__featured .sim-link{color:#fff;background:var(--accent);border:1px solid var(--accent)}
+.nav__featured .stack-link{color:var(--accent);border:1px solid rgba(20,111,99,.35);background:rgba(20,111,99,.05)}
+.nav__actions{white-space:nowrap;flex:0 0 auto}
+.nav__cta{padding:8px 11px;border:1px solid var(--line);border-radius:3px;color:var(--ink);background:transparent}
+.nav__cta:hover{border-color:var(--accent);color:var(--accent)}
+.case-dropdown{position:relative;display:flex;align-items:center}
+.case-dropdown-trigger{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;white-space:nowrap;padding:8px 10px;border-radius:3px;border:1px solid rgba(154,123,46,.5);background:rgba(154,123,46,.06);color:var(--brass);font-weight:600;cursor:pointer}
+.case-dropdown[data-open="true"] .case-dropdown-trigger,.case-dropdown-trigger:hover{background:rgba(154,123,46,.12)}
+.case-chevron{font-size:12px;transition:transform .18s ease}.case-dropdown[data-open="true"] .case-chevron{transform:rotate(180deg)}
+.case-dropdown-menu{position:absolute;top:calc(100% + 10px);right:0;z-index:130;width:290px;max-width:calc(100vw - 28px);padding:6px;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 20px 54px rgba(0,0,0,.18);opacity:0;visibility:hidden;transform:translateY(-6px);transition:.18s ease}
+.case-dropdown[data-open="true"] .case-dropdown-menu{opacity:1;visibility:visible;transform:none}
+.case-dropdown-menu a{display:flex;flex-direction:column;gap:2px;padding:10px 11px;border-radius:4px;text-decoration:none;color:var(--ink)}
+.case-dropdown-menu a:hover{background:var(--paper)}
+.case-menu-kicker{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+.lang-switch{position:relative;display:flex;align-items:center;gap:4px}
+.lang-trigger{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;padding:7px 8px;border:1px solid var(--line);border-radius:3px;background:transparent;color:var(--ink-soft);cursor:pointer}
+.lang-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:130;min-width:170px;padding:6px;display:flex;flex-direction:column;gap:1px;background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:0 20px 54px rgba(0,0,0,.18);opacity:0;visibility:hidden;transform:translateY(-6px);transition:.18s ease}
+.lang-switch[data-open="true"] .lang-menu{opacity:1;visibility:visible;transform:none}
+.lang-btn{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:4px;background:transparent;color:var(--ink);cursor:pointer}
+.lang-btn:hover{background:var(--paper)}.lang-btn.active{color:var(--accent);font-weight:600}.lang-code{font-family:var(--mono);font-size:9px;min-width:20px}.lang-name{font-size:12.5px}
+.theme-toggle{width:34px;height:34px;padding:0;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--ink-soft);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.theme-toggle:hover{color:var(--accent);border-color:var(--accent)}
+.theme-icon.sun{display:none}html[data-theme="light"] .theme-icon.moon{display:none}html[data-theme="light"] .theme-icon.sun{display:inline}
+.nav-burger{display:none;background:none;border:1px solid var(--line);color:var(--ink);padding:8px 10px;border-radius:3px;font-family:var(--mono);font-size:10px}
+#stack-nav-check{display:none}
+html[data-theme="dark"] .nav{background:rgba(8,22,39,.9)}
+html[data-theme="dark"] .nav__primary a{color:var(--ink-soft)}
+html[data-theme="dark"] .nav__cta{color:var(--ink);border-color:var(--line)}
+@media(max-width:1160px){.nav__grid{padding-inline:14px}.nav__primary{gap:11px}.nav__primary a{font-size:9.7px}.nav__featured a,.case-dropdown-trigger{font-size:9.5px;padding:7px 8px}.nav__cta{font-size:9.5px;padding:7px 9px}.lang-trigger{font-size:9px;padding:7px}}
+@media(max-width:980px){
+  .nav__grid{grid-template-columns:auto auto}.nav__links{position:fixed;top:0;right:0;left:auto;width:min(390px,90vw);height:100dvh;background:var(--paper);display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:82px 22px 26px;gap:18px;transform:translateX(100%);transition:transform .28s ease;border-left:1px solid var(--line);box-shadow:-20px 0 60px rgba(0,0,0,.12);overflow-y:auto}
+  #stack-nav-check:checked ~ .nav .nav__links{transform:translateX(0)}
+  .nav__primary,.nav__featured,.nav__actions{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:7px;flex:0 0 auto}.nav__primary{justify-content:flex-start}.nav__primary a,.nav__featured>a,.nav__cta,.case-dropdown-trigger{width:100%;text-align:center;padding:11px 10px;font-size:11px}.nav__featured{padding:14px 0 0;border-left:0;border-top:1px solid var(--line-soft)}.nav__actions{padding-top:14px;border-top:1px solid var(--line-soft)}.lang-switch{width:100%;display:block}.lang-trigger{width:100%;justify-content:space-between;border:0;border-bottom:1px solid var(--line-soft);border-radius:0;padding:11px 2px}.lang-menu{position:static;width:100%;min-width:0;margin-top:5px;display:none;opacity:1;visibility:visible;transform:none;border:0;box-shadow:none;background:transparent}.lang-switch[data-open="true"] .lang-menu{display:flex}.nav-burger{display:block;justify-self:end;z-index:140}.case-dropdown-menu{position:static;width:100%;max-width:none;margin-top:4px;box-shadow:none;display:none;opacity:1;visibility:visible;transform:none;background:transparent;border:0}.case-dropdown[data-open="true"] .case-dropdown-menu{display:flex}.case-dropdown-menu a{border:1px solid var(--line-soft);margin-top:4px}.theme-toggle{width:38px;height:38px;align-self:flex-start}
+  html[dir="rtl"] .nav__links{right:auto;left:0;transform:translateX(-100%);border-left:0;border-right:1px solid var(--line)}html[dir="rtl"] #stack-nav-check:checked ~ .nav .nav__links{transform:translateX(0)}
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{padding:clamp(60px,9vw,104px) 0 clamp(30px,4vw,44px)}
+.hero__title{
+  font-family:var(--serif);font-weight:600;
+  font-size:clamp(38px,6vw,64px);line-height:1.04;letter-spacing:-.028em;
+  margin:0 0 22px;
+}
+.hero__lede{
+  font-size:clamp(17px,2vw,20px);line-height:1.62;color:var(--ink-soft);
+  max-width:62ch;margin:0;
+}
+.hero__lede strong{font-weight:500;color:var(--ink)}
+
+/* ============================================================
+   LOGOTILE — pastille réutilisée (index + fiches + tableau)
+   ============================================================ */
+.logo{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:56px;height:56px;flex:0 0 56px;
+  border:1px solid var(--line);
+  background:color-mix(in srgb, var(--c) 8%, #fff);
+  overflow:hidden;
+}
+.logo img{
+  position:absolute;inset:11px;width:calc(100% - 22px);height:calc(100% - 22px);
+  object-fit:contain;background:transparent;
+}
+.logo i{
+  font-family:var(--serif);font-style:normal;font-weight:600;font-size:22px;
+  color:var(--c);line-height:1;
+}
+@supports not (background:color-mix(in srgb,red 8%,#fff)){
+  .logo{background:#fff}
+}
+
+/* ============================================================
+   INDEX DES OUTILS
+   ============================================================ */
+.index{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);
+}
+.index__item{
+  background:var(--card);text-decoration:none;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  padding:22px 10px 18px;transition:background .22s;
+}
+.index__item:hover{background:color-mix(in srgb, var(--c) 6%, #fff)}
+.index__item .logo{width:44px;height:44px;flex-basis:44px;border:none;background:transparent}
+.index__item .logo img{inset:4px;width:calc(100% - 8px);height:calc(100% - 8px)}
+.index__item .logo i{font-size:20px}
+.index__n{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--ink-soft);text-align:center;line-height:1.3}
+.index__item:hover .index__n{color:var(--ink)}
+@media(max-width:900px){.index{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:520px){.index{grid-template-columns:repeat(3,1fr)}}
+
+/* ============================================================
+   FICHES
+   ============================================================ */
+.section{padding:clamp(52px,7vw,88px) 0}
+.section--tight{padding-top:0}
+.section__head{max-width:64ch;margin-bottom:36px}
+.section__title{
+  font-family:var(--serif);font-weight:600;
+  font-size:clamp(25px,3.2vw,36px);line-height:1.16;letter-spacing:-.02em;margin:0 0 14px;
+}
+.section__note{color:var(--ink-soft);margin:0;font-size:16px}
+
+.cards{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(400px,1fr))}
+@media(max-width:520px){.cards{grid-template-columns:1fr}}
+.card{
+  background:var(--card);border:1px solid var(--line);
+  padding:clamp(22px,3vw,30px);display:flex;flex-direction:column;
+  transition:border-color .25s;scroll-margin-top:88px;
+}
+.card:hover{border-color:rgba(29,43,76,.28)}
+.card__top{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.card__ident{min-width:0}
+.card__name{font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:-.015em;margin:0 0 3px;line-height:1.15}
+.card__kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint)}
+.card__what{font-size:15.5px;color:var(--ink-soft);margin:0}
+
+/* ---- démo vidéo ---- */
+.demo{margin:22px 0 0;padding:0}
+.demo__frame{
+  position:relative;aspect-ratio:16/9;overflow:hidden;
+  border:1px solid var(--line);background:rgba(29,43,76,.03);
+}
+.demo video{width:100%;height:100%;object-fit:cover;display:block}
+.demo figcaption{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
+  color:var(--ink-faint);margin-top:8px;
+}
+
+.block{border-top:1px solid var(--line-soft);padding-top:14px;margin-top:16px}
+.block__k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
+.block__v{margin:0;font-size:15px;line-height:1.6}
+.block__v--swap{color:var(--ink-soft)}
+.block__v--swap b{color:var(--brass);font-weight:500;font-family:var(--mono);font-size:13.5px}
+.block--mine .block__k{color:var(--accent)}
+
+.card__foot{margin-top:auto;padding-top:22px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.06em;
+  border:1px solid var(--line);padding:3px 7px;color:var(--ink-faint);white-space:nowrap;
+}
+.tag--host{border-color:rgba(16,181,194,.4);color:var(--accent)}
+.src{
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-soft);
+  text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:1px;white-space:nowrap;
+}
+.src:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+.caution{
+  margin-top:16px;border-left:2px solid var(--brass);padding:10px 0 10px 14px;
+  font-size:14.5px;color:var(--ink-soft);
+}
+.caution b{color:var(--ink);font-weight:500}
+
+/* ============================================================
+   REGISTRE
+   ============================================================ */
+.ledger{width:100%;border-collapse:collapse;font-size:15px;background:var(--card);border:1px solid var(--line)}
+.ledger th{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-faint);text-align:left;font-weight:500;
+  padding:14px 18px;border-bottom:1px solid var(--line);
+}
+.ledger td{padding:13px 18px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.ledger tr:last-child td{border-bottom:none}
+.ledger .b{font-family:var(--serif);font-weight:600;font-size:16px;white-space:nowrap}
+.ledger .b span{display:inline-flex;align-items:center;gap:10px}
+.ledger .b .logo{width:26px;height:26px;flex-basis:26px;border:none;background:transparent}
+.ledger .b .logo img{inset:0;width:100%;height:100%}
+.ledger .b .logo i{font-size:15px}
+.ledger .s{color:var(--ink-soft)}
+.ledger .c{font-family:var(--mono);font-size:12.5px;color:var(--brass)}
+@media(max-width:760px){
+  .ledger,.ledger tbody,.ledger tr,.ledger td{display:block;width:100%}
+  .ledger thead{display:none}
+  .ledger tr{border-bottom:1px solid var(--line);padding:10px 0}
+  .ledger tr:last-child{border-bottom:none}
+  .ledger td{border:none;padding:5px 18px}
+  .ledger td::before{
+    content:attr(data-l);display:block;
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px;
+  }
+  .ledger td.b::before{display:none}
+  .ledger td.b{padding-top:10px;padding-bottom:8px}
+}
+
+/* ============================================================
+   RÉSERVES
+   ============================================================ */
+.limits{background:var(--ink);color:#EDEFF4}
+.limits .section__title{color:#fff}
+.limits .section__note{color:rgba(237,239,244,.66)}
+.limits .eyebrow{color:rgba(237,239,244,.5)}
+.limits__grid{display:grid;gap:1px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.14);grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.limit{background:var(--ink);padding:28px}
+.limit__h{font-family:var(--serif);font-size:19px;font-weight:600;margin:0 0 10px;color:#fff}
+.limit__p{margin:0;font-size:15px;line-height:1.6;color:rgba(237,239,244,.72)}
+
+/* ============================================================
+   CTA + PIED
+   ============================================================ */
+.cta{padding:clamp(52px,7vw,88px) 0;text-align:center}
+.cta__t{font-family:var(--serif);font-size:clamp(25px,3.4vw,38px);font-weight:600;letter-spacing:-.02em;margin:0 0 16px}
+.cta__p{color:var(--ink-soft);max-width:54ch;margin:0 auto 32px}
+.btn{
+  display:inline-block;font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;
+  text-decoration:none;padding:15px 30px;border:1px solid var(--ink);color:var(--ink);
+  transition:background .22s,color .22s;
+}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.foot{border-top:1px solid var(--line);padding:26px 0}
+.foot .shell{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--ink-faint)}
+
+/* ============================================================
+   REVEAL
+   ============================================================ */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+</style>
+</head>
+<body>
+<!-- NAV : à remplacer par le bloc canonique des autres pages -->
+<input id="stack-nav-check" type="checkbox"/>
+<nav aria-label="Navigation principale" class="nav">
+<div class="shell nav__grid">
+<a class="nav__brand" href="index.html#top">A. ADLANE</a>
+<label class="nav-burger" for="stack-nav-check">MENU</label>
+<div class="nav__links">
+<div class="nav__primary">
+<a data-stack-nav="profil" href="index.html#profil">Profil</a>
+<a data-stack-nav="services" href="index.html#services">Services</a>
+<a data-stack-nav="useCases" href="index.html#cas-usage">Cas d'usage</a>
+<a data-stack-nav="trends" href="index.html#marche">Tendances</a>
+<a data-stack-nav="experience" href="index.html#experience">Expérience</a>
+<a data-stack-nav="skills" href="index.html#competences">Compétences</a>
+<a aria-current="page" data-stack-nav="stack" href="stack/">Stack</a>
+<a data-stack-nav="education" href="index.html#formation">Formation</a>
+</div>
+<div class="nav__featured">
+<div class="case-dropdown">
+<button aria-expanded="false" class="case-dropdown-trigger" type="button"><span data-stack-nav="caseStudies">Cas d'étude</span><span aria-hidden="true" class="case-chevron">⌄</span></button>
+<div class="case-dropdown-menu" role="menu">
+<a href="cas-etude-reporting.html" role="menuitem"><span class="case-menu-kicker">01 · <span data-stack-nav="csData">Data</span></span><span data-stack-nav="csReporting">Reporting &amp; data</span></a>
+<a href="cas-etude-acquisition.html" role="menuitem"><span class="case-menu-kicker">02 · <span data-stack-nav="csAcqKicker">Acquisition</span></span><span data-stack-nav="csAcquisition">Acquisition automatisée</span></a>
+<a href="cas-etude-recrutement.html" role="menuitem"><span class="case-menu-kicker">03 · <span data-stack-nav="csTalent">Talent</span></span><span data-stack-nav="csRecruitment">Screening &amp; recrutement</span></a>
+</div>
+</div>
+<a class="sim-link" data-stack-nav="simulator" href="simulateur.html">Simulateur</a>
+</div>
+<div class="nav__actions">
+<a class="nav__cta" data-stack-nav="contact" href="index.html#contact">Contact</a>
+<div class="lang-switch">
+<button aria-expanded="false" class="lang-trigger" type="button"><span class="lang-current">FR</span><span aria-hidden="true">⌄</span></button>
+<div class="lang-menu" role="menu">
+<button class="lang-btn" data-lang="fr" type="button"><span class="lang-code">FR</span><span class="lang-name">Français</span></button>
+<button class="lang-btn" data-lang="en" type="button"><span class="lang-code">EN</span><span class="lang-name">English</span></button>
+<button class="lang-btn" data-lang="ar" type="button"><span class="lang-code">AR</span><span class="lang-name">العربية</span></button>
+<button class="lang-btn" data-lang="it" type="button"><span class="lang-code">IT</span><span class="lang-name">Italiano</span></button>
+<button class="lang-btn" data-lang="es" type="button"><span class="lang-code">ES</span><span class="lang-name">Español</span></button>
+</div>
+</div>
+<button aria-label="Changer de thème" class="theme-toggle" id="stack-theme-toggle" type="button"><span class="theme-icon moon">☾</span><span class="theme-icon sun">☀</span></button>
+</div>
+</div>
+</div>
+</nav>
+<!-- ============================ HERO ============================ -->
+<!-- TITRE : remplacer la ligne ci-dessous par l'option retenue -->
+<header class="hero">
+<div class="shell">
+<h1 class="hero__title" data-stack="hero.title">Stack open source</h1>
+<p class="hero__lede" data-stack="hero.lede">Les sept outils que je déploie et que j'exploite. Tous s'installent sur une infrastructure que l'entreprise contrôle, sans licence par utilisateur ni facturation à l'usage. Pour chacun : <strong>ce qu'il fait, ce qu'il remplace, et ce que j'en ai tiré sur des projets réels.</strong></p>
+</div>
+</header>
+<!-- ============================ INDEX ============================ -->
+<section class="section section--tight">
+<div class="shell">
+<nav aria-label="Sommaire des outils" class="index rv" data-stack="ui.indexAria">
+<a class="index__item" href="#supabase" style="--c:#3ECF8E">
+<span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/supabase.svg"/><i>S</i></span>
+<span class="index__n">Supabase</span>
+</a>
+<a class="index__item" href="#docling" style="--c:#0F62FE">
+<span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/docling.svg"/><i>D</i></span>
+<span class="index__n">Docling</span>
+</a>
+<a class="index__item" href="#qdrant" style="--c:#DC244C">
+<span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/qdrant.svg"/><i>Q</i></span>
+<span class="index__n">Qdrant</span>
+</a>
+<a class="index__item" href="#langchain" style="--c:#1C3C3C">
+<span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/langchain.svg"/><i>L</i></span>
+<span class="index__n">LangChain</span>
+</a>
+<a class="index__item" href="#pytorch" style="--c:#EE4C2C">
+<span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/pytorch.svg"/><i>P</i></span>
+<span class="index__n">PyTorch</span>
+</a>
+<a class="index__item" href="#openclaw" style="--c:#E2533B">
+<span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/openclaw.svg"/><i>O</i></span>
+<span class="index__n">OpenClaw</span>
+</a>
+<a class="index__item" href="#yetiforce" style="--c:#C8102E">
+<span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/yetiforce.svg"/><i>Y</i></span>
+<span class="index__n">YetiForce</span>
+</a>
+</nav>
+</div>
+</section>
+<!-- ============================ FICHES ============================ -->
+<section class="section section--tight">
+<div class="shell">
+<div class="cards">
+<!-- ---------- SUPABASE ---------- -->
+<article class="card rv" id="supabase">
+<div class="card__top" style="--c:#3ECF8E">
+<span class="logo"><img alt="Logo Supabase" onerror="this.remove()" src="/assets/logos/supabase.svg"/><i>S</i></span>
+<div class="card__ident">
+<h2 class="card__name">Supabase</h2>
+<span class="card__kind" data-stack="tools.supabase.kind">Base de données &amp; identités</span>
+</div>
+</div>
+<p class="card__what" data-stack="tools.supabase.what">Une base PostgreSQL, plus tout ce qu'il faut autour : authentification, droits d'accès ligne par ligne, stockage de fichiers, API générée automatiquement, événements en temps réel. Installable intégralement sur vos serveurs.</p>
+<figure class="demo">
+<div class="demo__frame">
+<video loop="" muted="" playsinline="" poster="/assets/demos/supabase.jpg" preload="metadata" src="/assets/demos/supabase.mp4"></video>
+</div>
+<figcaption data-stack="tools.supabase.caption">Une table créée, son API disponible dans la seconde</figcaption>
+</figure>
+<div class="block">
+<p class="block__k" data-stack="labels.bring">Ce que ça apporte</p>
+<p class="block__v" data-stack="tools.supabase.bring">Trente ans de fiabilité PostgreSQL, avec la couche applicative par-dessus. Et pas d'enfermement : c'est du Postgres standard — le jour où vous partez, vous partez avec une sauvegarde ordinaire, lisible par n'importe quel prestataire.</p>
+</div>
+<div class="block">
+<p class="block__k" data-stack="labels.replace">Ce que ça remplace</p>
+<p class="block__v block__v--swap" data-stack="tools.supabase.replace"><b>Firebase · Airtable à l'échelle · un back-end sur mesure</b> — soit un modèle propriétaire dont on ne sort pas, soit trois mois de développement pour refaire ce qui existe déjà.</p>
+</div>
+<div class="block block--mine">
+<p class="block__k" data-stack="labels.mine">Ce que j'en ai fait</p>
+<p class="block__v" data-stack="tools.supabase.mine">Référentiel de métadonnées d'un workflow de traduction de sites : suivi des versions de contenu pour ne retraduire que ce qui a réellement changé, au lieu de repasser sur l'intégralité des pages à chaque publication.</p>
+</div>
+<div class="card__foot">
+<div class="tags"><span class="tag">Apache 2.0</span><span class="tag">PostgreSQL</span><span class="tag tag--host">Auto-hébergeable</span></div>
+<a class="src" href="https://supabase.com" rel="noopener" target="_blank">supabase.com ↗</a>
+</div>
+</article>
+<!-- ---------- DOCLING ---------- -->
+<article class="card rv" id="docling">
+<div class="card__top" style="--c:#0F62FE">
+<span class="logo"><img alt="Logo Docling" onerror="this.remove()" src="/assets/logos/docling.svg"/><i>D</i></span>
+<div class="card__ident">
+<h2 class="card__name">Docling</h2>
+<span class="card__kind" data-stack="tools.docling.kind">Lecture documentaire</span>
+</div>
+</div>
+<p class="card__what" data-stack="tools.docling.what">Convertit PDF, Word, PowerPoint, Excel, HTML, emails et images scannées en Markdown ou JSON structuré, en conservant les tableaux, l'ordre de lecture et la hiérarchie des titres. Issu d'IBM Research Zurich, aujourd'hui porté par la fondation LF AI &amp; Data.</p>
+<figure class="demo">
+<div class="demo__frame">
+<video loop="" muted="" playsinline="" poster="/assets/demos/docling.jpg" preload="metadata" src="/assets/demos/docling.mp4"></video>
+</div>
+<figcaption data-stack="tools.docling.caption">Un PDF de 40 pages converti en Markdown structuré</figcaption>
+</figure>
+<div class="block">
+<p class="block__k" data-stack="labels.bring">Ce que ça apporte</p>
+<p class="block__v" data-stack="tools.docling.bring">L'information la plus utile d'une PME dort dans des fichiers que personne ne peut interroger : contrats, devis, comptes rendus, fiches techniques. Docling les rend exploitables — un tableau reste un tableau, pas une bouillie de lignes.</p>
+</div>
+<div class="block">
+<p class="block__k" data-stack="labels.replace">Ce que ça remplace</p>
+<p class="block__v block__v--swap" data-stack="tools.docling.replace"><b>Azure Document Intelligence · AWS Textract · Google Document AI</b> — facturés à la page traitée. Sur un fonds de plusieurs milliers de pages, cette ligne devient le premier poste du budget.</p>
+</div>
+<div class="block block--mine">
+<p class="block__k" data-stack="labels.mine">Ce que j'en ai fait</p>
+<p class="block__v" data-stack="tools.docling.mine">Pipeline d'extraction de CV et de rapports réglementaires. Remplace un parsing PDF artisanal qui perdait les tableaux et l'ordre des colonnes dès que la mise en page sortait du standard.</p>
+</div>
+<div class="card__foot">
+<div class="tags"><span class="tag">MIT</span><span class="tag">Python</span><span class="tag tag--host">Auto-hébergeable</span></div>
+<a class="src" href="https://github.com/docling-project/docling" rel="noopener" target="_blank">github ↗</a>
+</div>
+</article>
+<!-- ---------- QDRANT ---------- -->
+<article class="card rv" id="qdrant">
+<div class="card__top" style="--c:#DC244C">
+<span class="logo"><img alt="Logo Qdrant" onerror="this.remove()" src="/assets/logos/qdrant.svg"/><i>Q</i></span>
+<div class="card__ident">
+<h2 class="card__name">Qdrant</h2>
+<span class="card__kind" data-stack="tools.qdrant.kind">Base vectorielle</span>
+</div>
+</div>
+<p class="card__what" data-stack="tools.qdrant.what">Stocke le sens des textes plutôt que leurs mots, et retrouve en quelques millisecondes les passages proches d'une question — même formulée autrement. Écrit en Rust, conçu pour tenir la charge sur une machine modeste.</p>
+<figure class="demo">
+<div class="demo__frame">
+<video loop="" muted="" playsinline="" poster="/assets/demos/qdrant.jpg" preload="metadata" src="/assets/demos/qdrant.mp4"></video>
+</div>
+<figcaption data-stack="tools.qdrant.caption">Recherche par le sens sur un corpus de profils</figcaption>
+</figure>
+<div class="block">
+<p class="block__k" data-stack="labels.bring">Ce que ça apporte</p>
+<p class="block__v" data-stack="tools.qdrant.bring">Une recherche par mots-clés ne trouve que ce qu'on sait déjà nommer. Ici, on retrouve « le client qui se plaignait des délais » sans que ces mots figurent nulle part. C'est aussi ce qui permet à un assistant IA de citer vos documents au lieu d'improviser.</p>
+</div>
+<div class="block">
+<p class="block__k" data-stack="labels.replace">Ce que ça remplace</p>
+<p class="block__v block__v--swap" data-stack="tools.qdrant.replace"><b>Pinecone · Weaviate Cloud · Algolia</b> — abonnement mensuel indexé sur le volume stocké, avec des données hébergées hors de votre contrôle.</p>
+</div>
+<div class="block block--mine">
+<p class="block__k" data-stack="labels.mine">Ce que j'en ai fait</p>
+<p class="block__v" data-stack="tools.qdrant.mine">Index sémantique sur un corpus de profils et de fiches de poste : rapprochement candidat / mission par proximité de sens, plutôt que par correspondance exacte de mots-clés.</p>
+</div>
+<div class="card__foot">
+<div class="tags"><span class="tag">Apache 2.0</span><span class="tag">Rust</span><span class="tag tag--host">Auto-hébergeable</span></div>
+<a class="src" href="https://qdrant.tech" rel="noopener" target="_blank">qdrant.tech ↗</a>
+</div>
+</article>
+<!-- ---------- LANGCHAIN ---------- -->
+<article class="card rv" id="langchain">
+<div class="card__top" style="--c:#1C3C3C">
+<span class="logo"><img alt="Logo LangChain" onerror="this.remove()" src="/assets/logos/langchain.svg"/><i>L</i></span>
+<div class="card__ident">
+<h2 class="card__name">LangChain</h2>
+<span class="card__kind" data-stack="tools.langchain.kind">Orchestration IA</span>
+</div>
+</div>
+<p class="card__what" data-stack="tools.langchain.what">Relie un modèle de langage à vos données, vos outils et vos règles métier. Gère la mémoire de conversation, l'appel d'outils externes, la recherche augmentée et les agents multi-étapes.</p>
+<figure class="demo">
+<div class="demo__frame">
+<video loop="" muted="" playsinline="" poster="/assets/demos/langchain.jpg" preload="metadata" src="/assets/demos/langchain.mp4"></video>
+</div>
+<figcaption data-stack="tools.langchain.caption">Une chaîne de qualification exécutée étape par étape</figcaption>
+</figure>
+<div class="block">
+<p class="block__k" data-stack="labels.bring">Ce que ça apporte</p>
+<p class="block__v" data-stack="tools.langchain.bring">La différence entre un modèle qui répond et un processus qui décide. La logique devient du code : versionnée, relue, testée sur des cas réels avant mise en production. Et le modèle sous-jacent se change en une ligne — aucun fournisseur n'est incontournable.</p>
+</div>
+<div class="block">
+<p class="block__k" data-stack="labels.replace">Ce que ça remplace</p>
+<p class="block__v block__v--swap" data-stack="tools.langchain.replace"><b>Plateformes d'agents propriétaires</b> — facturées à l'exécution, et dont la logique reste enfermée dans une interface qu'on ne peut ni exporter ni auditer.</p>
+</div>
+<div class="block block--mine">
+<p class="block__k" data-stack="labels.mine">Ce que j'en ai fait</p>
+<p class="block__v" data-stack="tools.langchain.mine">Chaînes de qualification : lecture du document, extraction structurée, notation, décision — avec passage systématique à la validation humaine sur les cas ambigus.</p>
+</div>
+<div class="card__foot">
+<div class="tags"><span class="tag">MIT</span><span class="tag">Python · JS</span><span class="tag tag--host">Auto-hébergeable</span></div>
+<a class="src" href="https://www.langchain.com" rel="noopener" target="_blank">langchain.com ↗</a>
+</div>
+</article>
+<!-- ---------- PYTORCH ---------- -->
+<article class="card rv" id="pytorch">
+<div class="card__top" style="--c:#EE4C2C">
+<span class="logo"><img alt="Logo PyTorch" onerror="this.remove()" src="/assets/logos/pytorch.svg"/><i>P</i></span>
+<div class="card__ident">
+<h2 class="card__name">PyTorch</h2>
+<span class="card__kind" data-stack="tools.pytorch.kind">Modèles sur mesure</span>
+</div>
+</div>
+<p class="card__what" data-stack="tools.pytorch.what">La bibliothèque de référence pour entraîner, affiner et exécuter des modèles d'apprentissage profond — vision, classification, représentations vectorielles — sur son propre matériel.</p>
+<figure class="demo">
+<div class="demo__frame">
+<video loop="" muted="" playsinline="" poster="/assets/demos/pytorch.jpg" preload="metadata" src="/assets/demos/pytorch.mp4"></video>
+</div>
+<figcaption data-stack="tools.pytorch.caption">Classification d'images en temps réel sur machine locale</figcaption>
+</figure>
+<div class="block">
+<p class="block__k" data-stack="labels.bring">Ce que ça apporte</p>
+<p class="block__v" data-stack="tools.pytorch.bring">Sur une tâche étroite et répétitive, un petit modèle entraîné sur vos données bat souvent un grand modèle généraliste — et tourne pour le prix de l'électricité, sans qu'une seule donnée sorte de l'entreprise.</p>
+</div>
+<div class="block">
+<p class="block__k" data-stack="labels.replace">Ce que ça remplace</p>
+<p class="block__v block__v--swap" data-stack="tools.pytorch.replace"><b>Appels d'API facturés au token</b> pour du traitement de masse : classer 50 000 images ou documents par mois via une API généraliste coûte davantage que le modèle dédié qui fait la même chose.</p>
+</div>
+<div class="block block--mine">
+<p class="block__k" data-stack="labels.mine">Ce que j'en ai fait</p>
+<p class="block__v" data-stack="tools.pytorch.mine">Traitement d'image appliqué au contrôle et à la classification automatique de documents et de pièces : détection de défauts et tri par catégorie.</p>
+</div>
+<div class="card__foot">
+<div class="tags"><span class="tag">BSD-3</span><span class="tag">Python</span><span class="tag tag--host">Auto-hébergeable</span></div>
+<a class="src" href="https://pytorch.org" rel="noopener" target="_blank">pytorch.org ↗</a>
+</div>
+</article>
+<!-- ---------- OPENCLAW ---------- -->
+<article class="card rv" id="openclaw">
+<div class="card__top" style="--c:#E2533B">
+<span class="logo"><img alt="Logo OpenClaw" onerror="this.remove()" src="/assets/logos/openclaw.svg"/><i>O</i></span>
+<div class="card__ident">
+<h2 class="card__name">OpenClaw</h2>
+<span class="card__kind" data-stack="tools.openclaw.kind">Agent autonome</span>
+</div>
+</div>
+<p class="card__what" data-stack="tools.openclaw.what">Agent auto-hébergé qui tourne en continu sur une machine ou un serveur. Il se réveille tout seul selon un cycle programmé, enchaîne des tâches en plusieurs étapes, et se pilote depuis WhatsApp, Telegram, Slack ou Discord.</p>
+<figure class="demo">
+<div class="demo__frame">
+<video loop="" muted="" playsinline="" poster="/assets/demos/openclaw.jpg" preload="metadata" src="/assets/demos/openclaw.mp4"></video>
+</div>
+<figcaption data-stack="tools.openclaw.caption">Un message WhatsApp déclenche un workflow complet</figcaption>
+</figure>
+<div class="block">
+<p class="block__k" data-stack="labels.bring">Ce que ça apporte</p>
+<p class="block__v" data-stack="tools.openclaw.bring">L'automatisation cesse d'être un logiciel de plus à ouvrir : on lui parle dans l'outil qu'on utilise déjà. Et surtout, elle agit sans qu'on la sollicite — veille, relances, briefs du matin, contrôles de nuit.</p>
+</div>
+<div class="block">
+<p class="block__k" data-stack="labels.replace">Ce que ça remplace</p>
+<p class="block__v block__v--swap" data-stack="tools.openclaw.replace"><b>Licences d'assistants IA par utilisateur</b> — remplacées par une instance unique qui répond à toute l'équipe et garde les données sur l'infrastructure de l'entreprise.</p>
+</div>
+<div class="block block--mine">
+<p class="block__k" data-stack="labels.mine">Ce que j'en ai fait</p>
+<p class="block__v" data-stack="tools.openclaw.mine">Plusieurs bots entièrement automatisés avec lesquels j'interagis chaque jour : veille sectorielle, préparation de dossiers, déclenchement de workflows n8n depuis une simple conversation.</p>
+</div>
+<p class="caution"><b>À déployer avec des garde-fous.</b> Un agent qui accède au système de fichiers et au shell doit être cloisonné : compte dédié, approbation explicite des commandes, périmètre réseau restreint, version tenue à jour. Je ne livre jamais cet outil sans ce cadre.</p>
+<div class="card__foot">
+<div class="tags"><span class="tag">Open source</span><span class="tag">Node.js</span><span class="tag tag--host">Local-first</span></div>
+<a class="src" href="https://github.com/openclaw/openclaw" rel="noopener" target="_blank">github ↗</a>
+</div>
+</article>
+<!-- ---------- YETIFORCE ---------- -->
+<article class="card rv" id="yetiforce">
+<div class="card__top" style="--c:#C8102E">
+<span class="logo"><img alt="Logo YetiForce" onerror="this.remove()" src="/assets/logos/yetiforce.svg"/><i>Y</i></span>
+<div class="card__ident">
+<h2 class="card__name">YetiForce</h2>
+<span class="card__kind" data-stack="tools.yetiforce.kind">CRM · ERP auto-hébergé</span>
+</div>
+</div>
+<p class="card__what" data-stack="tools.yetiforce.what">Système de gestion complet installé sur vos serveurs : comptes, opportunités, devis, tickets, calendriers, documents. C'est le registre où le travail des automatisations devient visible et assignable.</p>
+<figure class="demo">
+<div class="demo__frame">
+<video loop="" muted="" playsinline="" poster="/assets/demos/yetiforce.jpg" preload="metadata" src="/assets/demos/yetiforce.mp4"></video>
+</div>
+<figcaption data-stack="tools.yetiforce.caption">Un dossier qualifié arrive enrichi dans le CRM</figcaption>
+</figure>
+<div class="block">
+<p class="block__k" data-stack="labels.bring">Ce que ça apporte</p>
+<p class="block__v" data-stack="tools.yetiforce.bring">Sans point d'atterrissage, une automatisation ne produit que du bruit. YetiForce donne aux équipes l'endroit où un résultat devient une décision, avec l'historique complet et les droits d'accès qui vont avec.</p>
+</div>
+<div class="block">
+<p class="block__k" data-stack="labels.replace">Ce que ça remplace</p>
+<p class="block__v block__v--swap" data-stack="tools.yetiforce.replace"><b>Salesforce · HubSpot · Dynamics</b> — facturés par utilisateur et par mois. Le coût d'un CRM propriétaire augmente avec vos recrutements ; celui-ci non.</p>
+</div>
+<div class="block block--mine">
+<p class="block__k" data-stack="labels.mine">Ce que j'en ai fait</p>
+<p class="block__v" data-stack="tools.yetiforce.mine">Déploiement et configuration comme registre métier en bout de chaîne : les dossiers qualifiés automatiquement y arrivent enrichis, prêts à être traités par un humain.</p>
+</div>
+<div class="card__foot">
+<div class="tags"><span class="tag">Licence YetiForce</span><span class="tag">PHP · MySQL</span><span class="tag tag--host">Auto-hébergeable</span></div>
+<a class="src" href="https://yetiforce.com" rel="noopener" target="_blank">yetiforce.com ↗</a>
+</div>
+</article>
+</div>
+</div>
+</section>
+<!-- ============================ REGISTRE ============================ -->
+<section class="section section--tight">
+<div class="shell">
+<div class="section__head rv">
+<p class="eyebrow eyebrow--accent">Le calcul</p>
+<h2 class="section__title">Ce que ces outils remplacent, et par quel modèle de coût</h2>
+<p class="section__note">L'open source n'est pas gratuit : il déplace la dépense de la licence vers l'hébergement et l'ingénierie. La différence tient en une phrase — cette dépense-là ne croît pas avec les effectifs, et elle s'arrête quand on le décide.</p>
+</div>
+<div class="rv">
+<table class="ledger">
+<thead>
+<tr><th data-stack="ledger.headers.0">Outil</th><th data-stack="ledger.headers.1">Équivalent propriétaire</th><th data-stack="ledger.headers.2">Modèle de coût évité</th><th data-stack="ledger.headers.3">Où vivent les données</th></tr>
+</thead>
+<tbody>
+<tr>
+<td class="b"><span style="--c:#3ECF8E"><span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/supabase.svg"/><i>S</i></span>Supabase</span></td>
+<td class="s" data-l="Équivalent" data-stack="ledger.rows.0.1">Firebase, Airtable</td>
+<td class="c" data-l="Coût évité" data-stack="ledger.rows.0.2">à l'enregistrement</td>
+<td class="s" data-l="Données" data-stack="ledger.rows.0.3">votre serveur</td>
+</tr>
+<tr>
+<td class="b"><span style="--c:#0F62FE"><span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/docling.svg"/><i>D</i></span>Docling</span></td>
+<td class="s" data-l="Équivalent" data-stack="ledger.rows.1.1">Textract, Document AI</td>
+<td class="c" data-l="Coût évité" data-stack="ledger.rows.1.2">à la page</td>
+<td class="s" data-l="Données" data-stack="ledger.rows.1.3">votre serveur</td>
+</tr>
+<tr>
+<td class="b"><span style="--c:#DC244C"><span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/qdrant.svg"/><i>Q</i></span>Qdrant</span></td>
+<td class="s" data-l="Équivalent" data-stack="ledger.rows.2.1">Pinecone, Algolia</td>
+<td class="c" data-l="Coût évité" data-stack="ledger.rows.2.2">au vecteur / mois</td>
+<td class="s" data-l="Données" data-stack="ledger.rows.2.3">votre serveur</td>
+</tr>
+<tr>
+<td class="b"><span style="--c:#1C3C3C"><span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/langchain.svg"/><i>L</i></span>LangChain</span></td>
+<td class="s" data-l="Équivalent" data-stack="ledger.rows.3.1">plateformes d'agents</td>
+<td class="c" data-l="Coût évité" data-stack="ledger.rows.3.2">à l'exécution</td>
+<td class="s" data-l="Données" data-stack="ledger.rows.3.3">votre serveur</td>
+</tr>
+<tr>
+<td class="b"><span style="--c:#EE4C2C"><span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/pytorch.svg"/><i>P</i></span>PyTorch</span></td>
+<td class="s" data-l="Équivalent" data-stack="ledger.rows.4.1">API de modèles</td>
+<td class="c" data-l="Coût évité" data-stack="ledger.rows.4.2">au token</td>
+<td class="s" data-l="Données" data-stack="ledger.rows.4.3">votre serveur</td>
+</tr>
+<tr>
+<td class="b"><span style="--c:#E2533B"><span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/openclaw.svg"/><i>O</i></span>OpenClaw</span></td>
+<td class="s" data-l="Équivalent" data-stack="ledger.rows.5.1">assistants IA d'entreprise</td>
+<td class="c" data-l="Coût évité" data-stack="ledger.rows.5.2">par utilisateur</td>
+<td class="s" data-l="Données" data-stack="ledger.rows.5.3">votre machine</td>
+</tr>
+<tr>
+<td class="b"><span style="--c:#C8102E"><span class="logo"><img alt="" onerror="this.remove()" src="/assets/logos/yetiforce.svg"/><i>Y</i></span>YetiForce</span></td>
+<td class="s" data-l="Équivalent" data-stack="ledger.rows.6.1">Salesforce, HubSpot</td>
+<td class="c" data-l="Coût évité" data-stack="ledger.rows.6.2">par siège / mois</td>
+<td class="s" data-l="Données" data-stack="ledger.rows.6.3">votre serveur</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- ============================ RÉSERVES ============================ -->
+<section class="section limits">
+<div class="shell">
+<div class="section__head rv">
+<p class="eyebrow" data-stack="limits.eyebrow">Le revers</p>
+<h2 class="section__title" data-stack="limits.title">Trois cas où je recommande plutôt une solution payante</h2>
+<p class="section__note" data-stack="limits.note">Un consultant qui n'a qu'une réponse n'a pas de méthode. Voici quand l'open source est le mauvais choix.</p>
+</div>
+<div class="limits__grid rv">
+<div class="limit">
+<h3 class="limit__h" data-stack="limits.items.0.h">Quand personne ne peut le maintenir</h3>
+<p class="limit__p" data-stack="limits.items.0.p">Un outil auto-hébergé sans propriétaire interne devient une dette : mises à jour repoussées, correctifs de sécurité oubliés. Si l'équipe est trop mince, l'abonnement est le choix rationnel — et je le dis avant le devis, pas après.</p>
+</div>
+<div class="limit">
+<h3 class="limit__h" data-stack="limits.items.1.h">Quand le besoin est déjà couvert pour 15 € par mois</h3>
+<p class="limit__p" data-stack="limits.items.1.p">Facturation, paie, signature électronique : des domaines saturés d'outils matures et peu coûteux. Reconstruire n'apporte aucun retour. L'automatisation crée de la valeur là où le métier est spécifique, pas là où il est standard.</p>
+</div>
+<div class="limit">
+<h3 class="limit__h" data-stack="limits.items.2.h">Quand la conformité exige un tiers responsable</h3>
+<p class="limit__p" data-stack="limits.items.2.p">Certains secteurs et certains appels d'offres réclament un contrat, une certification et un interlocuteur juridiquement engagé — pas un dépôt GitHub. L'éditeur propriétaire fait alors partie de la réponse.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- ============================ CTA ============================ -->
+<section class="cta">
+<div class="shell rv">
+<h2 class="cta__t" data-stack="cta.title">Lequel manque à votre organisation ?</h2>
+<p class="cta__p" data-stack="cta.text">La plupart des entreprises en utilisent déjà deux ou trois sans le savoir. Un audit d'une heure suffit généralement à repérer celui qui débloquerait le reste.</p>
+<a class="btn" data-stack="cta.button" href="/index.html#contact">Prendre contact</a>
+</div>
+</section>
+<footer class="foot">
+<div class="shell">
+<span>Amine Adlane — Automatisation &amp; IA</span>
+<span>Turin · Casablanca</span>
+</div>
+</footer>
+<script>
+(function(){
+  var STACK={
+    fr:{nav:{profil:'Profil',services:'Services',useCases:'Cas d\'usage',trends:'Tendances',experience:'Expérience',skills:'Compétences',education:'Formation',stack:'Stack',caseStudies:'Cas d\'étude',csReporting:'Reporting & data',csAcquisition:'Acquisition automatisée',csRecruitment:'Screening & recrutement',simulator:'Simulateur',contact:'Contact'},hero:{title:'Stack open source',lede:'Les sept outils que je déploie et que j\'exploite. Tous s\'installent sur une infrastructure que l\'entreprise contrôle, sans licence par utilisateur ni facturation à l\'usage. Pour chacun : ce qu\'il fait, ce qu\'il remplace, et ce que j\'en ai tiré sur des projets réels.'},labels:{bring:'Ce que ça apporte',replace:'Ce que ça remplace',mine:'Ce que j\'en ai fait'},limits:{eyebrow:'Le revers',title:'Trois cas où je recommande plutôt une solution payante',note:'Un consultant qui n\'a qu\'une réponse n\'a pas de méthode. Voici quand l\'open source est le mauvais choix.',items:[{h:'Quand personne ne peut le maintenir',p:'Un outil auto-hébergé sans propriétaire interne devient une dette : mises à jour repoussées, correctifs de sécurité oubliés. Si l\'équipe est trop mince, l\'abonnement est le choix rationnel — et je le dis avant le devis, pas après.'},{h:'Quand le besoin est déjà couvert pour 15 € par mois',p:'Facturation, paie, signature électronique : des domaines saturés d\'outils matures et peu coûteux. Reconstruire n\'apporte aucun retour. L\'automatisation crée de la valeur là où le métier est spécifique, pas là où il est standard.'},{h:'Quand la conformité exige un tiers responsable',p:'Certains secteurs et certains appels d\'offres réclament un contrat, une certification et un interlocuteur juridiquement engagé — pas un dépôt GitHub. L\'éditeur propriétaire fait alors partie de la réponse.'}]},cta:{title:'Lequel manque à votre organisation ?',text:'La plupart des entreprises en utilisent déjà deux ou trois sans le savoir. Un audit d\'une heure suffit généralement à repérer celui qui débloquerait le reste.',button:'Prendre contact'},meta:{title:'Stack open source — Amine Adlane',desc:'Sept outils open source auto-hébergeables — Supabase, Docling, Qdrant, LangChain, PyTorch, OpenClaw, YetiForce : ce qu\'ils font, ce qu\'ils remplacent, ce qu\'ils apportent en entreprise.'},ledger:{headers:['Outil','Équivalent','Coût évité','Données'],rows:[['','Firebase, Airtable','à l\'enregistrement','votre serveur'],['','Textract, Document AI','à la page','votre serveur'],['','Pinecone, Algolia','au vecteur / mois','votre serveur'],['','plateformes d\'agents','à l\'exécution','votre serveur'],['','API de modèles','au token','votre serveur'],['','assistants IA d\'entreprise','par utilisateur','votre machine'],['','Salesforce, HubSpot','par siège / mois','votre serveur']]},tools:{}},
+    en:{nav:{profil:'Profile',services:'Services',useCases:'Use cases',trends:'Trends',experience:'Experience',skills:'Skills',education:'Education',stack:'Stack',caseStudies:'Case studies',csReporting:'Reporting & data',csAcquisition:'Automated acquisition',csRecruitment:'Screening & recruiting',simulator:'Simulator',contact:'Contact'},hero:{title:'Open-source stack',lede:'Seven tools I deploy and operate. Each runs on infrastructure the company controls, without per-user licences or usage-based billing. For each one: what it does, what it replaces, and what I have actually built with it.'},labels:{bring:'What it brings',replace:'What it replaces',mine:'What I built with it'},limits:{eyebrow:'The trade-off',title:'Three cases where I recommend a paid solution instead',note:'A consultant with only one answer has no method. Here is when open source is the wrong choice.',items:[{h:'When nobody can maintain it',p:'A self-hosted tool with no internal owner becomes technical debt: updates slip, security patches are missed. If the team is too thin, the subscription is the rational choice — and I say so before the proposal, not after.'},{h:'When the need already costs €15 a month',p:'Billing, payroll, e-signature: mature, inexpensive tools already dominate these areas. Rebuilding adds no return. Automation creates value where the business is specific, not where the need is standard.'},{h:'When compliance requires an accountable third party',p:'Some sectors and tenders require a contract, certification and a legally accountable provider — not a GitHub repository. A proprietary vendor is then part of the answer.'}]},cta:{title:'Which one is missing from your organisation?',text:'Most companies already use two or three without realizing it. A one-hour audit is usually enough to identify the tool that would unlock the rest.',button:'Get in touch'},meta:{title:'Open-source stack — Amine Adlane',desc:'Seven self-hostable open-source tools — Supabase, Docling, Qdrant, LangChain, PyTorch, OpenClaw and YetiForce: what they do, replace and bring to business.'},ledger:{headers:['Tool','Equivalent','Avoided cost','Data'],rows:[['','Firebase, Airtable','per record','your server'],['','Textract, Document AI','per page','your server'],['','Pinecone, Algolia','per vector / month','your server'],['','agent platforms','per run','your server'],['','model APIs','per token','your server'],['','enterprise AI assistants','per user','your machine'],['','Salesforce, HubSpot','per seat / month','your server']]},tools:{}},
+    it:{nav:{profil:'Profilo',services:'Servizi',useCases:'Casi d\'uso',trends:'Tendenze',experience:'Esperienza',skills:'Competenze',education:'Formazione',stack:'Stack',caseStudies:'Casi di studio',csReporting:'Reporting & dati',csAcquisition:'Acquisizione automatizzata',csRecruitment:'Screening & recruiting',simulator:'Simulatore',contact:'Contatti'},hero:{title:'Stack open source',lede:'I sette strumenti che distribuisco e utilizzo. Tutti possono essere installati su un\'infrastruttura controllata dall\'azienda, senza licenze per utente né fatturazione a consumo. Per ciascuno: cosa fa, cosa sostituisce e cosa ne ho ricavato su progetti reali.'},labels:{bring:'Cosa porta',replace:'Cosa sostituisce',mine:'Cosa ne ho fatto'},limits:{eyebrow:'Il rovescio della medaglia',title:'Tre casi in cui consiglio invece una soluzione a pagamento',note:'Un consulente con una sola risposta non ha un metodo. Ecco quando l\'open source è la scelta sbagliata.',items:[{h:'Quando nessuno può mantenerlo',p:'Uno strumento self-hosted senza un responsabile interno diventa debito tecnico: aggiornamenti rimandati e patch di sicurezza dimenticate. Se il team è troppo piccolo, l\'abbonamento è la scelta razionale — e lo dico prima del preventivo, non dopo.'},{h:'Quando il bisogno è già coperto con 15 € al mese',p:'Fatturazione, paghe, firma elettronica: strumenti maturi ed economici dominano già questi ambiti. Ricostruire non porta ritorno. L\'automazione crea valore dove il lavoro è specifico, non dove è standard.'},{h:'Quando la conformità richiede un responsabile terzo',p:'Alcuni settori e bandi richiedono un contratto, una certificazione e un interlocutore legalmente responsabile — non un repository GitHub. In quel caso il fornitore proprietario fa parte della soluzione.'}]},cta:{title:'Quale manca alla tua organizzazione?',text:'La maggior parte delle aziende ne usa già due o tre senza saperlo. Un audit di un\'ora basta spesso a individuare quello che sbloccherebbe il resto.',button:'Contattami'},meta:{title:'Stack open source — Amine Adlane',desc:'Sette strumenti open source auto-ospitabili — Supabase, Docling, Qdrant, LangChain, PyTorch, OpenClaw, YetiForce: cosa fanno, cosa sostituiscono e cosa portano in azienda.'},ledger:{headers:['Strumento','Equivalente','Costo evitato','Dati'],rows:[['','Firebase, Airtable','per record','il tuo server'],['','Textract, Document AI','per pagina','il tuo server'],['','Pinecone, Algolia','per vettore / mese','il tuo server'],['','piattaforme di agenti','per esecuzione','il tuo server'],['','API di modelli','per token','il tuo server'],['','assistenti IA aziendali','per utente','il tuo computer'],['','Salesforce, HubSpot','per utente / mese','il tuo server']]},tools:{}},
+    es:{nav:{profil:'Perfil',services:'Servicios',useCases:'Casos de uso',trends:'Tendencias',experience:'Experiencia',skills:'Competencias',education:'Formación',stack:'Stack',caseStudies:'Casos de estudio',csReporting:'Reporting y datos',csAcquisition:'Adquisición automatizada',csRecruitment:'Screening y selección',simulator:'Simulador',contact:'Contacto'},hero:{title:'Stack open source',lede:'Los siete herramientas que despliego y exploto. Todas se instalan en una infraestructura bajo control de la empresa, sin licencias por usuario ni facturación por uso. Para cada una: qué hace, qué sustituye y qué he construido con ella en proyectos reales.'},labels:{bring:'Qué aporta',replace:'Qué sustituye',mine:'Qué he hecho con ella'},limits:{eyebrow:'La contrapartida',title:'Tres casos en los que recomiendo una solución de pago',note:'Un consultor que solo tiene una respuesta no tiene método. Aquí es cuando el open source es la elección equivocada.',items:[{h:'Cuando nadie puede mantenerlo',p:'Una herramienta autoalojada sin responsable interno se convierte en deuda técnica: actualizaciones aplazadas y parches de seguridad olvidados. Si el equipo es demasiado pequeño, la suscripción es la opción racional — y lo digo antes del presupuesto, no después.'},{h:'Cuando la necesidad ya está cubierta por 15 € al mes',p:'Facturación, nóminas, firma electrónica: ámbitos llenos de herramientas maduras y económicas. Reconstruir no aporta retorno. La automatización crea valor donde el negocio es específico, no donde es estándar.'},{h:'Cuando el cumplimiento exige un tercero responsable',p:'Algunos sectores y licitaciones exigen contrato, certificación y un interlocutor legalmente responsable — no un repositorio de GitHub. En ese caso, el proveedor propietario forma parte de la respuesta.'}]},cta:{title:'¿Cuál falta en tu organización?',text:'La mayoría de las empresas ya utilizan dos o tres sin darse cuenta. Una auditoría de una hora suele bastar para detectar cuál desbloquearía el resto.',button:'Contactar'},meta:{title:'Stack open source — Amine Adlane',desc:'Siete herramientas open source autoalojables — Supabase, Docling, Qdrant, LangChain, PyTorch, OpenClaw y YetiForce: qué hacen, qué sustituyen y qué aportan.'},ledger:{headers:['Herramienta','Equivalente','Coste evitado','Datos'],rows:[['','Firebase, Airtable','por registro','tu servidor'],['','Textract, Document AI','por página','tu servidor'],['','Pinecone, Algolia','por vector / mes','tu servidor'],['','plataformas de agentes','por ejecución','tu servidor'],['','APIs de modelos','por token','tu servidor'],['','asistentes IA empresariales','por usuario','tu máquina'],['','Salesforce, HubSpot','por usuario / mes','tu servidor']]},tools:{}},
+    ar:{nav:{profil:'الملف الشخصي',services:'الخدمات',useCases:'حالات الاستخدام',trends:'الاتجاهات',experience:'الخبرة',skills:'المهارات',education:'التكوين',stack:'المكدس',caseStudies:'دراسات الحالة',csReporting:'التقارير والبيانات',csAcquisition:'اكتساب العملاء آلياً',csRecruitment:'الفرز والتوظيف',simulator:'المحاكي',contact:'تواصل'},hero:{title:'مكدس مفتوح المصدر',lede:'سبعة أدوات أنشرها وأشغّلها. يمكن تثبيتها على بنية تحتفظ الشركة بالتحكم فيها، من دون تراخيص لكل مستخدم أو فوترة حسب الاستخدام. ولكل أداة: ماذا تفعل، ماذا تستبدل، وما الذي بنيته بها في مشاريع حقيقية.'},labels:{bring:'ما الذي تضيفه',replace:'ما الذي تستبدله',mine:'ما الذي بنيته بها'},limits:{eyebrow:'الجانب الآخر',title:'ثلاث حالات أوصي فيها بحل مدفوع بدلاً منها',note:'المستشار الذي لا يملك إلا إجابة واحدة لا يملك منهجاً. هذه هي الحالات التي يكون فيها المصدر المفتوح هو الخيار الخطأ.',items:[{h:'عندما لا يوجد من يستطيع صيانتها',p:'الأداة المستضافة ذاتياً من دون مسؤول داخلي تتحول إلى دين تقني: تحديثات مؤجلة وتصحيحات أمنية منسية. إذا كان الفريق صغيراً جداً، فالاشتراك هو الخيار العقلاني — وأقول ذلك قبل العرض لا بعده.'},{h:'عندما يكون الاحتياج مغطى أصلاً بـ15 يورو شهرياً',p:'الفوترة والرواتب والتوقيع الإلكتروني مجالات مشبعة بأدوات ناضجة ومنخفضة التكلفة. إعادة بنائها لا تضيف عائداً. الأتمتة تخلق قيمة عندما يكون العمل متخصصاً، لا عندما يكون معيارياً.'},{h:'عندما يفرض الامتثال مسؤولاً خارجياً',p:'بعض القطاعات وطلبات العروض تتطلب عقداً وشهادة وطرفاً يتحمل مسؤولية قانونية — وليس مستودع GitHub. عندها يكون المورّد المملوك جزءاً من الحل.'}]},cta:{title:'ما الأداة التي تنقص مؤسستك؟',text:'معظم الشركات تستخدم بالفعل اثنتين أو ثلاثاً من دون أن تدرك ذلك. تكفي مراجعة لمدة ساعة عادة لتحديد الأداة التي قد تفتح الطريق أمام الباقي.',button:'تواصل معي'},meta:{title:'مكدس مفتوح المصدر — أمين عدلان',desc:'سبع أدوات مفتوحة المصدر قابلة للاستضافة الذاتية — Supabase وDocling وQdrant وLangChain وPyTorch وOpenClaw وYetiForce.'},ledger:{headers:['الأداة','البديل','التكلفة المتجنبة','البيانات'],rows:[['','Firebase, Airtable','لكل سجل','خادمك'],['','Textract, Document AI','لكل صفحة','خادمك'],['','Pinecone, Algolia','لكل متجه / شهر','خادمك'],['','منصات الوكلاء','لكل تنفيذ','خادمك'],['','واجهات النماذج','لكل رمز','خادمك'],['','مساعدو الذكاء الاصطناعي للمؤسسات','لكل مستخدم','جهازك'],['','Salesforce, HubSpot','لكل مقعد / شهر','خادمك']]},tools:{}}
+  };
+
+  var tools={
+    supabase:{kind:['Base de données & identités','Database & identity','Database e identità','Base de datos e identidades','قاعدة البيانات والهويات'],what:['Une base PostgreSQL, plus tout ce qu\'il faut autour : authentification, droits d\'accès ligne par ligne, stockage de fichiers, API générée automatiquement, événements en temps réel. Installable intégralement sur vos serveurs.','A PostgreSQL database plus the surrounding application layer: authentication, row-level access rules, file storage, generated APIs and real-time events. Fully installable on your servers.','Un database PostgreSQL con autenticazione, regole di accesso a livello di riga, storage, API generate e aggiornamenti real-time. Installabile sui tuoi server.','Una base PostgreSQL más autenticación, permisos por fila, almacenamiento, API generada y eventos en tiempo real. Instalable en tus servidores.','قاعدة PostgreSQL مع المصادقة وقواعد الوصول لكل صف وتخزين الملفات وواجهات API وأحداث فورية. قابلة للتثبيت بالكامل على خوادمك.'],caption:['Une table créée, son API disponible dans la seconde','Create a table, get its API in a second','Crei una tabella e la sua API è disponibile in un secondo','Creas una tabla y su API está disponible en un segundo','إنشاء جدول وتصبح واجهته البرمجية متاحة خلال ثانية'],bring:['Trente ans de fiabilité PostgreSQL, avec la couche applicative par-dessus. Et pas d\'enfermement : c\'est du Postgres standard — le jour où vous partez, vous partez avec une sauvegarde ordinaire, lisible par n\'importe quel prestataire.','Thirty years of PostgreSQL reliability, with the application layer on top. No lock-in: it is standard Postgres, so you leave with an ordinary backup that any provider can read.','Trent\'anni di affidabilità PostgreSQL con il livello applicativo sopra. Nessun lock-in: è PostgreSQL standard e puoi portare via un backup leggibile da qualsiasi fornitore.','Treinta años de fiabilidad de PostgreSQL con la capa de aplicación encima. Sin bloqueo propietario: sigues en Postgres estándar.','ثلاثون عاماً من موثوقية PostgreSQL مع طبقة تطبيق فوقها، ومن دون احتجاز تقني: يبقى PostgreSQL قياسياً ويمكن نقل النسخة الاحتياطية.'],replace:['Firebase · Airtable à l\'échelle · un back-end sur mesure — soit un modèle propriétaire dont on ne sort pas, soit trois mois de développement pour refaire ce qui existe déjà.','Firebase, large-scale Airtable, or a custom backend — either a proprietary model you cannot leave or months spent rebuilding existing capabilities.','Firebase, Airtable su larga scala o un backend custom: soluzioni proprietarie o mesi di sviluppo per ricostruire ciò che esiste già.','Firebase, Airtable a gran escala o un backend a medida — software propietario o meses de desarrollo para rehacer lo que ya existe.','Firebase وAirtable على نطاق واسع أو خلفية مخصصة — نموذج مملوك أو أشهر من التطوير لإعادة بناء ما هو موجود.'],mine:['Référentiel de métadonnées d\'un workflow de traduction de sites : suivi des versions de contenu pour ne retraduire que ce qui a réellement changé, au lieu de repasser sur l\'intégralité des pages à chaque publication.','A metadata registry for a website translation workflow, tracking content versions so only changed content is translated again.','Un registro di metadati per un workflow di traduzione di siti, per ritradurre solo ciò che è cambiato.','Un registro de metadatos para un flujo de traducción web, para retraducir solo el contenido que ha cambiado.','سجل للبيانات الوصفية في سير عمل ترجمة المواقع، يتتبع إصدارات المحتوى لإعادة ترجمة ما تغيّر فقط.']},
+    docling:{kind:['Lecture documentaire','Document understanding','Lettura documentale','Procesamiento documental','قراءة المستندات'],what:['Convertit PDF, Word, PowerPoint, Excel, HTML, emails et images scannées en Markdown ou JSON structuré, en conservant les tableaux, l\'ordre de lecture et la hiérarchie des titres. Issu d\'IBM Research Zurich, aujourd\'hui porté par la fondation LF AI & Data.','Converts PDF, Word, PowerPoint, Excel, HTML, emails and scanned images into structured Markdown or JSON while preserving tables, reading order and heading hierarchy. Originated at IBM Research Zurich and is now part of the LF AI & Data Foundation.','Converte PDF, Word, PowerPoint, Excel, HTML, email e immagini scansionate in Markdown o JSON strutturato, preservando tabelle e ordine di lettura.','Convierte PDF, Word, PowerPoint, Excel, HTML, correos e imágenes escaneadas en Markdown o JSON estructurado, conservando tablas y jerarquía.','يحوّل PDF وWord وPowerPoint وExcel وHTML ورسائل البريد والصور الممسوحة إلى Markdown أو JSON منظم مع الحفاظ على الجداول وترتيب القراءة.'],caption:['Un PDF de 40 pages converti en Markdown structuré','A 40-page PDF converted into structured Markdown','Un PDF di 40 pagine convertito in Markdown strutturato','Un PDF de 40 páginas convertido en Markdown estructurado','تحويل ملف PDF من 40 صفحة إلى Markdown منظم'],bring:['L\'information la plus utile d\'une PME dort dans des fichiers que personne ne peut interroger : contrats, devis, comptes rendus, fiches techniques. Docling les rend exploitables — un tableau reste un tableau, pas une bouillie de lignes.','The most useful SME information often sits in files nobody can query. Docling makes it usable while preserving tables instead of flattening them into lines.','Le informazioni più utili di una PMI sono spesso nei file. Docling le rende interrogabili mantenendo la struttura delle tabelle.','La información más útil de una pyme suele estar en archivos que nadie puede consultar. Docling los vuelve utilizables y conserva las tablas.','أهم معلومات الشركات الصغيرة والمتوسطة غالباً ما تكون في ملفات لا يمكن الاستعلام عنها. يجعلها Docling قابلة للاستخدام مع الحفاظ على بنية الجداول.'],replace:['Azure Document Intelligence · AWS Textract · Google Document AI — facturés à la page traitée. Sur un fonds de plusieurs milliers de pages, cette ligne devient le premier poste du budget.','Azure Document Intelligence, AWS Textract and Google Document AI — billed per processed page, which becomes significant on large document collections.','Azure Document Intelligence, AWS Textract e Google Document AI, fatturati per pagina e potenzialmente costosi su grandi volumi.','Azure Document Intelligence, AWS Textract y Google Document AI, facturados por página procesada.','Azure Document Intelligence وAWS Textract وGoogle Document AI — خدمات تُحاسب حسب الصفحة المعالجة.'],mine:['Pipeline d\'extraction de CV et de rapports réglementaires. Remplace un parsing PDF artisanal qui perdait les tableaux et l\'ordre des colonnes dès que la mise en page sortait du standard.','A CV and regulatory-report extraction pipeline, replacing fragile PDF parsing that lost tables and column order on non-standard layouts.','Pipeline per l\'estrazione di CV e report regolamentari, al posto di parser PDF artigianali che perdevano tabelle e colonne.','Pipeline para extraer CV y reportes regulatorios, sustituyendo un parsing PDF artesanal que perdía tablas y columnas.','خط أنابيب لاستخراج السير الذاتية والتقارير التنظيمية، يحل محل تحليل PDF هش كان يفقد الجداول وترتيب الأعمدة.']},
+    qdrant:{kind:['Base vectorielle','Vector database','Database vettoriale','Base de datos vectorial','قاعدة بيانات متجهية'],what:['Stocke le sens des textes plutôt que leurs mots, et retrouve en quelques millisecondes les passages proches d\'une question — même formulée autrement. Écrit en Rust, conçu pour tenir la charge sur une machine modeste.','Stores semantic meaning rather than exact words and retrieves passages close to a question in milliseconds, even when phrased differently. Written in Rust and designed to run efficiently.','Memorizza il significato dei testi e recupera in millisecondi i passaggi semanticamente vicini, anche con formulazioni diverse. Scritto in Rust.','Almacena el significado de los textos en lugar de las palabras exactas y recupera pasajes similares en milisegundos. Escrito en Rust.','يخزن معنى النصوص بدلاً من الكلمات ويسترجع المقاطع القريبة من السؤال خلال ميلي ثانية حتى بصياغة مختلفة. مكتوب بلغة Rust.'],caption:['Recherche par le sens sur un corpus de profils','Semantic search across a profile corpus','Ricerca semantica su un corpus di profili','Búsqueda semántica sobre un corpus de perfiles','بحث دلالي عبر مجموعة من الملفات الشخصية'],bring:['Une recherche par mots-clés ne trouve que ce qu\'on sait déjà nommer. Ici, on retrouve « le client qui se plaignait des délais » sans que ces mots figurent nulle part. C\'est aussi ce qui permet à un assistant IA de citer vos documents au lieu d\'improviser.','Keyword search only finds what you already know how to name. Semantic search can retrieve the right passage without exact wording, enabling an AI assistant to cite your documents instead of inventing.','La ricerca per parole chiave trova solo ciò che sappiamo nominare. La ricerca semantica collega concetti simili e permette a un assistente IA di citare i documenti.','La búsqueda por palabras clave solo encuentra lo que ya sabes nombrar. La búsqueda semántica recupera por significado y permite a un asistente citar tus documentos.','البحث بالكلمات المفتاحية يجد ما نعرف تسميته فقط. البحث الدلالي يعثر على المقاطع القريبة في المعنى ويمكّن المساعد من الاستشهاد بمستنداتك.'],replace:['Pinecone · Weaviate Cloud · Algolia — abonnement mensuel indexé sur le volume stocké, avec des données hébergées hors de votre contrôle.','Pinecone, Weaviate Cloud and Algolia — subscription pricing tied to stored volume, with data hosted outside your control.','Pinecone, Weaviate Cloud e Algolia, con abbonamenti legati al volume e dati ospitati fuori dal tuo controllo.','Pinecone, Weaviate Cloud y Algolia, con precios mensuales ligados al volumen almacenado.','Pinecone وWeaviate Cloud وAlgolia — اشتراكات مرتبطة بالحجم والبيانات مستضافة خارج سيطرتك.'],mine:['Index sémantique sur un corpus de profils et de fiches de poste : rapprochement candidat / mission par proximité de sens, plutôt que par correspondance exacte de mots-clés.','A semantic index over profiles and job descriptions, matching candidates to assignments by meaning instead of exact keywords.','Indice semantico su profili e job description per abbinare candidati e missioni per significato.','Índice semántico sobre perfiles y descripciones de puestos para relacionar candidatos y misiones por significado.','فهرس دلالي للسير الذاتية ووصف الوظائف لمطابقة المرشحين بالمهام حسب المعنى لا الكلمات الدقيقة.']},
+    langchain:{kind:['Orchestration IA','AI orchestration','Orchestrazione IA','Orquestación de IA','تنسيق الذكاء الاصطناعي'],what:['Relie un modèle de langage à vos données, vos outils et vos règles métier. Gère la mémoire de conversation, l\'appel d\'outils externes, la recherche augmentée et les agents multi-étapes.','Connects a language model to your data, tools and business rules, with memory, tool calling, retrieval-augmented search and multi-step agents.','Collega un modello linguistico a dati, strumenti e regole di business, con memoria, tool calling e agenti multi-step.','Conecta un modelo de lenguaje con datos, herramientas y reglas de negocio, con memoria, herramientas y agentes multietapa.','يربط النموذج اللغوي ببياناتك وأدواتك وقواعد العمل، مع الذاكرة واستدعاء الأدوات والبحث المعزز والوكلاء متعددَي الخطوات.'],caption:['Une chaîne de qualification exécutée étape par étape','A qualification chain executed step by step','Una pipeline di qualificazione eseguita passo per passo','Una cadena de cualificación ejecutada paso a paso','تنفيذ سلسلة تأهيل خطوة بخطوة'],bring:['La différence entre un modèle qui répond et un processus qui décide. La logique devient du code : versionnée, relue, testée sur des cas réels avant mise en production. Et le modèle sous-jacent se change en une ligne — aucun fournisseur n\'est incontournable.','It is the difference between a model that answers and a process that decides. Logic becomes versioned, reviewable and testable code, while the underlying model can be swapped without redesigning the workflow.','È la differenza tra un modello che risponde e un processo che decide: logica versionata, verificabile e testabile, con modello sostituibile.','Es la diferencia entre un modelo que responde y un proceso que decide: lógica versionada y testeable, con el modelo intercambiable.','إنه الفرق بين نموذج يجيب وعملية تتخذ القرار: تصبح المنطقية كوداً قابلاً للإصدار والمراجعة والاختبار، مع إمكانية تبديل النموذج.'],replace:['Plateformes d\'agents propriétaires — facturées à l\'exécution, et dont la logique reste enfermée dans une interface qu\'on ne peut ni exporter ni auditer.','Proprietary agent platforms billed per execution, with workflow logic trapped in an interface that cannot be exported or audited.','Piattaforme proprietarie di agenti, fatturate per esecuzione e con logiche chiuse in un\'interfaccia.','Plataformas propietarias de agentes facturadas por ejecución y con la lógica encerrada en una interfaz no exportable.','منصات وكلاء مملوكة تُحاسب لكل تنفيذ، مع منطق محصور في واجهة لا يمكن تصديرها أو تدقيقها.'],mine:['Chaînes de qualification : lecture du document, extraction structurée, notation, décision — avec passage systématique à la validation humaine sur les cas ambigus.','Qualification chains: document reading, structured extraction, scoring and decision, with mandatory human validation on ambiguous cases.','Pipeline di qualificazione: lettura, estrazione strutturata, scoring e decisione, con validazione umana sui casi ambigui.','Cadenas de cualificación: lectura, extracción, puntuación y decisión, con validación humana en casos ambiguos.','سلاسل تأهيل تشمل القراءة والاستخراج المنظم والتقييم والقرار مع تحقق بشري إلزامي للحالات الغامضة.']},
+    pytorch:{kind:['Modèles sur mesure','Custom models','Modelli su misura','Modelos a medida','نماذج مخصصة'],what:['La bibliothèque de référence pour entraîner, affiner et exécuter des modèles d\'apprentissage profond — vision, classification, représentations vectorielles — sur son propre matériel.','A reference library to train, fine-tune and run deep-learning models for vision, classification and embeddings on your own hardware.','La libreria di riferimento per addestrare, ottimizzare ed eseguire modelli di deep learning sul proprio hardware.','Biblioteca de referencia para entrenar, ajustar y ejecutar modelos de deep learning en hardware propio.','مكتبة مرجعية لتدريب وضبط وتشغيل نماذج التعلم العميق للرؤية والتصنيف والتمثيلات المتجهية على عتادك الخاص.'],caption:['Classification d\'images en temps réel sur machine locale','Real-time image classification on a local machine','Classificazione di immagini in tempo reale su macchina locale','Clasificación de imágenes en tiempo real en una máquina local','تصنيف الصور في الوقت الفعلي على جهاز محلي'],bring:['Sur une tâche étroite et répétitive, un petit modèle entraîné sur vos données bat souvent un grand modèle généraliste — et tourne pour le prix de l\'électricité, sans qu\'une seule donnée sorte de l\'entreprise.','For a narrow, repetitive task, a small model trained on your data can outperform a large general model and run for the cost of electricity, with no data leaving the company.','Su un compito ristretto e ripetitivo, un piccolo modello addestrato sui tuoi dati può superare un modello generalista e girare al solo costo energetico.','En tareas estrechas y repetitivas, un modelo pequeño entrenado con tus datos puede superar a uno generalista y funcionar por el coste eléctrico.','في المهام الضيقة والمتكررة، قد يتفوق نموذج صغير مدرب على بياناتك على نموذج عام كبير ويعمل بتكلفة الكهرباء فقط دون خروج البيانات من الشركة.'],replace:['Appels d\'API facturés au token pour du traitement de masse : classer 50 000 images ou documents par mois via une API généraliste coûte davantage que le modèle dédié qui fait la même chose.','Token-billed model APIs for bulk processing: classifying 50,000 images or documents a month can cost more than a dedicated model doing the same job.','API di modelli fatturate a token per grandi volumi: classificare 50.000 immagini o documenti al mese può costare più di un modello dedicato.','APIs de modelos facturadas por token para procesamiento masivo: clasificar 50.000 imágenes o documentos al mes puede costar más que un modelo dedicado.','واجهات نماذج تُحاسب بالرمز للمعالجة الجماعية: قد يكون تصنيف 50 ألف صورة أو مستند شهرياً أغلى من نموذج مخصص.'],mine:['Traitement d\'image appliqué au contrôle et à la classification automatique de documents et de pièces : détection de défauts et tri par catégorie.','Image processing for document and component inspection and automatic classification, including defect detection.','Elaborazione immagini per controllo e classificazione automatica di documenti e componenti, con rilevamento dei difetti.','Procesamiento de imágenes para control y clasificación automática de documentos y piezas, incluida la detección de defectos.','معالجة صور لفحص وتصنيف المستندات والقطع تلقائياً، مع اكتشاف العيوب والفرز حسب الفئة.']},
+    openclaw:{kind:['Agent autonome','Autonomous agent','Agente autonomo','Agente autónomo','وكيل مستقل'],what:['Agent auto-hébergé qui tourne en continu sur une machine ou un serveur. Il se réveille tout seul selon un cycle programmé, enchaîne des tâches en plusieurs étapes, et se pilote depuis WhatsApp, Telegram, Slack ou Discord.','A self-hosted agent that runs continuously on a machine or server, wakes on a schedule, chains multi-step tasks and can be controlled from WhatsApp, Telegram, Slack or Discord.','Un agente self-hosted che gira continuamente, si attiva secondo un ciclo programmato, esegue attività multi-step ed è controllabile via WhatsApp, Telegram, Slack o Discord.','Un agente autoalojado que se ejecuta de forma continua, se despierta según un ciclo programado y puede controlarse desde WhatsApp, Telegram, Slack o Discord.','وكيل مستضاف ذاتياً يعمل باستمرار على جهاز أو خادم، يستيقظ وفق جدول، وينفذ مهام متعددة الخطوات ويمكن التحكم به من WhatsApp وTelegram وSlack وDiscord.'],caption:['Un message WhatsApp déclenche un workflow complet','A WhatsApp message triggers a full workflow','Un messaggio WhatsApp avvia un workflow completo','Un mensaje de WhatsApp activa un flujo completo','رسالة WhatsApp تطلق سير عمل كاملاً'],bring:['L\'automatisation cesse d\'être un logiciel de plus à ouvrir : on lui parle dans l\'outil qu\'on utilise déjà. Et surtout, elle agit sans qu\'on la sollicite — veille, relances, briefs du matin, contrôles de nuit.','Automation stops being another app to open: you talk to it in the tool you already use, and it can act without being prompted — monitoring, follow-ups, morning briefs and overnight checks.','L\'automazione non è più un software da aprire: le parli nello strumento che usi già e può agire da sola, per monitoraggio, solleciti e controlli.','La automatización deja de ser otro software: hablas con ella en la herramienta que ya usas y puede actuar sola para vigilancia, recordatorios y controles.','تصبح الأتمتة جزءاً من الأداة التي تستخدمها أصلاً، ويمكنها العمل دون طلب مباشر في المراقبة والمتابعات والملخصات والفحوص الليلية.'],replace:['Licences d\'assistants IA par utilisateur — remplacées par une instance unique qui répond à toute l\'équipe et garde les données sur l\'infrastructure de l\'entreprise.','Per-user AI assistant licences, replaced by one shared instance serving the team while keeping data on company infrastructure.','Licenze di assistenti IA per utente, sostituite da un\'istanza condivisa che serve tutto il team.','Licencias de asistentes de IA por usuario, sustituidas por una única instancia compartida que mantiene los datos en la infraestructura de la empresa.','تراخيص مساعدين للذكاء الاصطناعي لكل مستخدم، تُستبدل بنسخة واحدة تخدم الفريق وتحفظ البيانات داخل بنية الشركة.'],mine:['Plusieurs bots entièrement automatisés avec lesquels j\'interagis chaque jour : veille sectorielle, préparation de dossiers, déclenchement de workflows n8n depuis une simple conversation.','Several fully automated bots I interact with daily for sector monitoring, dossier preparation and triggering n8n workflows from a simple conversation.','Più bot completamente automatizzati che uso ogni giorno per monitoraggio, preparazione dossier e avvio di workflow n8n da una conversazione.','Varios bots totalmente automatizados que uso cada día para vigilancia sectorial, preparación de dossiers y activación de workflows n8n desde una conversación.','عدة روبوتات مؤتمتة بالكامل أتفاعل معها يومياً للمراقبة القطاعية وتحضير الملفات وتشغيل تدفقات n8n من محادثة بسيطة.']},
+    yetiforce:{kind:['CRM · ERP auto-hébergé','Self-hosted CRM · ERP','CRM · ERP self-hosted','CRM · ERP autoalojado','CRM · ERP مستضاف ذاتياً'],what:['Système de gestion complet installé sur vos serveurs : comptes, opportunités, devis, tickets, calendriers, documents. C\'est le registre où le travail des automatisations devient visible et assignable.','A complete management system installed on your servers: accounts, opportunities, quotes, tickets, calendars and documents. It is where automation output becomes visible and assignable.','Sistema gestionale completo sui tuoi server: account, opportunità, preventivi, ticket, calendari e documenti. È il registro in cui i risultati dell\'automazione diventano visibili e assegnabili.','Sistema de gestión completo instalado en tus servidores: cuentas, oportunidades, presupuestos, tickets, calendarios y documentos. Es donde el trabajo automatizado se vuelve visible y asignable.','نظام إدارة كامل مثبت على خوادمك: الحسابات والفرص والعروض والتذاكر والمواعيد والمستندات. هنا تصبح نتائج الأتمتة مرئية وقابلة للإسناد.'],caption:['Un dossier qualifié arrive enrichi dans le CRM','A qualified record arrives enriched in the CRM','Un dossier qualificato arriva arricchito nel CRM','Un expediente cualificado llega enriquecido al CRM','وصول ملف مؤهل ومُثرى إلى نظام CRM'],bring:['Sans point d\'atterrissage, une automatisation ne produit que du bruit. YetiForce donne aux équipes l\'endroit où un résultat devient une décision, avec l\'historique complet et les droits d\'accès qui vont avec.','Without a landing point, automation only produces noise. YetiForce gives teams the place where an output becomes a decision, with full history and access rights.','Senza un punto di arrivo, l\'automazione produce solo rumore. YetiForce offre il luogo in cui un risultato diventa una decisione, con storico completo e permessi.','Sin un punto de aterrizaje, la automatización solo produce ruido. YetiForce da al equipo el lugar donde un resultado se convierte en decisión, con historial y permisos.','من دون نقطة وصول، تنتج الأتمتة ضجيجاً فقط. يمنح YetiForce الفريق مكاناً يتحول فيه الناتج إلى قرار مع السجل الكامل والصلاحيات.'],replace:['Salesforce · HubSpot · Dynamics — facturés par utilisateur et par mois. Le coût d\'un CRM propriétaire augmente avec vos recrutements ; celui-ci non.','Salesforce, HubSpot and Dynamics — billed per user and month. Proprietary CRM cost grows with headcount; this one does not.','Salesforce, HubSpot e Dynamics, fatturati per utente e mese. Il costo cresce con l\'organico; qui no.','Salesforce, HubSpot y Dynamics, facturados por usuario y mes. El coste crece con la plantilla; aquí no.','Salesforce وHubSpot وDynamics — تُحاسب لكل مستخدم شهرياً. تكلفة CRM المملوك ترتفع مع عدد الموظفين؛ هذا لا.'],mine:['Déploiement et configuration comme registre métier en bout de chaîne : les dossiers qualifiés automatiquement y arrivent enrichis, prêts à être traités par un humain.','Deployed as the business register at the end of the chain: automatically qualified records arrive enriched and ready for human handling.','Distribuito come registro operativo a fine catena: i dossier qualificati arrivano arricchiti e pronti per l\'intervento umano.','Desplegado como registro operativo al final de la cadena: los expedientes cualificados llegan enriquecidos y listos para un humano.','نشره كسجل أعمال في نهاية السلسلة: تصل الملفات المؤهلة آلياً مُثرَاة وجاهزة للمعالجة البشرية.']}
+  };
+
+  Object.keys(tools).forEach(function(id){['kind','what','caption','bring','replace','mine'].forEach(function(k){STACK.fr.tools[id]=tools[id][k] ? tools[id][k][0] : '';});});
+
+  function apply(lang){
+    if(!STACK[lang]) lang='fr';
+    var d=STACK[lang];
+    document.documentElement.lang=lang;document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
+    document.title=d.meta.title;
+    var desc=document.querySelector('meta[data-stack-attr]'); if(desc) desc.setAttribute('content',d.meta.desc);
+    document.querySelectorAll('[data-stack-nav]').forEach(function(el){var key=el.getAttribute('data-stack-nav'); if(d.nav[key]) el.textContent=d.nav[key];});
+    document.querySelectorAll('[data-stack]').forEach(function(el){var key=el.getAttribute('data-stack'), val=null; var parts=key.split('.'); var cur=d; for(var i=0;i<parts.length;i++){if(cur==null){val=null;break;}cur=cur[parts[i]];} if(Array.isArray(cur)){var langIndex={fr:0,en:1,it:2,es:3,ar:4}[lang]; val=cur[langIndex];} else if(typeof cur==='string'){val=cur;} if(typeof val==='string') el.textContent=val;});
+    Object.keys(tools).forEach(function(id){
+      var c=document.getElementById(id),t=tools[id], idx={fr:0,en:1,it:2,es:3,ar:4}[lang]; if(!c) return;
+      c.querySelector('.card__kind').textContent=t.kind[idx];c.querySelector('.card__what').textContent=t.what[idx];var cap=c.querySelector('.demo figcaption');if(cap)cap.textContent=t.caption[idx];
+      var blocks=c.querySelectorAll('.block__v'); if(blocks[0])blocks[0].textContent=t.bring[idx]; if(blocks[1])blocks[1].textContent=t.replace[idx]; if(blocks[2])blocks[2].textContent=t.mine[idx];
+    });
+    var h=d.ledger.headers;document.querySelectorAll('.ledger thead th').forEach(function(el,i){if(h[i])el.textContent=h[i]});
+    document.querySelectorAll('.ledger tbody tr').forEach(function(row,r){var vals=row.querySelectorAll('td'); if(!vals.length||!d.ledger.rows[r])return; for(var j=1;j<vals.length;j++){vals[j].textContent=d.ledger.rows[r][j];vals[j].setAttribute('data-l',h[j]);}});
+    d.limits.items.forEach(function(item,i){var el=document.querySelectorAll('.limit')[i];if(el){el.querySelector('.limit__h').textContent=item.h;el.querySelector('.limit__p').textContent=item.p;}});
+    document.querySelector('.limits .eyebrow').textContent=d.limits.eyebrow;document.querySelector('.limits .section__title').textContent=d.limits.title;document.querySelector('.limits .section__note').textContent=d.limits.note;
+    document.querySelector('.cta__t').textContent=d.cta.title;document.querySelector('.cta__p').textContent=d.cta.text;document.querySelector('.cta .btn').textContent=d.cta.button;
+    document.querySelector('.hero__title').textContent=d.hero.title;document.querySelector('.hero__lede').textContent=d.hero.lede;
+    var cur=document.querySelector('.lang-current');if(cur)cur.textContent=lang.toUpperCase();
+    document.querySelectorAll('.lang-btn').forEach(function(b){var a=b.getAttribute('data-lang')===lang;b.classList.toggle('active',a);b.setAttribute('aria-pressed',a?'true':'false');});
+    try{localStorage.setItem('site-lang',lang)}catch(e){}
+  }
+  var lang='fr';try{var saved=localStorage.getItem('site-lang');if(saved&&STACK[saved])lang=saved}catch(e){}
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.addEventListener('click',function(){apply(this.getAttribute('data-lang'));document.querySelector('.lang-switch').setAttribute('data-open','false');});});
+  var lt=document.querySelector('.lang-trigger');var ls=document.querySelector('.lang-switch'); if(lt&&ls){lt.addEventListener('click',function(e){e.stopPropagation();ls.setAttribute('data-open',ls.getAttribute('data-open')==='true'?'false':'true');lt.setAttribute('aria-expanded',ls.getAttribute('data-open')==='true'?'true':'false');});document.addEventListener('click',function(){ls.setAttribute('data-open','false');lt.setAttribute('aria-expanded','false')});}
+  var cd=document.querySelector('.case-dropdown');if(cd){var ct=cd.querySelector('.case-dropdown-trigger');ct.addEventListener('click',function(e){e.stopPropagation();var open=cd.getAttribute('data-open')==='true';cd.setAttribute('data-open',open?'false':'true');ct.setAttribute('aria-expanded',open?'false':'true')});document.addEventListener('click',function(e){if(!cd.contains(e.target)){cd.setAttribute('data-open','false');ct.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',function(e){if(e.key==='Escape'){cd.setAttribute('data-open','false');ls.setAttribute('data-open','false')}});}
+  var theme=document.getElementById('stack-theme-toggle');var themeValue='dark';try{themeValue=localStorage.getItem('site-theme')||'dark'}catch(e){};document.documentElement.setAttribute('data-theme',themeValue);if(theme)theme.addEventListener('click',function(){var next=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('site-theme',next)}catch(e){}});
+  var navCheck=document.getElementById('stack-nav-check');document.querySelectorAll('.nav__links a').forEach(function(a){a.addEventListener('click',function(){if(navCheck)navCheck.checked=false;})});
+  apply(lang);
+})();
+</script><script>
+(function(){
+  /* ---------- apparition au défilement ---------- */
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  },{threshold:.10, rootMargin:'0px 0px -6% 0px'});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+  /* ---------- démos vidéo ----------
+     Le bloc entier disparaît si le fichier est absent : la page reste
+     publiable tant que /assets/demos/ n'est pas rempli.               */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var vids = document.querySelectorAll('.demo video');
+
+  vids.forEach(function(v){
+    v.addEventListener('error', function(){
+      var fig = v.closest('.demo');
+      if(fig) fig.remove();
+    });
+    if(reduce){ v.setAttribute('controls',''); }
+  });
+
+  if(!reduce && vids.length){
+    var vio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var v = e.target;
+        if(e.isIntersecting){ v.play().catch(function(){}); }
+        else{ v.pause(); }
+      });
+    },{threshold:.45});
+    vids.forEach(function(v){ vio.observe(v); });
+  }
+})();
+</script>
+</body>
+</html>
